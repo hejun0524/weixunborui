@@ -1,0 +1,230 @@
+body {
+    font-size: .875rem;
+}
+
+.feather {
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+}
+
+/*
+ * Sidebar
+ */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100; /* Behind the navbar */
+    padding: 48px 0 0; /* Height of navbar */
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+    .sidebar-sticky {
+        position: -webkit-sticky;
+        position: sticky;
+    }
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+}
+
+.sidebar .nav-link .feather {
+    margin-right: 4px;
+    color: #999;
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+}
+
+.sidebar .nav-link:hover .feather,
+.sidebar .nav-link.active .feather {
+    color: inherit;
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+/*
+ * Content
+ */
+
+[role="main"] {
+    padding-top: 48px; /* Space for fixed navbar */
+}
+
+/*
+ * Navbar
+ */
+
+.navbar-brand {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    font-size: 1rem;
+    background-color: rgba(0, 0, 0, .25);
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+}
+
+.navbar .form-control {
+    padding: .75rem 1rem;
+    border-width: 0;
+    border-radius: 0;
+}
+
+.form-control-dark {
+    color: #fff;
+    background-color: rgba(255, 255, 255, .1);
+    border-color: rgba(255, 255, 255, .1);
+}
+
+.form-control-dark:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+}
+
+.form-control {
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.form-control:focus {
+    border: 0;
+    border-bottom: 1px solid deepskyblue;
+    box-shadow: none;
+}
+
+.form-control[readonly] {
+    background-color: transparent;
+}
+
+.form-control[readonly]:focus {
+    border-bottom: 1px solid black;
+}
+
+.form-control-danger:focus {
+    border-color: #ff0000;
+}
+
+.form-control-success:focus {
+    border-color: #00dd00;
+}
+
+.table-equal-width td {
+    width: 12.5%;
+}
+
+.notes {
+    background-image: -webkit-linear-gradient(left, white 10px, transparent 10px), -webkit-linear-gradient(right, white 10px, transparent 10px), -webkit-linear-gradient(white 30px, #ccc 30px, #ccc 31px, white 31px);
+    background-image: -moz-linear-gradient(left, white 10px, transparent 10px), -moz-linear-gradient(right, white 10px, transparent 10px), -moz-linear-gradient(white 30px, #ccc 30px, #ccc 31px, white 31px);
+    background-image: -ms-linear-gradient(left, white 10px, transparent 10px), -ms-linear-gradient(right, white 10px, transparent 10px), -ms-linear-gradient(white 30px, #ccc 30px, #ccc 31px, white 31px);
+    background-image: -o-linear-gradient(left, white 10px, transparent 10px), -o-linear-gradient(right, white 10px, transparent 10px), -o-linear-gradient(white 30px, #ccc 30px, #ccc 31px, white 31px);
+    background-image: linear-gradient(left, white 10px, transparent 10px), linear-gradient(right, white 10px, transparent 10px), linear-gradient(white 30px, #ccc 30px, #ccc 31px, white 31px);
+    background-size: 100% 100%, 100% 100%, 100% 31px;
+    border-radius: 8px;
+    line-height: 31px;
+    padding: 8px;
+}
+
+/*
+ * Utilities
+ */
+
+.border-top {
+    border-top: 1px solid #e5e5e5;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.scroll-div {
+    overflow: auto;
+    max-height: 700px;
+}
+
+.custom-file-label::after {
+    content: none;
+}
+
+.required:after {
+    content: " *";
+    color: #e32;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.fake-link {
+    color: #307cf6;
+    cursor: pointer;
+}
+
+.fake-link-clicked {
+    color: blue;
+    cursor: pointer;
+}
+
+.fake-link-plus {
+    color: saddlebrown;
+    cursor: pointer;
+}
+
+.fake-link-minus {
+    color: mediumpurple;
+    cursor: pointer;
+}
+
+.cell-half {
+    width: 5%;
+}
+
+.cell-1 {
+    width: 10%;
+}
+
+.cell-2 {
+    width: 20%;
+}
+
+.cell-3 {
+    width: 30%;
+}
+
+.cell-4 {
+    width: 40%;
+}
+
+.cell-5 {
+    width: 50%;
+}
+
+.cell-7 {
+    width: 70%;
+}
+
+.cell-8 {
+    width: 80%;
+}
+
+.font-xs {
+    font-size: 0.75rem;
+}

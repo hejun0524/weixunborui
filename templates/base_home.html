@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    {% load static %}
+    {% include 'global_css.html' %}
+    <link rel="stylesheet" href="{% static 'css/carousel.css' %}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+<!-- Navigation -->
+<header>
+    <nav class="navbar  navbar-expand-lg navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-2 mr-0" href="{% url 'home:index' %}">威训博锐</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="fa fa-list"></span>
+        </button>
+        <div id="navbarNavDropdown" class="navbar-collapse collapse px-3">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'home:index' %}">主页 <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:dashboard' %}">工作台</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:logout' %}">退出系统</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:login' %}">登录</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+</header>
+<main role="main">
+    {% block content %}
+    {% endblock %}
+    <!-- FOOTER -->
+    <footer class="container">
+        <p>© 2018 北京威训博锐科技有限公司</p>
+    </footer>
+</main>
+{% include 'global_js.html' %}
+{% block js %}
+{% endblock %}
+</body>
+</html>

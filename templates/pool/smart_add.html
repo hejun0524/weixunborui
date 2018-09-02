@@ -1,0 +1,79 @@
+<div class="collapse" id="smart_add_collapse">
+    <div class="card card-body mb-3">
+        <div class="alert alert-dark">
+            如需更改章节请在上方直接选择章节即可。
+        </div>
+        <form role="form" action="" method="post" enctype="multipart/form-data" id="form_smart_add">
+            {% csrf_token %}
+            <div class="form-group row" hidden>
+                <label for="id_smart_chapter_id" class="col-sm-2 col-form-label required">章节ID</label>
+                <input type="text" class="col-sm-10 form-control form-control-sm"
+                       id="id_smart_chapter_id" name="smart_chapter_id" readonly required>
+            </div>
+            <div class="form-group row pr-5">
+                <label for="id_smart_chapter" class="col-sm-2 col-form-label required">章节</label>
+                <input type="text" class="col-sm-10 form-control form-control-sm"
+                       id="id_smart_chapter" name="smart_chapter" readonly required>
+            </div>
+            <div class="form-group row pr-5">
+                <label for="id_smart_type" class="col-sm-2 col-form-label required">题目类型</label>
+                <select class="col-sm-10 custom-select" id="id_smart_type" name="smart_type" required>
+                    <option value="" selected>请选择</option>
+                    {% for q_type in type_sc_full %}
+                        <option value="{{ forloop.counter }}">{{ q_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group row pr-5">
+                <span class="col-sm-2 col-form-label">附件</span>
+                <div class="col-sm-10 input-group px-0">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="id_smart_attachments" name="smart_attachments"
+                               multiple>
+                        <label class="custom-file-label" for="id_smart_attachments">上传附件（可多选）</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_smart_attachments">
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row pr-5">
+                <span class="col-sm-2 col-form-label">图片</span>
+                <div class="col-sm-10 input-group px-0">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="id_smart_images" name="smart_images"
+                               accept="image/*" multiple>
+                        <label class="custom-file-label" for="id_smart_images">上传图片（可多选）</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_smart_images">
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row pr-5">
+                <span class="col-sm-2 col-form-label">视频</span>
+                <div class="col-sm-10 input-group px-0">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="id_smart_videos" name="smart_videos"
+                               accept="video/*" multiple>
+                        <label class="custom-file-label" for="id_smart_videos">上传视频（可多选）</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_smart_videos">
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <label for="id_questions" class="font-weight-bold required">请在下面粘贴题目</label>
+            <textarea class="form-control notes mb-3" rows="15" id="id_questions" name="questions" required></textarea>
+            <button type="submit" class="btn btn-sm btn-primary" name="btn_smart_add" id="btn_smart_add">提交</button>
+            <button type="button" class="btn btn-sm btn-secondary" id="btn_smart_cancel">取消</button>
+        </form>
+    </div>
+    <hr>
+</div>

@@ -1,0 +1,177 @@
+<!-- Category modal -->
+<div class="modal fade" id="category_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title_category">添加类别</h5>
+            </div>
+            <form role="form" method="post" id="form_category" class="modal-body pr-5">
+                {% csrf_token %}
+                <div class="form-group row" hidden>
+                    <label for="id_category_id" class="col-sm-3 col-form-label required">序号</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_category_id" name="category_id" readonly>
+                </div>
+                <div class="form-group row">
+                    <label for="id_category_name" class="col-sm-3 col-form-label required">类别名称</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_category_name" name="category_name">
+                </div>
+                <div class="form-group row">
+                    <label for="id_category_index" class="col-sm-3 col-form-label required">索引</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_category_index" name="category_index">
+                </div>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
+                <button class="btn btn-sm btn-primary" type="submit" id="btn_category">确认添加</button>
+                <button class="btn btn-sm btn-danger" type="submit" id="delete_category" name="delete_category" hidden>
+                    删除
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Subject modal -->
+<div class="modal fade" id="subject_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title_subject">添加科目</h5>
+            </div>
+            <form role="form" method="post" id="form_subject" class="modal-body pr-5">
+                {% csrf_token %}
+                <div class="form-group row" hidden>
+                    <label for="id_subject_id" class="col-sm-3 col-form-label required">序号</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_subject_id" name="subject_id" readonly>
+                </div>
+                <div class="form-group row">
+                    <label for="id_subject_category" class="col-sm-3 col-form-label required">所属类别</label>
+                    <select class="col-sm-9 custom-select" id="id_subject_category" name="subject_category" required>
+                        <option selected disabled>请选择</option>
+                        {% for object in all_categories %}
+                            <option value="{{ object.id }}">{{ object }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group row">
+                    <label for="id_subject_name" class="col-sm-3 col-form-label required">科目名称</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_subject_name" name="subject_name">
+                </div>
+                <div class="form-group row">
+                    <label for="id_subject_index" class="col-sm-3 col-form-label required">索引</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_subject_index" name="subject_index">
+                </div>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
+                <button class="btn btn-sm btn-primary" type="submit" id="btn_subject">确认添加</button>
+                <button class="btn btn-sm btn-danger" type="submit" id="delete_subject" name="delete_subject" hidden>
+                    删除
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Chapter modal -->
+<div class="modal fade" id="chapter_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title_chapter">添加章节</h5>
+            </div>
+            <form role="form" method="post" id="form_chapter" class="modal-body pr-5" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group row" hidden>
+                    <label for="id_chapter_id" class="col-sm-3 col-form-label required">序号</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_chapter_id" name="chapter_id" readonly>
+                </div>
+                <div class="form-group row">
+                    <label for="id_chapter_category" class="col-sm-3 col-form-label">所属类别</label>
+                    <select class="col-sm-9 custom-select" id="id_chapter_category" name="chapter_category" required>
+                        <option value="0" selected>全部</option>
+                        {% for object in all_categories %}
+                            <option value="{{ object.id }}">{{ object }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group row">
+                    <label for="id_chapter_subject" class="col-sm-3 col-form-label required">所属科目</label>
+                    <select class="col-sm-9 custom-select" id="id_chapter_subject" name="chapter_subject" required>
+                        <option selected disabled>请选择</option>
+                        {% for object in all_subjects %}
+                            <option value="{{ object.id }}">{{ object }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group row">
+                    <label for="id_chapter_name" class="col-sm-3 col-form-label required">章节名称</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_chapter_name" name="chapter_name">
+                </div>
+                <div class="form-group row">
+                    <label for="id_chapter_index" class="col-sm-3 col-form-label required">索引</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_chapter_index" name="chapter_index">
+                </div>
+                <div class="form-group row">
+                    <span class="col-sm-3 col-form-label required">图片</span>
+                    <div class="col-sm-9 input-group px-0">
+                        <div class="custom-file">
+                            <input type="file" class="col-sm-9 custom-file-input" id="id_chapter_image"
+                                   name="chapter_image" accept="image/*">
+                            <label class="custom-file-label" for="id_chapter_image" id="label_chapter_image">
+                                上传图片
+                            </label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_chapter_image">
+                                重置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-sm table-bordered table-equal-width">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">类型</th>
+                        {% for entry in type_sc_abbr %}
+                            <th scope="col">{{ entry }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th scope="row">分值</th>
+                        {% for entry in chapter_points %}
+                            <td>
+                                <label for="id_{{ entry }}" hidden>{{ entry }}</label>
+                                <input type="number" class="form-control form-control-sm" id="id_{{ entry }}"
+                                       name="{{ entry }}" value="1">
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">难度</th>
+                        {% for entry in chapter_difficulties %}
+                            <td>
+                                <label for="id_{{ entry }}" hidden>{{ entry }}</label>
+                                <input type="number" class="form-control form-control-sm" id="id_{{ entry }}"
+                                       name="{{ entry }}" value="1">
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    </tbody>
+                </table>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
+                <button class="btn btn-sm btn-primary" type="submit" id="btn_chapter">确认</button>
+                <button class="btn btn-sm btn-danger" type="submit" id="delete_chapter" name="delete_chapter" hidden>
+                    删除
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

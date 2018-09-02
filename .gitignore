@@ -1,0 +1,5 @@
+.DS_Store
+media
+migrations
+__pycache__
+.idea
