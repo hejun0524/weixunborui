@@ -4,16 +4,6 @@
 {% block title %}账户管理{% endblock %}
 {% block canvas_title %}账户管理{% endblock %}
 {% block content %}
-    <!-- Messages -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert
-                            alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-    <!-- Forms -->
     <div class="row">
         <div class="col-md-6 pr-md-5">
             <p class="font-weight-bold">查看个人信息（如需修改请联系上级）</p>

@@ -4,16 +4,6 @@
 {% block title %}附件管理{% endblock %}
 {% block canvas_title %}附件管理{% endblock %}
 {% block content %}
-    <!-- Messages -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert
-                            alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-    <!-- Forms -->
     <div class="row">
         <div class="col-md-6 pr-md-5">
             <p class="font-weight-bold">添加新的附件</p>
