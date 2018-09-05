@@ -2,13 +2,55 @@
 {% load static %}
 
 {% block title %}组成试卷{% endblock %}
-{% block canvas_title %}组成试卷{% endblock %}
+{% block canvas_title %}组成试卷（此页面仍在建设中）{% endblock %}
 
 {% block content %}
-    <!-- Forms -->
+    <h6 class="font-weight-bold">选择您的策略</h6>
     <div class="row">
-        <div class="col-md-6 pr-md-5">
-            <p class="font-weight-bold">在这里管理试卷</p>
+        <div class="col-md-4">
+            <!-- Category -->
+            <label for="id_category" class="font-weight-bold">类别</label>
+            <div class="form-group">
+                <select class="custom-select" id="id_category" name="category" size="5">
+                    <option value="0" selected>全部</option>
+                    {% for object in all_categories %}
+                        <option value="{{ object.id }}">{{ object }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Strategy -->
+            <label for="id_strategy" class="font-weight-bold">策略</label>
+            <div class="float-right">
+                <span id="add_strategy" class="fake-link text-primary">新建策略</span>
+            </div>
+            <div class="form-group">
+                <select class="custom-select" id="id_strategy" name="strategy" size="5">
+                    <option value="0" selected>全部</option>
+                    {% for object in all_strategies %}
+                        <option value="{{ object.id }}">{{ object }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <h6 class="font-weight-bold">生成您的考试包</h6>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="id_students" class="font-weight-bold required">学生名单</label>
+            <textarea class="form-control notes mb-3" rows="15" id="id_students" name="students" required></textarea>
+            <div class="alert alert-secondary">
+                每行一位学生，格式为考试号-姓名-证件号。例：<br>
+                1A-大卫-2018FCS025<br>
+                1B-迈克-2018SEN026<br>
+                1C-安妮-2017FMA037<br>
+            </div>
+        </div>
+        <div class="col-md-4">
+
+        </div>
+        <div class="col-md-4">
+
         </div>
     </div>
 {% endblock %}

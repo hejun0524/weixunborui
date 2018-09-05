@@ -161,15 +161,12 @@ def validate_smart_text(question_type, smart_text):
     lines = smart_text.strip().split('\r\n')
     current_code = 1
     index = None
-    if question_type == 7:
-        return wrong_message('对不起，暂时不支持综合题的输入。')
     for line in lines:
         line = line.strip()
         if not line:  # Empty line
             continue
-        # Identify the line and update current code
-        identifier = smart_identifier(line, current_code)
-        current_code = identifier[0]
+        identifier = smart_identifier(line, current_code)  # Identify the line
+        current_code = identifier[0]  # Update current code
         if current_code == 1:
             index = identifier[1]
             if index in result:
@@ -257,6 +254,9 @@ def smart_identifier(line, current_code):
     r = re.match('[(（]([A-Z])[）)](.*)', line)
     if r:  # Code 8: Choices
         return 8, r.group(1).strip(), r.group(2).strip()
+    r = re.match('题型：(.*)', line)
+    if r:  # Code 9: Type of questions - for secondary parts
+        return 9, r.group(1).strip()
     if current_code % 10 == 0:  # Code line breaks
         return current_code, line.strip()
     return current_code * 10, line.strip()  # Code line breaks
