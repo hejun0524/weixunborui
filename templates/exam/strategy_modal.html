@@ -1,0 +1,53 @@
+<!-- Strategy modal -->
+<div class="modal fade" id="strategy_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加策略</h5>
+            </div>
+            <form role="form" method="post" id="form_strategy" class="modal-body pr-5">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label for="id_strategy_category" class="col-sm-3 col-form-label">所属类别</label>
+                    <select class="col-sm-9 custom-select" id="id_strategy_category" name="strategy_category">
+                        <option value="0" selected>全部</option>
+                        {% for object in all_categories %}
+                            <option value="{{ object.id }}">{{ object }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group row">
+                    <label for="id_strategy_subject" class="col-sm-3 col-form-label required">所属科目</label>
+                    <select class="col-sm-9 custom-select" id="id_strategy_subject" name="strategy_subject" required>
+                        <option selected disabled>请选择</option>
+                        {% for object in all_subjects %}
+                            <option value="{{ object.id }}">{{ object }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group row">
+                    <label for="id_strategy_name" class="col-sm-3 col-form-label required">策略名称</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_strategy_name" name="strategy_name" required>
+                </div>
+                <div class="form-group row">
+                    <label for="id_strategy_index" class="col-sm-3 col-form-label required">索引</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_strategy_index" name="strategy_index" required>
+                </div>
+                <div class="form-group row">
+                    <label for="id_strategy_description" class="col-sm-3 col-form-label">简介</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_strategy_description" name="strategy_description">
+                </div>
+                <div class="form-group row">
+                    <label for="id_strategy_timer" class="col-sm-3 col-form-label">限时（分钟）</label>
+                    <input type="number" class="col-sm-9 form-control form-control-sm"
+                           id="id_strategy_timer" name="strategy_timer" value="100">
+                </div>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
+                <button class="btn btn-sm btn-primary" type="submit" name="add_strategy">确认添加</button>
+            </form>
+        </div>
+    </div>
+</div>

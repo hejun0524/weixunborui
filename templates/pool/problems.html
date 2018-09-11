@@ -67,15 +67,19 @@
             <table class="table table-sm table-bordered">
                 <tbody>
                 <tr>
-                    <td class="cell-4" rowspan="8">
-                        <img class="card-img-top" id="cell_chapter_image" src="{% static 'img/no_img.png' %}">
-                    </td>
-                    <td scope="row" class="cell-2">类型</td>
-                    <td class="cell-2">分值</td>
-                    <td class="cell-2">难度</td>
+                    <th class="cell-3">章节图片</th>
+                    <th scope="row" class="cell-3">题目类型</th>
+                    <th class="cell-2">分值</th>
+                    <th class="cell-2">难度</th>
                 </tr>
                 {% for entry in chapter_info %}
                     <tr>
+                        {% if forloop.counter0 == 0 %}
+                            <td rowspan="7">
+                                <img class="img-fluid center-block" id="cell_chapter_image"
+                                     src="{% static 'img/no_img.png' %}">
+                            </td>
+                        {% endif %}
                         <td scope="row" class="cell-2">{{ entry.0 }}</td>
                         <td class="cell-2" id="cell_chapter_{{ entry.1 }}"></td>
                         <td class="cell-2" id="cell_chapter_{{ entry.2 }}"></td>

@@ -4,12 +4,15 @@ from django.contrib.postgres import fields
 
 # Create your models here.
 class Strategy(models.Model):
-    category = models.ForeignKey('pool.Category', on_delete=models.CASCADE)
+    subject = models.ForeignKey('pool.Subject', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     index = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     timer = models.IntegerField(default=100)
     plan = fields.JSONField(null=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Exam(models.Model):
