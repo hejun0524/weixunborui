@@ -4,7 +4,7 @@ from django.contrib.postgres import fields
 
 # Create your models here.
 class Strategy(models.Model):
-    category = models.ForeignKey('pool.Subject', on_delete=models.CASCADE)
+    subject = models.ForeignKey('pool.Subject', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     index = models.CharField(max_length=100)
     description = models.TextField(blank=True)
