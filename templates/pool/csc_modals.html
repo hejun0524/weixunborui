@@ -49,7 +49,7 @@
                 <div class="form-group row">
                     <label for="id_subject_category" class="col-sm-3 col-form-label required">所属类别</label>
                     <select class="col-sm-9 custom-select" id="id_subject_category" name="subject_category" required>
-                        <option selected disabled>请选择</option>
+                        <option value="" selected disabled>请选择</option>
                         {% for object in all_categories %}
                             <option value="{{ object.id }}">{{ object }}</option>
                         {% endfor %}
@@ -91,7 +91,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="id_chapter_category" class="col-sm-3 col-form-label">所属类别</label>
-                    <select class="col-sm-9 custom-select" id="id_chapter_category" name="chapter_category" required>
+                    <select class="col-sm-9 custom-select" id="id_chapter_category" name="chapter_category">
                         <option value="0" selected>全部</option>
                         {% for object in all_categories %}
                             <option value="{{ object.id }}">{{ object }}</option>
@@ -101,7 +101,7 @@
                 <div class="form-group row">
                     <label for="id_chapter_subject" class="col-sm-3 col-form-label required">所属科目</label>
                     <select class="col-sm-9 custom-select" id="id_chapter_subject" name="chapter_subject" required>
-                        <option selected disabled>请选择</option>
+                        <option value="" selected disabled>请选择</option>
                         {% for object in all_subjects %}
                             <option value="{{ object.id }}">{{ object }}</option>
                         {% endfor %}

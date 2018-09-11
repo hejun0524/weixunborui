@@ -34,6 +34,45 @@ function ajaxChangeSelection(callerType, code, targets, has0, entries, fixedSele
     });
 }
 
+function ajaxChangeTable(callerType, code, targets, entries, specialTargets, specialEntries, specialAttributes) {
+    $.ajax({
+        url: ['', 'exam', callerType, code, ''].join('/'),
+        success: function (data) {
+            for (var i = 0; i < targets.length; i++) {
+                var $target = $(targets[i]);
+                $target.html(data[entries[i]]);
+            }
+            for (var j = 0; j < specialTargets.length; j++) {
+                var sTarget = $(specialTargets[j]);
+                if (specialAttributes[j] === 'value') {
+                    sTarget.val(data[specialEntries[j]]);
+                    continue;
+                }
+                sTarget.attr(specialAttributes[j], data[specialEntries[j]]);
+            }
+        }
+    });
+}
+
+function setStrategyInfo(pk) {
+    var targets = ['#cell_strategy_name', '#cell_strategy_index', '#cell_strategy_description', '#cell_strategy_timer'];
+    var entries = ['full_path', 'full_index', 'description', 'timer'];
+    var specialTargets = [];
+    var specialEntries = [];
+    var specialAttributes = [];
+    if (pk === 0) { // reset
+        for (var i = 0; i < targets.length; i++) {
+            var emptyCell = $(targets[i]);
+            emptyCell.text('请先选择一个章节');
+        }
+        for (var j = 0; j < specialTargets.length; j++) {
+            $(specialTargets[j]).val('');
+        }
+    } else {
+        ajaxChangeTable('get_strategy', pk, targets, entries, specialTargets, specialEntries, specialAttributes);
+    }
+}
+
 $('#add_strategy').click(function () {
     $('#strategy_modal').modal('show');
 });
@@ -50,6 +89,10 @@ $('#id_subject').change(function () {
         'change_subject/' + $('#id_category').val(), $(this).val(),
         ['#id_strategy'], [true], ['strategies'], false
     );
+});
+
+$('#id_strategy').change(function () {
+    setStrategyInfo(parseInt($(this).val()));
 });
 
 $('#id_strategy_category').change(function () {

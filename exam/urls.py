@@ -8,4 +8,5 @@ urlpatterns = [
     # AJAX urls
     path('change_category/<int:category_id>/', views.change_category),
     path('change_subject/<int:category_id>/<int:subject_id>/', views.change_subject),
+    path('get_strategy/<int:strategy_id>/', views.get_strategy),
 ]

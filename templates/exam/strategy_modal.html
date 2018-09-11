@@ -19,7 +19,7 @@
                 <div class="form-group row">
                     <label for="id_strategy_subject" class="col-sm-3 col-form-label required">所属科目</label>
                     <select class="col-sm-9 custom-select" id="id_strategy_subject" name="strategy_subject" required>
-                        <option selected disabled>请选择</option>
+                        <option value="" selected disabled>请选择</option>
                         {% for object in all_subjects %}
                             <option value="{{ object.id }}">{{ object }}</option>
                         {% endfor %}
@@ -43,7 +43,7 @@
                 <div class="form-group row">
                     <label for="id_strategy_timer" class="col-sm-3 col-form-label">限时（分钟）</label>
                     <input type="number" class="col-sm-9 form-control form-control-sm"
-                           id="id_strategy_timer" name="strategy_timer" value="100">
+                           id="id_strategy_timer" name="strategy_timer" placeholder="请填写一个数，若空白则默认100分钟">
                 </div>
                 <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
                 <button class="btn btn-sm btn-primary" type="submit" name="add_strategy">确认添加</button>

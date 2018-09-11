@@ -19,9 +19,11 @@ def exams(request):
                 subject_id=int(request.POST.get('strategy_subject')),
                 name=request.POST.get('strategy_name'),
                 index=request.POST.get('strategy_index'),
-                description=request.POST.get('strategy_description'),
-                timer=int(request.POST.get('strategy_timer')),
             )
+            if request.POST.get('strategy_description'):
+                new_object.description = request.POST.get('strategy_description')
+            if request.POST.get('strategy_timer'):
+                new_object.timer = int(request.POST.get('strategy_timer'))
             new_object.save()
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
@@ -57,3 +59,21 @@ def change_subject(request, category_id, subject_id):
     for st in strategies:
         strategy_list.append((st.id, str(st)))
     return JsonResponse({'chapters': strategy_list})
+
+
+def get_strategy(request, strategy_id):
+    this_object = Strategy.objects.get(id=strategy_id)
+    this_parent = this_object.subject
+    this_grandparent = this_object.subject.category
+    res = {
+        'category': this_grandparent.id,
+        'subject': this_parent.id,
+        'chapter': this_object.id,
+        'name': this_object.name,
+        'index': this_object.index,
+        'full_path': '/'.join((this_grandparent.name, this_parent.name, this_object.name)),
+        'full_index': '/'.join((this_grandparent.index, this_parent.index, this_object.index)),
+        'description': this_object.description,
+        'timer': '{}分钟'.format(this_object.timer),
+    }
+    return JsonResponse(res)
