@@ -216,7 +216,10 @@ function ajaxChangeProblemPreview(callerType, codes, $caller) {
                 }
             }
             // 3 - Answer
-            var $ans = $('<div></div>').html(data['ans_lines'].join('<br>'));
+            var $ans = null;
+            if (data.hasOwnProperty('ans_lines')) {
+                $ans = $('<div></div>').html(data['ans_lines'].join('<br>'));
+            }
             var $answerImage = null;
             if (data.hasOwnProperty('answer_image')) {
                 $answerImage = $('<img src="" class="img-fluid">');

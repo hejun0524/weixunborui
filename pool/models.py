@@ -100,6 +100,7 @@ class NumericBlank(CommonProblem):
 
 class Description(CommonProblem):
     answer = models.TextField(blank=True)
+    need_answer = models.BooleanField(default=True)
 
 
 class Comprehensive(Problem):
@@ -121,7 +122,6 @@ class ComprehensiveProblem(models.Model):
     percentage = models.FloatField()
     description = models.TextField()
     image = models.ImageField(upload_to=RenameUploads('problem/'), blank=True)
-    attachment = models.FileField(upload_to=RenameUploads('problem/'), blank=True)
     video = models.FileField(upload_to=RenameUploads('problem/'), blank=True)
     student_upload = models.BooleanField(default=False)
     chance = models.IntegerField(default=1)
@@ -156,6 +156,7 @@ class SubNumericBlank(ComprehensiveProblem):
 
 class SubDescription(ComprehensiveProblem):
     answer = models.TextField(blank=True)
+    need_answer = models.BooleanField(default=True)
 
 
 # ==========================================================================

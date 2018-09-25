@@ -7,9 +7,11 @@ import re
 # Create your views here.
 
 class_list = (MultipleChoice, MultipleResponse, TrueOrFalse, TextBlank, NumericBlank, Description, Comprehensive)
+sub_class_list = (SubMultipleChoice, SubMultipleResponse, SubTrueOrFalse, SubTextBlank, SubNumericBlank, SubDescription)
 type_sc_abbr = ('单选', '多选', '判断', '文填', '数填', '陈述', '综合')
 type_sc_full = ('单项选择题', '多项选择题', '判断题', '文本填空题', '数字填空题', '陈述题', '综合题')
 type_en_abbr = ('mc', 'mr', 'tf', 'tb', 'nb', 'dc', 'cp')
+old_sc_full = {'单选题': 1, '多选题': 2, '判断题': 3, '文本填空': 4, '数字填空': 5, '简答题': 6, '主观题': 6, }
 
 
 def problems(request):
@@ -112,17 +114,35 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
         return redirect('pool:problems')
     smart_files = {}
     question_info = {}
-    for question_index in validation_result[2]:
+    # Pending to database
+    if question_type == 7:  # Comprehensive
+        question_index = validation_result[2]['main_part']
         q = class_list[question_type - 1](index=question_index, chapter_id=chapter_id)
         question_content = validation_result[2][question_index]
         for attribute in question_content:
             setattr(q, attribute, question_content[attribute])
         q.save()
-        question_info[question_index] = {'id': q.id, 'type': question_type, }
-        init_files = {'video': None, 'attachment': None, 'image': None, 'answer_image': None, }
-        if question_type == 1 or question_type == 2:
-            init_files.update({'choice_images': {}})
-        smart_files[question_index] = init_files
+        for sub_order in validation_result[2]:
+            if sub_order != question_index and sub_order != 'main_part':
+                sub_content = validation_result[2][sub_order]
+                sub_type = sub_content['question_type']
+                sub = sub_class_list[sub_type -1](order=sub_order, comprehensive=q)
+                for sub_attribute in sub_content:
+                    if sub_attribute != 'question_type':
+                        setattr(sub, sub_attribute, sub_content[sub_attribute])
+                sub.save()
+    else:
+        for question_index in validation_result[2]:
+            q = class_list[question_type - 1](index=question_index, chapter_id=chapter_id)
+            question_content = validation_result[2][question_index]
+            for attribute in question_content:
+                setattr(q, attribute, question_content[attribute])
+            q.save()
+            question_info[question_index] = {'id': q.id, 'type': question_type, }
+            init_files = {'video': None, 'attachment': None, 'image': None, 'answer_image': None, }
+            if question_type == 1 or question_type == 2:
+                init_files.update({'choice_images': {}})
+            smart_files[question_index] = init_files
     # Images, attachments and videos
     all_files = [(smart_images, 'image'), (smart_attachments, 'attachment'), (smart_videos, 'video')]
     for file_set in all_files:
@@ -152,13 +172,16 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
 
 
 def validate_smart_text(question_type, smart_text):
-    def wrong_message(warning):
-        return False, warning, {}
-
-    result = {}
-    if not 1 <= question_type <= 7:  # Wrong type (impossible to happen though)
-        return wrong_message('题型错误！')
     lines = smart_text.strip().split('\r\n')
+    if question_type == 7:
+        return validate_comprehensive(lines)
+    if 0 < question_type < 7:
+        return validate_common(question_type, lines)
+    return wrong_message('题型错误！')
+
+
+def validate_common(question_type, lines):
+    result = {}
     current_code = 1
     index = None
     for line in lines:
@@ -170,62 +193,166 @@ def validate_smart_text(question_type, smart_text):
         if current_code == 1:
             index = identifier[1]
             if index in result:
-                return wrong_message('您有重复的题目索引号！位置：' + line)
+                return wrong_message('您有重复的题目索引号！位置：{}'.format(line))
             result[index] = {}
             result[index]['description'] = identifier[2]
         elif index is None:
-            return wrong_message('您尚未指定索引号！位置：' + line)
+            return wrong_message('您尚未指定索引号！位置：{}'.format(line))
         elif current_code == 10:
             result[index]['description'] += '\r\n' + identifier[1]
         elif current_code == 6:
-            result[index].update({'answer': identifier[1], })
+            result[index]['answer'] = identifier[1]
         elif current_code == 60:
             result[index]['answer'] += '\r\n' + identifier[1]
         elif current_code == 7:
             result[index]['student_upload'] = identifier[1]
         elif current_code == 5:
             result[index]['chance'] = identifier[1]
+        elif current_code == 11:
+            if question_type != 6:
+                return wrong_message('非陈述题必须要有答案！题目号：{}'.format(index))
+            result[index]['need_answer'] = identifier[1]
         elif current_code == 4:
             if question_type != 5:
-                return wrong_message('此题应归类为数字填空！位置：' + line)
+                return wrong_message('此题应归类为数字填空！位置：{}'.format(line))
             result[index]['error'] = identifier[1]
         elif current_code == 8:
             if question_type > 2:
-                return wrong_message('此题应归类为选择题！位置：' + line)
+                return wrong_message('此题应归类为选择题！位置：{}'.format(line))
             if 'choices' in result[index]:
                 result[index]['choices'].append((identifier[1], identifier[2]))
             else:
                 result[index]['choices'] = [(identifier[1], identifier[2]), ]
+    return validate_problem(question_type, result)
 
+
+def validate_comprehensive(lines):
+    result = {}
+    current_code = 1
+    previous_order = 0  # Zero means main part
+    index = None
+    main_part_processed = False
+    for line in lines:
+        line = line.strip()
+        if not line:  # Empty line
+            continue
+        identifier = smart_identifier(line, current_code)  # Identify the line
+        current_code = identifier[0]  # Update current code
+        if current_code == 1:
+            index = identifier[1]
+            if main_part_processed:
+                return wrong_message('综合题只支持一次输入一题！')
+            if index in result:
+                return wrong_message('您有重复的题目索引号！位置：{}'.format(line))
+            main_part_processed = True
+            result[index] = {}
+            result[index]['description'] = identifier[2]
+            result['main_part'] = index
+        elif index is None:
+            return wrong_message('您尚未指定索引号！位置：{}'.format(line))
+        elif current_code == 2:
+            index = identifier[1]  # Already integer
+            if index != previous_order + 1:
+                return wrong_message('您的小题题号不连续！')
+            previous_order = index  # Update it
+            result[index] = {}
+            result[index]['description'] = identifier[2]
+        elif current_code == 10 or current_code == 20:
+            result[index]['description'] += '\r\n' + identifier[1]
+        elif previous_order == 0:
+            return wrong_message('综合题主干只允许包括索引号和题干描述！位置：{}'.format(line))
+        elif current_code == 9:
+            if identifier[1] in old_sc_full:
+                result[index]['question_type'] = old_sc_full[identifier[1]]
+            elif identifier[1] in type_sc_full:
+                result[index]['question_type'] = type_sc_full.index(identifier[1])
+            elif identifier[1] in type_sc_abbr:
+                result[index]['question_type'] = type_sc_abbr.index(identifier[1])
+        elif current_code == 3:
+            result[index]['percentage'] = identifier[1]
+        elif current_code == 6:
+            result[index]['answer'] = identifier[1]
+        elif current_code == 60:
+            result[index]['answer'] += '\r\n' + identifier[1]
+        elif current_code == 7:
+            result[index]['student_upload'] = identifier[1]
+        elif current_code == 5:
+            result[index]['chance'] = identifier[1]
+        elif 'question_type' not in result[index]:
+            return wrong_message('请在小题题干下一行声明小题题型！小题号：{}'.format(index))
+        elif current_code == 11:
+            if result[index]['question_type'] != 6:
+                return wrong_message('非陈述题必须要有答案！题号：{}'.format(index))
+            result[index]['need_answer'] = identifier[1]
+        elif current_code == 4:
+            if result[index]['question_type'] != 5:
+                return wrong_message('此题应归类为数字填空！位置：{}'.format(line))
+            result[index]['error'] = identifier[1]
+        elif current_code == 8:
+            if result[index]['question_type'] > 2:
+                return wrong_message('此题应归类为选择题！位置：{}'.format(line))
+            if 'choices' in result[index]:
+                result[index]['choices'].append((identifier[1], identifier[2]))
+            else:
+                result[index]['choices'] = [(identifier[1], identifier[2]), ]
+    return validate_problem(7, result)
+
+
+def wrong_message(warning):
+    return False, warning, {}
+
+
+def validate_problem(question_type, result, is_sub=False):
     valid = True
-    required_fields = ['description', 'answer', ]
+    required_fields = ['description', ]
+    if question_type < 7:
+        required_fields.append('answer')
     if question_type == 1 or question_type == 2:
         required_fields.append('choices')
+    if is_sub:
+        required_fields.append('percentage')
     message = '已成功添加题目，请选择章节并点击显示题目进行查看！'
-    # Check required fields and validate answers
-    for question_index in result:
+    # For comprehensive questions
+    if question_type == 7:
+        if 'main_part' not in result:
+            return wrong_message('您的题目缺失主干部分！')
+        question_index = result['main_part']
         question_content = result[question_index]
-        print(question_content, required_fields)
         for field in required_fields:
             if field not in question_content:
                 return wrong_message('您的题目缺失必要信息！题目号：' + question_index)
-            if field == 'answer':  # Check answer format
-                current_answer = question_content[field]
-                if question_type == 5:
-                    try:
-                        result[question_index][field] = float(current_answer)
-                    except ValueError:
-                        return wrong_message('数字填空答案必须为数字！题目号：' + question_index)
-                if question_type <= 2:
-                    separated_choices = list(zip(*result[question_index]['choices']))
-                    result[question_index]['choices'] = separated_choices[1]
-                    if question_type == 2:
-                        result[question_index][field] = list(current_answer)
-                    for correct_choice in current_answer:
-                        if question_type == 1 and len(current_answer) != 1:
-                            return wrong_message('单选题答案只能为一个选项！题目号：' + question_index)
-                        if correct_choice not in separated_choices[0]:
-                            return wrong_message('答案和选项不符！题目号：' + question_index)
+        for sub_order in result:
+            if sub_order != question_index and sub_order != 'main_part':
+                sub_result = {sub_order: result[sub_order]}
+                sub_validation = validate_problem(result[sub_order]['question_type'], sub_result, True)
+                if not sub_validation[0]:
+                    return sub_validation
+        return valid, message, result
+    else:  # Check required fields and validate answers
+        for question_index in result:
+            question_content = result[question_index]
+            for field in required_fields:
+                if field not in question_content:
+                    return wrong_message('您的题目缺失必要信息！题目号：{}'.format(question_index))
+                if field == 'answer':  # Check answer format
+                    current_answer = question_content[field]
+                    if question_type == 5:
+                        try:
+                            result[question_index][field] = float(current_answer)
+                        except ValueError:
+                            return wrong_message('数字填空答案必须为数字！题目号：{}'.format(question_index))
+                    if question_type <= 2:
+                        if 'choices' not in result[question_index]:
+                            return wrong_message('此题没有选项！题目号：{}'.format(question_index))
+                        separated_choices = list(zip(*result[question_index]['choices']))
+                        result[question_index]['choices'] = separated_choices[1]
+                        if question_type == 2:
+                            result[question_index][field] = list(current_answer)
+                        for correct_choice in current_answer:
+                            if question_type == 1 and len(current_answer) != 1:
+                                return wrong_message('单选题答案只能为一个选项！题目号：{}'.format(question_index))
+                            if correct_choice not in separated_choices[0]:
+                                return wrong_message('答案和选项不符！题目号：{}'.format(question_index))
     return valid, message, result
 
 
@@ -248,8 +375,7 @@ def smart_identifier(line, current_code):
     r = re.match('答案：(.*)', line)
     if r:  # Code 6: Answer
         return 6, r.group(1).strip()
-    r = re.match('允许考生上传附件', line)
-    if r:  # Code 7: Upload
+    if line == '允许考生上传附件':  # Code 7: Upload
         return 7, True
     r = re.match('[(（]([A-Z])[）)](.*)', line)
     if r:  # Code 8: Choices
@@ -257,6 +383,8 @@ def smart_identifier(line, current_code):
     r = re.match('题型：(.*)', line)
     if r:  # Code 9: Type of questions - for secondary parts
         return 9, r.group(1).strip()
+    if line == '本题不需要文字作答':  # Code 11: Answer is optional - for description
+        return 11, False
     if current_code % 10 == 0:  # Code line breaks
         return current_code, line.strip()
     return current_code * 10, line.strip()  # Code line breaks
@@ -433,9 +561,6 @@ def get_problem(request, problem_type, problem_id):
     this_subject = this_chapter.subject
     this_category = this_subject.category
     # Get content
-    ans_lines = '答案：{}'.format(this_problem.answer).split('\r\n')
-    if type(this_problem.answer) == list:
-        ans_lines = '答案：{}'.format(''.join(this_problem.answer)).split('\r\n')
     result = {
         'type_sc': type_sc_full[type_index],
         'category': this_category.id,
@@ -444,8 +569,16 @@ def get_problem(request, problem_type, problem_id):
         'full_index': '/'.join((this_category.index, this_subject.index, this_chapter.index, this_problem.index)),
         'full_path': '/'.join((this_category.name, this_subject.name, this_chapter.name, type_sc_full[type_index])),
         'desc_lines': str(this_problem).split('\r\n'),
-        'ans_lines': ans_lines,
     }
+    if problem_type != 'cp':
+        if type(this_problem.answer) == list:
+            result['ans_lines'] = '答案：{}'.format(''.join(this_problem.answer)).split('\r\n')
+        elif not this_problem.answer:
+            result['ans_lines'] = '答案：略。'
+        else:
+            result['ans_lines'] = '答案：{}'.format(this_problem.answer).split('\r\n')
+    else:
+        result['sub'] = []
     if problem_type == 'mc' or problem_type == 'mr':
         choice_lines = []
         for i in range(len(this_problem.choices)):
