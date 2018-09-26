@@ -186,94 +186,109 @@ function ajaxChangeProblemPreview(callerType, codes, $caller) {
             // Clear right table
             var $preview = $('#problem_preview');
             $preview.html('');
-            // All components
-            // 0 - Paths
-            var $path = $('<div class="font-weight-bold"></div>').html(data['full_path']);
-            var $index = $('<div class="font-weight-bold"></div>').html(data['full_index']);
-            // 1 - Description
-            var $desc = $('<div></div>').html(data['desc_lines'].join('<br>'));
-            var $image = null;
-            if (data.hasOwnProperty('image')) {
-                $image = $('<img src="" class="img-fluid">');
-                $image.attr('src', data['image']);
-            }
-            // 2 - Choices and images
-            var $choices = [];
-            if (data.hasOwnProperty('choice_lines')) {
-                for (var cl = 0; cl < data['choice_lines'].length; cl++){
-                    var choiceRow = $('<tr></tr>');
-                    choiceRow.append($('<td></td>').html(data['choice_lines'][cl]));
-                    $choices.push(choiceRow);
-                    if(data.hasOwnProperty(String.fromCharCode(cl + 65))){
-                        var imageRow = $('<tr></tr>');
-                        var imageCell = $('<td></td>');
-                        var choiceImage = $('<img src="" class="img-fluid">');
-                        choiceImage.attr('src', data[String.fromCharCode(cl + 65)]);
-                        imageCell.append(choiceImage);
-                        imageRow.append(imageCell);
-                        $choices.push(imageRow);
-                    }
-                }
-            }
-            // 3 - Answer
-            var $ans = null;
-            if (data.hasOwnProperty('ans_lines')) {
-                $ans = $('<div></div>').html(data['ans_lines'].join('<br>'));
-            }
-            var $answerImage = null;
-            if (data.hasOwnProperty('answer_image')) {
-                $answerImage = $('<img src="" class="img-fluid">');
-                $answerImage.attr('src', data['answer_image']);
-            }
-            // 4 - Other info
-            var $info = null;
-            // 5 - Buttons
-            var $btnGroup = $('<div class="btn-group btn-group-sm"></div>');
-            var $editBtn = $('<button type="button" class="btn btn-primary"></button>').text('修改');
-            var $deleteBtn = $('<button type="button" class="btn btn-danger"></button>').text('删除');
-            var $aBtn = $('<button type="button" class="btn btn-primary" disabled></button>').text('无附件');
-            var $vBtn = $('<button type="button" class="btn btn-primary" disabled></button>').text('无视频');
-            if (data.hasOwnProperty('attachment')) {
-                $aBtn.attr('disabled', false);
-                $aBtn.text('查看附件');
-                $aBtn.click(function () {
-                    location.href = data['attachment'];
-                });
-            }
-            if (data.hasOwnProperty('video')) {
-                $vBtn.attr('disabled', false);
-                $vBtn.text('视频暂时不支持播放');
-            }
-            $editBtn.click(function () {
-                alert('抱歉，暂时不支持修改题目！');
-            });
-            $deleteBtn.click(function () {
-                if (confirm('确认要删除本题？')) {
-                    location.href = ['', 'pool', 'delete_problem', ''].join('/') + codes.join('/') + '/';
-                }
-            });
-            $btnGroup.append($aBtn, $vBtn, $editBtn, $deleteBtn);
-            // Append
-            var components = [$path, $index, $desc, $image, $choices, $ans, $answerImage, $info, $btnGroup];
-            for (var i = 0; i < components.length; i++){
-                if (components[i]){
-                    if (i === 4){
-                        for (var j = 0; j < $choices.length; j++){
-                            $preview.append($choices[j]);
-                        }
-                        continue;
-                    }
-                    var row = $('<tr></tr>');
-                    var cell = $('<td></td>');
-                    cell.append(components[i]);
-                    row.append(cell);
-                    $preview.append(row);
+            formatProblemPreview(data);
+            if (data.hasOwnProperty('sub')){
+                for (var i = 0; i < data['sub'].length; i++){
+                    formatProblemPreview(data['sub'][i]);
                 }
             }
         }
     });
 }
 
+function formatProblemPreview(data){
+    var $preview = $('#problem_preview');
+    // All components
+    // 0 - Paths
+    var $path = null;
+    if (data.hasOwnProperty('full_path')){
+        $path = $('<div class="font-weight-bold"></div>').html(data['full_path']);
+    }
+    var $index = null;
+    if (data.hasOwnProperty('full_index')){
+        $index = $('<div class="font-weight-bold"></div>').html(data['full_index']);
+    }
+    // 1 - Description
+    var $desc = $('<div></div>').html(data['desc_lines'].join('<br>'));
+    var $image = null;
+    if (data.hasOwnProperty('image')) {
+        $image = $('<img src="" class="img-fluid">');
+        $image.attr('src', data['image']);
+    }
+    // 2 - Choices and images
+    var $choices = [];
+    if (data.hasOwnProperty('choice_lines')) {
+        for (var cl = 0; cl < data['choice_lines'].length; cl++){
+            var choiceRow = $('<tr></tr>');
+            choiceRow.append($('<td></td>').html(data['choice_lines'][cl]));
+            $choices.push(choiceRow);
+            if(data.hasOwnProperty(String.fromCharCode(cl + 65))){
+                var imageRow = $('<tr></tr>');
+                var imageCell = $('<td></td>');
+                var choiceImage = $('<img src="" class="img-fluid">');
+                choiceImage.attr('src', data[String.fromCharCode(cl + 65)]);
+                imageCell.append(choiceImage);
+                imageRow.append(imageCell);
+                $choices.push(imageRow);
+            }
+        }
+    }
+    // 3 - Answer
+    var $ans = null;
+    if (data.hasOwnProperty('ans_lines')) {
+        $ans = $('<div></div>').html(data['ans_lines'].join('<br>'));
+    }
+    var $answerImage = null;
+    if (data.hasOwnProperty('answer_image')) {
+        $answerImage = $('<img src="" class="img-fluid">');
+        $answerImage.attr('src', data['answer_image']);
+    }
+    // 4 - Other info
+    var $info = null;
+    // 5 - Buttons
+    var $btnGroup = $('<div class="btn-group btn-group-sm"></div>');
+    var $editBtn = $('<button type="button" class="btn btn-primary"></button>').text('修改');
+    var $deleteBtn = $('<button type="button" class="btn btn-danger"></button>').text('删除');
+    var $aBtn = $('<button type="button" class="btn btn-primary" disabled></button>').text('无附件');
+    var $vBtn = $('<button type="button" class="btn btn-primary" disabled></button>').text('无视频');
+    if (data.hasOwnProperty('attachment')) {
+        $aBtn.attr('disabled', false);
+        $aBtn.text('查看附件');
+        $aBtn.click(function () {
+            location.href = data['attachment'];
+        });
+    }
+    if (data.hasOwnProperty('video')) {
+        $vBtn.attr('disabled', false);
+        $vBtn.text('视频暂时不支持播放');
+    }
+    $editBtn.click(function () {
+        alert('抱歉，暂时不支持修改题目！');
+    });
+    $deleteBtn.click(function () {
+        if (confirm('确认要删除本题？')) {
+            location.href = ['', 'pool', 'delete_problem', ''].join('/') + codes.join('/') + '/';
+        }
+    });
+    $btnGroup.append($aBtn, $vBtn, $editBtn, $deleteBtn);
+    // Append
+    var components = [$path, $index, $desc, $image, $choices, $ans, $answerImage, $info, $btnGroup];
+    for (var i = 0; i < components.length; i++){
+        if (components[i]){
+            if (i === 4){
+                for (var j = 0; j < $choices.length; j++){
+                    $preview.append($choices[j]);
+                }
+                continue;
+            }
+            var row = $('<tr></tr>');
+            var cell = $('<td></td>');
+            cell.append(components[i]);
+            row.append(cell);
+            $preview.append(row);
+        }
+    }
+}
 function setChapterInfo(pk) {
     var targets = ['#cell_chapter_name', '#cell_chapter_index'];
     var entries = ['full_path', 'full_index'];

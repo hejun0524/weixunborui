@@ -127,6 +127,9 @@ class ComprehensiveProblem(models.Model):
     chance = models.IntegerField(default=1)
     answer_image = models.ImageField(upload_to=RenameUploads('problem/'), blank=True)
 
+    def __str__(self):
+        return '({}) {}'.format(self.order, self.description)
+
     class Meta:
         abstract = True
 

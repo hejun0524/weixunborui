@@ -122,6 +122,8 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
         for attribute in question_content:
             setattr(q, attribute, question_content[attribute])
         q.save()
+        smart_files[question_index] = {'video': None, 'attachment': None, 'image': None, }
+        question_info[question_index] = {'id': q.id, 'type': question_type, }
         for sub_order in validation_result[2]:
             if sub_order != question_index and sub_order != 'main_part':
                 sub_content = validation_result[2][sub_order]
@@ -131,6 +133,12 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
                     if sub_attribute != 'question_type':
                         setattr(sub, sub_attribute, sub_content[sub_attribute])
                 sub.save()
+                init_sub_files = {'video': None, 'image': None, 'answer_image': None, }
+                sub_index = '{}-{}'.format(question_index, sub_order)
+                question_info[sub_index] = {'id': sub.id, 'type': sub_type, }
+                if sub_type == 1 or sub_type == 2:
+                    init_sub_files.update({'choice_images': {}})
+                smart_files[sub_index] = init_sub_files
     else:
         for question_index in validation_result[2]:
             q = class_list[question_type - 1](index=question_index, chapter_id=chapter_id)
@@ -148,7 +156,7 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
     for file_set in all_files:
         for smart_file in file_set[0]:
             fvr = validate_smart_file(smart_files, smart_file, file_set[1])
-            if not fvr[0]:  # File validation result
+            if not fvr[0]:  # File validation result: failed
                 messages.error(request, fvr[1])
                 return redirect('pool:problems')
             if fvr[2] == 'choice_images':
@@ -158,7 +166,11 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
     for question_index in smart_files:
         question_files = smart_files[question_index]
         question_id_type = question_info[question_index]
-        q = class_list[question_id_type['type'] - 1].objects.get(pk=question_id_type['id'])
+        r = re.match('(.*)-(.*)', question_index)
+        if r:
+            q = sub_class_list[question_id_type['type'] - 1].objects.get(pk=question_id_type['id'])
+        else:
+            q = class_list[question_id_type['type'] - 1].objects.get(pk=question_id_type['id'])
         for attribute in question_files:
             if attribute == 'choice_images':
                 for option in question_files[attribute]:
@@ -562,32 +574,56 @@ def get_problem(request, problem_type, problem_id):
     this_category = this_subject.category
     # Get content
     result = {
-        'type_sc': type_sc_full[type_index],
         'category': this_category.id,
         'subject': this_subject.id,
         'chapter': this_chapter.id,
         'full_index': '/'.join((this_category.index, this_subject.index, this_chapter.index, this_problem.index)),
         'full_path': '/'.join((this_category.name, this_subject.name, this_chapter.name, type_sc_full[type_index])),
-        'desc_lines': str(this_problem).split('\r\n'),
     }
-    if problem_type != 'cp':
+    result.update(get_problem_details(this_problem, type_index))
+    # Get media set
+    result.update(get_media_set(this_problem))
+    # For sub questions
+    if problem_type == 'cp':
+        result['sub'] = []
+        all_subs = []
+        for sub_class in sub_class_list:
+            sub_class_set = getattr(this_problem, '{}_set'.format(sub_class.__name__.lower())).all()
+            all_subs.extend(list(sub_class_set))
+        all_subs.sort(key=lambda x: x.order)
+        for this_sub in all_subs:
+            sub_index = sub_class_list.index(this_sub.__class__)
+            sub_result = {}
+            sub_result.update(get_problem_details(this_sub, sub_index))
+            sub_result.update(get_media_set(this_sub))
+            result['sub'].append(sub_result)
+    return JsonResponse(result)
+
+
+def get_problem_details(this_problem, type_index):
+    result = {
+        'type_sc': type_sc_full[type_index], 
+        'desc_lines': str(this_problem).split('\r\n')
+    }
+    if type_index != 7 - 1:
         if type(this_problem.answer) == list:
             result['ans_lines'] = '答案：{}'.format(''.join(this_problem.answer)).split('\r\n')
         elif not this_problem.answer:
             result['ans_lines'] = '答案：略。'
         else:
             result['ans_lines'] = '答案：{}'.format(this_problem.answer).split('\r\n')
-    else:
-        result['sub'] = []
-    if problem_type == 'mc' or problem_type == 'mr':
-        choice_lines = []
-        for i in range(len(this_problem.choices)):
-            choice = this_problem.choices[i]
-            choice_lines.append('(' + chr(65 + i) + ')' + choice)
-        result['choice_lines'] = choice_lines
-    # Get media set
+        if type_index == 1 or type_index == 2:
+            choice_lines = []
+            for i in range(len(this_problem.choices)):
+                choice = this_problem.choices[i]
+                choice_lines.append('(' + chr(65 + i) + ')' + choice)
+            result['choice_lines'] = choice_lines
+    return result
+
+
+def get_media_set(this_problem):
     media_set = {}
-    media_set_names = ('image', 'attachment', 'video', 'answer_image')
+    media_set_names = ('image', 'attachment', 'video', 'answer_image', )
     for media in media_set_names:
         if hasattr(this_problem, media):
             if getattr(this_problem, media):
@@ -596,8 +632,7 @@ def get_problem(request, problem_type, problem_id):
     if hasattr(this_problem, image_set):
         for choice_image in getattr(this_problem, image_set).all():
             media_set[choice_image.choice] = '/media/{}'.format(str(choice_image.image))
-    result.update(media_set)
-    return JsonResponse(result)
+    return media_set
 
 
 def delete_problem(request, problem_type, problem_id):
