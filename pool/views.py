@@ -618,6 +618,10 @@ def get_problem_details(this_problem, type_index):
                 choice = this_problem.choices[i]
                 choice_lines.append('(' + chr(65 + i) + ')' + choice)
             result['choice_lines'] = choice_lines
+    info_attributes = ('student_upload', 'chance', 'need_answer', 'error', 'percentage')
+    for info in info_attributes:
+        if hasattr(this_problem, info):
+            result[info] = getattr(this_problem, info)
     return result
 
 

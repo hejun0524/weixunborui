@@ -244,7 +244,26 @@ function formatProblemPreview(data){
         $answerImage.attr('src', data['answer_image']);
     }
     // 4 - Other info
-    var $info = null;
+    var $info = [];
+    var infoAttributes = ['error', 'percentage', 'student_upload', 'chance', 'need_answer'];
+    for (var ii = 0; ii < infoAttributes.length; ii++){
+        if (data.hasOwnProperty(infoAttributes[ii])){
+            var infoRow = $('<tr></tr>');
+            var infoRawData = data[infoAttributes[ii]];
+            if (infoAttributes[ii] === 'error'){
+                infoRow.append($('<td></td>').html('允许误差：' + infoRawData + '%'));
+            } else if (infoAttributes[ii] === 'error') {
+                infoRow.append($('<td></td>').html('分值比重：' + infoRawData + '%'));
+            } else if (infoAttributes[ii] === 'student_upload') {
+                infoRow.append($('<td></td>').html(infoRawData? '允许考生上传附件':'禁止考生上传附件'));
+            } else if (infoAttributes[ii] === 'chance') {
+                infoRow.append($('<td></td>').html('允许机会：' + infoRawData + '次'));
+            } else if (infoAttributes[ii] === 'need_answer' && infoRawData) {
+                infoRow.append($('<td></td>').html('本题不需要文字作答'));
+            }
+            $info.push(infoRow);
+        }
+    }
     // 5 - Buttons
     var $btnGroup = $('<div class="btn-group btn-group-sm"></div>');
     var $editBtn = $('<button type="button" class="btn btn-primary"></button>').text('修改');
@@ -275,20 +294,21 @@ function formatProblemPreview(data){
     var components = [$path, $index, $desc, $image, $choices, $ans, $answerImage, $info, $btnGroup];
     for (var i = 0; i < components.length; i++){
         if (components[i]){
-            if (i === 4){
-                for (var j = 0; j < $choices.length; j++){
-                    $preview.append($choices[j]);
+            if (components[i] instanceof Array){
+                for(var j = 0; j < components[i].length; j++){
+                    $preview.append(components[i][j]);
                 }
-                continue;
+            } else {
+                var row = $('<tr></tr>');
+                var cell = $('<td></td>');
+                cell.append(components[i]);
+                row.append(cell);
+                $preview.append(row);
             }
-            var row = $('<tr></tr>');
-            var cell = $('<td></td>');
-            cell.append(components[i]);
-            row.append(cell);
-            $preview.append(row);
         }
     }
 }
+
 function setChapterInfo(pk) {
     var targets = ['#cell_chapter_name', '#cell_chapter_index'];
     var entries = ['full_path', 'full_index'];
