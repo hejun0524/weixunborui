@@ -605,14 +605,14 @@ def get_problem_details(this_problem, type_index):
         'type_sc': type_sc_full[type_index], 
         'desc_lines': str(this_problem).split('\r\n')
     }
-    if type_index != 7 - 1:
+    if type_index != 6:
         if type(this_problem.answer) == list:
             result['ans_lines'] = '答案：{}'.format(''.join(this_problem.answer)).split('\r\n')
         elif not this_problem.answer:
             result['ans_lines'] = '答案：略。'
         else:
             result['ans_lines'] = '答案：{}'.format(this_problem.answer).split('\r\n')
-        if type_index == 1 or type_index == 2:
+        if type_index == 0 or type_index == 1:
             choice_lines = []
             for i in range(len(this_problem.choices)):
                 choice = this_problem.choices[i]
