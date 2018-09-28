@@ -252,7 +252,7 @@ function formatProblemPreview(data){
             var infoRawData = data[infoAttributes[ii]];
             if (infoAttributes[ii] === 'error'){
                 infoRow.append($('<td></td>').html('允许误差：' + infoRawData + '%'));
-            } else if (infoAttributes[ii] === 'error') {
+            } else if (infoAttributes[ii] === 'percentage') {
                 infoRow.append($('<td></td>').html('分值比重：' + infoRawData + '%'));
             } else if (infoAttributes[ii] === 'student_upload') {
                 infoRow.append($('<td></td>').html(infoRawData? '允许考生上传附件':'禁止考生上传附件'));
