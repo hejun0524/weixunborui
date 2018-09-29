@@ -1,5 +1,6 @@
-function ajaxChangeSelection(callerType, code, targets, has0, entries, fixedSelection) {
+function ajaxChangeSelection(requestApp, callerType, code, targets, has0, entries, fixedSelection) {
     /*
+    requestApp: pool, exam or whatever;
     callerType: what user clicked on - the component's model type;
     code: model id - i.e., caller's value;
     targets: a list of components that will be affected;
@@ -8,7 +9,7 @@ function ajaxChangeSelection(callerType, code, targets, has0, entries, fixedSele
     fixedSelection: whether maintain the previous selection
      */
     $.ajax({
-        url: ['', 'exam', callerType, code, ''].join('/'),
+        url: ['', requestApp, callerType, code, ''].join('/'),
         success: function (data) {
             for (var i = 0; i < targets.length; i++) {
                 var $target = $(targets[i]);
@@ -34,9 +35,9 @@ function ajaxChangeSelection(callerType, code, targets, has0, entries, fixedSele
     });
 }
 
-function ajaxChangeTable(callerType, code, targets, entries, specialTargets, specialEntries, specialAttributes) {
+function ajaxChangeTable(requestApp, callerType, code, targets, entries, specialTargets, specialEntries, specialAttributes) {
     $.ajax({
-        url: ['', 'exam', callerType, code, ''].join('/'),
+        url: ['', requestApp, callerType, code, ''].join('/'),
         success: function (data) {
             for (var i = 0; i < targets.length; i++) {
                 var $target = $(targets[i]);
@@ -69,7 +70,28 @@ function setStrategyInfo(pk) {
             $(specialTargets[j]).val('');
         }
     } else {
-        ajaxChangeTable('get_strategy', pk, targets, entries, specialTargets, specialEntries, specialAttributes);
+        ajaxChangeTable('exam', 'get_strategy', pk, targets, entries, specialTargets, specialEntries, specialAttributes);
+    }
+}
+
+function setChapterInfo(pk) {
+    var targets = [];
+    var entries = [];
+    var specialTargets = ['#cell_chapter_image'];
+    var specialEntries = ['image_path'];
+    var specialAttributes = ['src'];
+    var i = 1;
+    for (; i <= 7; i++) {
+        targets.push('#cell_chapter_point' + i, '#cell_chapter_difficulty' + i, '#cell_chapter_q_num' + i);
+        entries.push('point' + i, 'difficulty' + i, 'q_num' + i);
+    }
+    if (pk === 0) { // reset
+        for (i = 0; i < targets.length; i++) {
+            $(targets[i]).html('');
+        }
+        $('#cell_chapter_image').attr('src', '/static/img/no_img.png');
+    } else {
+        ajaxChangeTable('pool', 'get_chapter', pk, targets, entries, specialTargets, specialEntries, specialAttributes);
     }
 }
 
@@ -77,16 +99,23 @@ $('#add_strategy').click(function () {
     $('#strategy_modal').modal('show');
 });
 
+$('#add_chapter').click(function () {
+    if (parseInt($('#id_strategy').val()) === 0) {
+        return alert('请先选择一个策略！');
+    }
+    $('#chapter_modal').modal('show');
+});
+
 $('#id_category').change(function () {
     ajaxChangeSelection(
-        'change_category', $(this).val(),
+        'exam', 'change_category', $(this).val(),
         ['#id_subject', '#id_strategy'], [true, true], ['subjects', 'strategies'], false
     );
 });
 
 $('#id_subject').change(function () {
     ajaxChangeSelection(
-        'change_subject/' + $('#id_category').val(), $(this).val(),
+        'exam', 'change_subject/' + $('#id_category').val(), $(this).val(),
         ['#id_strategy'], [true], ['strategies'], false
     );
 });
@@ -97,8 +126,25 @@ $('#id_strategy').change(function () {
 
 $('#id_strategy_category').change(function () {
     ajaxChangeSelection(
-        'change_category', $(this).val(),
+        'exam', 'change_category', $(this).val(),
         ['#id_strategy_subject'], [false], ['subjects'], false
     );
 });
 
+$('#id_chapter_category').change(function () {
+    ajaxChangeSelection(
+        'pool', 'change_category', $(this).val(),
+        ['#id_chapter_subject', '#id_chapter_chapter'], [true, false], ['subjects', 'chapters'], false
+    );
+});
+
+$('#id_chapter_subject').change(function () {
+    ajaxChangeSelection(
+        'pool', 'change_subject/' + $('#id_chapter_category').val(), $(this).val(),
+        ['#id_chapter_chapter'], [false], ['chapters'], false
+    );
+});
+
+$('#id_chapter_chapter').change(function() {
+    setChapterInfo(parseInt($(this).val()));
+})

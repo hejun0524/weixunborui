@@ -1,17 +1,27 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
-from pool.models import Category, Subject
+from pool.models import Category, Subject, Chapter
 from .models import *
 
 
 # Create your views here.
 
+type_sc_abbr = ('单选', '多选', '判断', '文填', '数填', '陈述', '综合')
+type_sc_full = ('单项选择题', '多项选择题', '判断题', '文本填空题', '数字填空题', '陈述题', '综合题')
+
+
 def exams(request):
+    chapter_points = tuple(map(lambda num: 'point{}'.format(num), range(1, 8)))
+    chapter_difficulties = tuple(map(lambda num: 'difficulty{}'.format(num), range(1, 8)))
+    chapter_q_nums = tuple(map(lambda num: 'q_num{}'.format(num), range(1, 8)))
     context = {
         'all_categories': Category.objects.all().order_by('index'),
         'all_subjects': Subject.objects.all().order_by('index'),
+        'all_chapters': Chapter.objects.all().order_by('index'),
         'all_strategies': Strategy.objects.all().order_by('index'),
+        'type_sc_abbr': type_sc_abbr,
+        'chapter_info': tuple(zip(type_sc_full, chapter_points, chapter_difficulties, chapter_q_nums)),
     }
     if request.method == 'POST':
         if 'add_strategy' in request.POST:

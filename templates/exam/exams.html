@@ -63,6 +63,28 @@
                 </tr>
                 </tbody>
             </table>
+            <table class="table table-sm table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col" class="cell-2">章节
+                        <span id="add_chapter" class="fake-link text-primary">
+                            <span class="fa fa-plus-circle"></span>
+                        </span>
+                    </th>
+                    {% for entry in type_sc_abbr %}
+                        <th scope="col" class="cell-1">{{ entry }}</th>
+                    {% endfor %}
+                    <th scope="col" class="cell-1">操作</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                <tr>
+                    <th class="cell-2">总分</th>
+                    <td colspan="8" id="total_points">0</td>
+                </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
     <hr>

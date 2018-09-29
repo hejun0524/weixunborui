@@ -10,6 +10,7 @@ class Strategy(models.Model):
     description = models.TextField(blank=True)
     timer = models.IntegerField(default=100)
     plan = fields.JSONField(null=True)
+    created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name

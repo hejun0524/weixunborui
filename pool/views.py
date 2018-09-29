@@ -512,6 +512,7 @@ def get_chapter(request, chapter_id):
     for i in range(1, 8):
         res['point{}'.format(i)] = this_object.points[i - 1]
         res['difficulty{}'.format(i)] = this_object.difficulties[i - 1]
+        res['q_num{}'.format(i)] = len(class_list[i - 1].objects.filter(chapter_id=chapter_id))
     return JsonResponse(res)
 
 
