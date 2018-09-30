@@ -63,6 +63,7 @@
                 </tr>
                 </tbody>
             </table>
+            <p class="font-weight-bold mb-2">查看策略结构</p>
             <table class="table table-sm table-bordered">
                 <thead>
                 <tr>
@@ -72,12 +73,12 @@
                         </span>
                     </th>
                     {% for entry in type_sc_abbr %}
-                        <th scope="col" class="cell-1">{{ entry }}</th>
+                        <th scope="col" class="cell-8p">{{ entry }}</th>
                     {% endfor %}
-                    <th scope="col" class="cell-1">操作</th>
+                    <th scope="col" class="cell-24p">操作</th>
                 </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody id="strategy_structure"></tbody>
                 <tfoot>
                 <tr>
                     <th class="cell-2">总分</th>
@@ -85,6 +86,18 @@
                 </tr>
                 </tfoot>
             </table>
+            <form role="form" method="post" id="form_save_structure">
+                {% csrf_token %}
+                <div class="form-group" hidden>
+                    <label for="id_selected_strategy">策略ID</label>
+                    <input type="text" id="id_selected_strategy" name="selected_strategy" readonly>
+                </div>
+                <div class="form-group" hidden>
+                    <label for="id_strategy_plan">策略JSON</label>
+                    <input type="text" id="id_strategy_plan" name="strategy_plan" readonly>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" id="id_save_structure">保存修改</button>
+            </form>
         </div>
     </div>
     <hr>

@@ -81,7 +81,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="id_chapter_chapter" class="col-sm-3 col-form-label required">选择章节</label>
-                    <select class="col-sm-9 custom-select" id="id_chapter_chapter">
+                    <select class="col-sm-9 custom-select" id="id_chapter_chapter" required>
                         <option value="" selected disabled>请选择</option>
                         {% for object in all_chapters %}
                             <option value="{{ object.id }}">{{ object }}</option>
@@ -92,10 +92,11 @@
                 <tbody>
                 <tr>
                     <th scope="col" class="cell-3">章节图片</th>
-                    <th scope="col" class="cell-3">题目类型</th>
+                    <th scope="col" class="cell-2">题目类型</th>
                     <th scope="col" class="cell-1">分值</th>
                     <th scope="col" class="cell-1">难度</th>
-                    <th scope="col" class="cell-2">包含题量</th>
+                    <th scope="col" class="cell-1">可选量</th>
+                    <th scope="col" class="cell-2">选择</th>
                 </tr>
                 {% for entry in chapter_info %}
                     <tr>
@@ -109,10 +110,15 @@
                         <td id="cell_chapter_{{ entry.1 }}"></td>
                         <td id="cell_chapter_{{ entry.2 }}"></td>
                         <td id="cell_chapter_{{ entry.3 }}"></td>
+                        <td>
+                            <label for="cell_chapter_selected_{{ entry.3 }}" hidden>{{ entry.3 }}</label>
+                            <input class="form-control form-control-sm" type="number" id="cell_chapter_selected_{{ entry.3 }}" value="0" min="0">
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
                 </table>
+                <button class="btn btn-sm btn-primary" id="btn_add_chapter">确认选择</button>
             </div>
         </div>
     </div>

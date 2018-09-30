@@ -225,6 +225,14 @@ body {
     width: 80%;
 }
 
+.cell-8p {
+    width: 8%;
+}
+
+.cell-24p {
+    width: 24%;
+}
+
 .font-xs {
     font-size: 0.75rem;
 }

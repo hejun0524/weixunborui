@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from pool.models import Category, Subject, Chapter
 from .models import *
+import json
 
 
 # Create your views here.
@@ -35,6 +36,11 @@ def exams(request):
             if request.POST.get('strategy_timer'):
                 new_object.timer = int(request.POST.get('strategy_timer'))
             new_object.save()
+        if 'strategy_plan' in request.POST:
+            this_object = Strategy.objects.get(id=int(request.POST.get('selected_strategy')))
+            plan = json.loads(request.POST.get('strategy_plan'))
+            this_object.plan = plan
+            this_object.save()
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
@@ -75,15 +81,23 @@ def get_strategy(request, strategy_id):
     this_object = Strategy.objects.get(id=strategy_id)
     this_parent = this_object.subject
     this_grandparent = this_object.subject.category
+    plan = []
+    plan_matrix = this_object.plan
+    for plan_list in plan_matrix:
+        plan.append({
+            'plan_list': plan_list,
+            'chapter_name': str(Chapter.objects.get(id=plan_list[0])),
+        })
     res = {
         'category': this_grandparent.id,
         'subject': this_parent.id,
-        'chapter': this_object.id,
+        'strategy': this_object.id,
         'name': this_object.name,
         'index': this_object.index,
         'full_path': '/'.join((this_grandparent.name, this_parent.name, this_object.name)),
         'full_index': '/'.join((this_grandparent.index, this_parent.index, this_object.index)),
         'description': this_object.description,
         'timer': '{}分钟'.format(this_object.timer),
+        'plan': plan, 
     }
     return JsonResponse(res)
