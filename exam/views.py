@@ -5,7 +5,6 @@ from pool.models import Category, Subject, Chapter
 from .models import *
 import json
 
-
 # Create your views here.
 
 type_sc_abbr = ('单选', '多选', '判断', '文填', '数填', '陈述', '综合')
@@ -68,13 +67,12 @@ def change_subject(request, category_id, subject_id):
     if subject_id == 0:
         return change_category(request, category_id)
     else:
-        selected_subject = Subject.objects.get(pk=subject_id)
-        chapters = Strategy.objects.filter(subject=selected_subject)
-    strategies = chapters.order_by('index')
+        strategies = Strategy.objects.filter(subject_id=subject_id)
+    strategies = strategies.order_by('index')
     strategy_list = []
     for st in strategies:
         strategy_list.append((st.id, str(st)))
-    return JsonResponse({'chapters': strategy_list})
+    return JsonResponse({'strategies': strategy_list})
 
 
 def get_strategy(request, strategy_id):
@@ -99,6 +97,18 @@ def get_strategy(request, strategy_id):
         'full_index': '/'.join((this_grandparent.index, this_parent.index, this_object.index)),
         'description': this_object.description,
         'timer': '{}分钟'.format(this_object.timer),
-        'plan': plan, 
+        'plan': plan,
     }
     return JsonResponse(res)
+
+
+def generate_gxb():
+    pass
+
+
+def generate_list():
+    pass
+
+
+def generate_package():
+    pass
