@@ -13,7 +13,7 @@ class Strategy(models.Model):
     created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return '{} - {}'.format(self.index, self.name)
 
 
 class Exam(models.Model):
