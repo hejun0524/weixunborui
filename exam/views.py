@@ -83,11 +83,12 @@ def get_strategy(request, strategy_id):
     this_grandparent = this_object.subject.category
     plan = []
     plan_matrix = this_object.plan
-    for plan_list in plan_matrix:
-        plan.append({
-            'plan_list': plan_list,
-            'chapter_name': str(Chapter.objects.get(id=plan_list[0])),
-        })
+    if plan_matrix is not None:
+        for plan_list in plan_matrix:
+            plan.append({
+                'plan_list': plan_list,
+                'chapter_name': str(Chapter.objects.get(id=plan_list[0])),
+            })
     res = {
         'category': this_grandparent.id,
         'subject': this_parent.id,
