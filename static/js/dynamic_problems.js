@@ -187,8 +187,8 @@ function ajaxChangeProblemPreview(callerType, codes, $caller) {
             var $preview = $('#problem_preview');
             $preview.html('');
             formatProblemPreview(data);
-            if (data.hasOwnProperty('sub')){
-                for (var i = 0; i < data['sub'].length; i++){
+            if (data.hasOwnProperty('sub')) {
+                for (var i = 0; i < data['sub'].length; i++) {
                     formatProblemPreview(data['sub'][i]);
                 }
             }
@@ -196,16 +196,16 @@ function ajaxChangeProblemPreview(callerType, codes, $caller) {
     });
 }
 
-function formatProblemPreview(data){
+function formatProblemPreview(data) {
     var $preview = $('#problem_preview');
     // All components
     // 0 - Paths
     var $path = null;
-    if (data.hasOwnProperty('full_path')){
+    if (data.hasOwnProperty('full_path')) {
         $path = $('<div class="font-weight-bold"></div>').html(data['full_path']);
     }
     var $index = null;
-    if (data.hasOwnProperty('full_index')){
+    if (data.hasOwnProperty('full_index')) {
         $index = $('<div class="font-weight-bold"></div>').html(data['full_index']);
     }
     // 1 - Description
@@ -218,11 +218,11 @@ function formatProblemPreview(data){
     // 2 - Choices and images
     var $choices = [];
     if (data.hasOwnProperty('choice_lines')) {
-        for (var cl = 0; cl < data['choice_lines'].length; cl++){
+        for (var cl = 0; cl < data['choice_lines'].length; cl++) {
             var choiceRow = $('<tr></tr>');
             choiceRow.append($('<td></td>').html(data['choice_lines'][cl]));
             $choices.push(choiceRow);
-            if(data.hasOwnProperty(String.fromCharCode(cl + 65))){
+            if (data.hasOwnProperty(String.fromCharCode(cl + 65))) {
                 var imageRow = $('<tr></tr>');
                 var imageCell = $('<td></td>');
                 var choiceImage = $('<img src="" class="img-fluid">');
@@ -246,16 +246,16 @@ function formatProblemPreview(data){
     // 4 - Other info
     var $info = [];
     var infoAttributes = ['error', 'percentage', 'student_upload', 'chance', 'need_answer'];
-    for (var ii = 0; ii < infoAttributes.length; ii++){
-        if (data.hasOwnProperty(infoAttributes[ii])){
+    for (var ii = 0; ii < infoAttributes.length; ii++) {
+        if (data.hasOwnProperty(infoAttributes[ii])) {
             var infoRow = $('<tr></tr>');
             var infoRawData = data[infoAttributes[ii]];
-            if (infoAttributes[ii] === 'error'){
+            if (infoAttributes[ii] === 'error') {
                 infoRow.append($('<td></td>').html('允许误差：' + infoRawData + '%'));
             } else if (infoAttributes[ii] === 'percentage') {
                 infoRow.append($('<td></td>').html('分值比重：' + infoRawData + '%'));
             } else if (infoAttributes[ii] === 'student_upload') {
-                infoRow.append($('<td></td>').html(infoRawData? '允许考生上传附件':'禁止考生上传附件'));
+                infoRow.append($('<td></td>').html(infoRawData ? '允许考生上传附件' : '禁止考生上传附件'));
             } else if (infoAttributes[ii] === 'chance') {
                 infoRow.append($('<td></td>').html('允许机会：' + infoRawData + '次'));
             } else if (infoAttributes[ii] === 'need_answer' && infoRawData) {
@@ -292,10 +292,10 @@ function formatProblemPreview(data){
     $btnGroup.append($aBtn, $vBtn, $editBtn, $deleteBtn);
     // Append
     var components = [$path, $index, $desc, $image, $choices, $ans, $answerImage, $info, $btnGroup];
-    for (var i = 0; i < components.length; i++){
-        if (components[i]){
-            if (components[i] instanceof Array){
-                for(var j = 0; j < components[i].length; j++){
+    for (var i = 0; i < components.length; i++) {
+        if (components[i]) {
+            if (components[i] instanceof Array) {
+                for (var j = 0; j < components[i].length; j++) {
                     $preview.append(components[i][j]);
                 }
             } else {
@@ -479,4 +479,8 @@ $('#group_delete').click(function () {
         return alert('请先选择一个章节！');
     }
     $('#group_delete_modal').modal('show');
+});
+
+$('#id_questions').keyup(function () {
+    $('#max_input').text(800 - $(this).val().length);
 });
