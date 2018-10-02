@@ -11,7 +11,7 @@ sub_class_list = (SubMultipleChoice, SubMultipleResponse, SubTrueOrFalse, SubTex
 type_sc_abbr = ('单选', '多选', '判断', '文填', '数填', '陈述', '综合')
 type_sc_full = ('单项选择题', '多项选择题', '判断题', '文本填空题', '数字填空题', '陈述题', '综合题')
 type_en_abbr = ('mc', 'mr', 'tf', 'tb', 'nb', 'dc', 'cp')
-old_sc_full = {'单选题': 1, '多选题': 2, '判断题': 3, '文本填空': 4, '数字填空': 5, '简答题': 6, '主观题': 6, }
+old_sc_full = {'单选题': 1, '多选题': 2, '判断题': 3, '文本填空': 4, '数字填空': 5, '简答题': 6, '主观题': 6, '陈述题': 6}
 
 
 def problems(request):
@@ -55,6 +55,7 @@ def problems(request):
             this_object.save()
         elif 'edit_subject' in request.POST:
             this_object = Subject.objects.get(id=int(request.POST.get('subject_id')))
+            this_object.category_id = request.POST.get('subject_category')
             this_object.name = request.POST.get('subject_name')
             this_object.index = request.POST.get('subject_index')
             this_object.save()
@@ -65,6 +66,7 @@ def problems(request):
             for i in range(1, 8):
                 points.append(request.POST.get('point{}'.format(i)))
                 difficulties.append(request.POST.get('difficulty{}'.format(i)))
+            this_object.subject_id = request.POST.get('chapter_subject')
             this_object.name = request.POST.get('chapter_name')
             this_object.index = request.POST.get('chapter_index')
             this_object.points = points
@@ -128,7 +130,7 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
             if sub_order != question_index and sub_order != 'main_part':
                 sub_content = validation_result[2][sub_order]
                 sub_type = sub_content['question_type']
-                sub = sub_class_list[sub_type -1](order=sub_order, comprehensive=q)
+                sub = sub_class_list[sub_type - 1](order=sub_order, comprehensive=q)
                 for sub_attribute in sub_content:
                     if sub_attribute != 'question_type':
                         setattr(sub, sub_attribute, sub_content[sub_attribute])
@@ -174,8 +176,7 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
         for attribute in question_files:
             if attribute == 'choice_images':
                 for option in question_files[attribute]:
-                    if option:
-                        replace_or_create(q.__class__.__name__, q.id, option, question_files[attribute][option])
+                    replace_or_create(q.__class__.__name__, q.id, option, question_files[attribute][option])
             if question_files[attribute]:
                 setattr(q, attribute, question_files[attribute])
                 q.save()
@@ -603,7 +604,7 @@ def get_problem(request, problem_type, problem_id):
 
 def get_problem_details(this_problem, type_index):
     result = {
-        'type_sc': type_sc_full[type_index], 
+        'type_sc': type_sc_full[type_index],
         'desc_lines': str(this_problem).split('\r\n')
     }
     if type_index != 6:
@@ -628,7 +629,7 @@ def get_problem_details(this_problem, type_index):
 
 def get_media_set(this_problem):
     media_set = {}
-    media_set_names = ('image', 'attachment', 'video', 'answer_image', )
+    media_set_names = ('image', 'attachment', 'video', 'answer_image',)
     for media in media_set_names:
         if hasattr(this_problem, media):
             if getattr(this_problem, media):

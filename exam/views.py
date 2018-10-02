@@ -30,16 +30,31 @@ def exams(request):
                 name=request.POST.get('strategy_name'),
                 index=request.POST.get('strategy_index'),
             )
-            if request.POST.get('strategy_description'):
-                new_object.description = request.POST.get('strategy_description')
+            new_object.description = request.POST.get('strategy_description')
             if request.POST.get('strategy_timer'):
                 new_object.timer = int(request.POST.get('strategy_timer'))
             new_object.save()
-        if 'strategy_plan' in request.POST:
+        elif 'strategy_plan' in request.POST:
             this_object = Strategy.objects.get(id=int(request.POST.get('selected_strategy')))
             plan = json.loads(request.POST.get('strategy_plan'))
             this_object.plan = plan
             this_object.save()
+        elif 'edit_strategy' in request.POST or 'duplicate_strategy' in request.POST:
+            this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
+            this_object.subject_id = int(request.POST.get('strategy_subject'))
+            this_object.name = request.POST.get('strategy_name')
+            this_object.index = request.POST.get('strategy_index')
+            this_object.description = request.POST.get('strategy_description')
+            if request.POST.get('strategy_timer'):
+                this_object.timer = int(request.POST.get('strategy_timer'))
+            else:
+                this_object.timer = 100
+            if 'duplicate_strategy' in request.POST:
+                this_object.pk = None
+            this_object.save()
+        elif 'delete_strategy' in request.POST:
+            this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
+            this_object.delete()
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
@@ -86,6 +101,7 @@ def get_strategy(request, strategy_id):
             plan.append({
                 'plan_list': plan_list,
                 'chapter_name': str(Chapter.objects.get(id=plan_list[0])),
+                'list_total_points': calculate_total_points(plan_list),
             })
     res = {
         'category': this_grandparent.id,
@@ -97,9 +113,15 @@ def get_strategy(request, strategy_id):
         'full_index': '/'.join((this_grandparent.index, this_parent.index, this_object.index)),
         'description': this_object.description,
         'timer': '{}分钟'.format(this_object.timer),
+        'timer_num': this_object.timer,
         'plan': plan,
     }
     return JsonResponse(res)
+
+
+def calculate_total_points(plan_list):
+    chapter = Chapter.objects.get(id=plan_list[0])
+    return sum([x*y for x,y in zip(plan_list[1:], chapter.points)])
 
 
 def generate_gxb():

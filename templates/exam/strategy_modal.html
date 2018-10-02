@@ -4,10 +4,15 @@
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">添加策略</h5>
+                <h5 class="modal-title" id="title_strategy">添加策略</h5>
             </div>
             <form role="form" method="post" id="form_strategy" class="modal-body pr-5">
                 {% csrf_token %}
+                <div class="form-group row" hidden>
+                    <label for="id_strategy_id" class="col-sm-3 col-form-label required">序号</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_strategy_id" name="strategy_id" readonly>
+                </div>
                 <div class="form-group row">
                     <label for="id_strategy_category" class="col-sm-3 col-form-label">所属类别</label>
                     <select class="col-sm-9 custom-select" id="id_strategy_category" name="strategy_category">
@@ -47,7 +52,10 @@
                            id="id_strategy_timer" name="strategy_timer" placeholder="请填写一个数，若空白则默认100分钟">
                 </div>
                 <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
-                <button class="btn btn-sm btn-primary" type="submit" name="add_strategy">确认添加</button>
+                <button class="btn btn-sm btn-primary" type="submit" id="btn_strategy">确认添加</button>
+                <button class="btn btn-sm btn-danger" type="submit" id="delete_strategy" name="delete_strategy" hidden>
+                    删除
+                </button>
             </form>
         </div>
     </div>
@@ -89,35 +97,37 @@
                     </select>
                 </div>
                 <table class="table table-sm table-bordered">
-                <tbody>
-                <tr>
-                    <th scope="col" class="cell-3">章节图片</th>
-                    <th scope="col" class="cell-2">题目类型</th>
-                    <th scope="col" class="cell-1">分值</th>
-                    <th scope="col" class="cell-1">难度</th>
-                    <th scope="col" class="cell-1">可选量</th>
-                    <th scope="col" class="cell-2">选择</th>
-                </tr>
-                {% for entry in chapter_info %}
+                    <tbody>
                     <tr>
-                        {% if forloop.counter0 == 0 %}
-                            <td rowspan="7">
-                                <img class="img-fluid center-block" id="cell_chapter_image"
-                                     src="{% static 'img/no_img.png' %}">
-                            </td>
-                        {% endif %}
-                        <td scope="row">{{ entry.0 }}</td>
-                        <td id="cell_chapter_{{ entry.1 }}"></td>
-                        <td id="cell_chapter_{{ entry.2 }}"></td>
-                        <td id="cell_chapter_{{ entry.3 }}"></td>
-                        <td>
-                            <label for="cell_chapter_selected_{{ entry.3 }}" hidden>{{ entry.3 }}</label>
-                            <input class="form-control form-control-sm" type="number" id="cell_chapter_selected_{{ entry.3 }}" value="0" min="0">
-                        </td>
+                        <th scope="col" class="cell-3">章节图片</th>
+                        <th scope="col" class="cell-2">题目类型</th>
+                        <th scope="col" class="cell-1">分值</th>
+                        <th scope="col" class="cell-1">难度</th>
+                        <th scope="col" class="cell-1">可选量</th>
+                        <th scope="col" class="cell-2">选择</th>
                     </tr>
-                {% endfor %}
-                </tbody>
+                    {% for entry in chapter_info %}
+                        <tr>
+                            {% if forloop.counter0 == 0 %}
+                                <td rowspan="7">
+                                    <img class="img-fluid center-block" id="cell_chapter_image"
+                                         src="{% static 'img/no_img.png' %}">
+                                </td>
+                            {% endif %}
+                            <td scope="row">{{ entry.0 }}</td>
+                            <td id="cell_chapter_{{ entry.1 }}"></td>
+                            <td id="cell_chapter_{{ entry.2 }}"></td>
+                            <td id="cell_chapter_{{ entry.3 }}"></td>
+                            <td>
+                                <label for="cell_chapter_selected_{{ entry.3 }}" hidden>{{ entry.3 }}</label>
+                                <input class="form-control form-control-sm" type="number"
+                                       id="cell_chapter_selected_{{ entry.3 }}" value="0" min="0">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
                 </table>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
                 <button class="btn btn-sm btn-primary" id="btn_add_chapter">确认选择</button>
             </div>
         </div>

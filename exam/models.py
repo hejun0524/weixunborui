@@ -25,7 +25,7 @@ class Exam(models.Model):
     strategy_detail = fields.JSONField()
 
 
-class ExamVerification(models.Model):
+class GovernmentCertification(models.Model):
     project = models.CharField(max_length=100)
     verified = models.CharField(max_length=100)
     school = models.CharField(max_length=100)

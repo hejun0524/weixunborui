@@ -53,7 +53,7 @@ function ajaxChangeTable(requestApp, callerType, code, targets, entries, special
                     $('#strategy_structure').html(''); // Re-select, clear
                     for (var k = 0; k < data[specialEntries[j]].length; k++) {
                         var planLine = data[specialEntries[j]][k];
-                        appendPlanLine(planLine['chapter_name'], planLine['plan_list']);
+                        appendPlanLine(planLine['chapter_name'], planLine['plan_list'], planLine['list_total_points']);
                     }
                     continue;
                 }
@@ -63,20 +63,80 @@ function ajaxChangeTable(requestApp, callerType, code, targets, entries, special
     });
 }
 
+function ajaxChangeForm(requestApp, callerType, code, targets, entries, isDuplication) {
+    $.ajax({
+        url: ['', requestApp, callerType, code, ''].join('/'),
+        success: function (data) {
+            for (var i = 0; i < targets.length; i++) {
+                var $target = $(targets[i]);
+                if (entries[i] === 'name' && isDuplication) {
+                    $target.val(data[entries[i]] + ' - 拷贝');
+                } else if (entries[i] === 'index' && isDuplication) {
+                    $target.val(data[entries[i]] + 'COPY');
+                } else {
+                    $target.val(data[entries[i]]);
+                }
+            }
+        }
+    });
+}
+
+function displayModal(action, type) {
+    var translations = {
+        'add': '添加',
+        'edit': '修改',
+        'duplicate': '复制',
+        'strategy': '策略'
+    };
+    var typeSc = translations[type];
+    var actionSc = translations[action];
+    var $selection = $('#id_' + type); // From main page, selection list
+    var selectedValue = $selection.val();
+    var $submitBtn = $('#btn_' + type); // Determine its name
+    var $hiddenId = $('#id_' + type + '_id');
+    var $modalTitle = $('#title_' + type);
+    $submitBtn.attr('name', action + '_' + type);
+    $submitBtn.text('确认' + actionSc);
+    $hiddenId.val('');
+    $modalTitle.text(actionSc + typeSc);
+    $('#delete_' + type).attr('hidden', action !== 'edit');
+    // Selection violation
+    if (action === 'edit' || action === 'duplicate') {
+        if (selectedValue === '0') {
+            return alert('请选择一个' + typeSc + '！');
+        }
+        // Hidden field - object id
+        $hiddenId.val(selectedValue);
+        if (type === 'strategy') {
+            var targets = [
+                '#id_strategy_category', '#id_strategy_subject',
+                '#id_strategy_name', '#id_strategy_index', '#id_strategy_description', '#id_strategy_timer'
+            ];
+            var entries = ['category', 'subject', 'name', 'index', 'description', 'timer_num'];
+            ajaxChangeForm('exam', 'get_strategy', selectedValue, targets, entries, action === 'duplicate');
+            ajaxChangeSelection(
+                'pool', 'change_category', $('#id_strategy_category').val(),
+                ['#id_strategy_subject'], [false], ['subjects'], true
+            );
+        }
+    }
+    $('#' + type + '_modal').modal('show');
+}
+
 function setStrategyInfo(pk) {
     var targets = ['#cell_strategy_name', '#cell_strategy_index', '#cell_strategy_description', '#cell_strategy_timer'];
     var entries = ['full_path', 'full_index', 'description', 'timer'];
     var specialTargets = ['#id_selected_strategy', '#strategy_structure'];
     var specialEntries = ['strategy', 'plan'];
     var specialAttributes = ['value', 'plan'];
+    $('#total_points').text(0);
     if (pk === 0) { // reset
         for (var i = 0; i < targets.length; i++) {
             var emptyCell = $(targets[i]);
             emptyCell.text('请先选择一个章节');
         }
-        for (var j = 0; j < specialTargets.length; j++) {
-            $(specialTargets[j]).val('');
-        }
+        $('#id_selected_strategy').val('');
+        $('#strategy_structure').html('');
     } else {
         ajaxChangeTable('exam', 'get_strategy', pk, targets, entries, specialTargets, specialEntries, specialAttributes);
     }
@@ -104,8 +164,9 @@ function setChapterInfo(pk) {
     }
 }
 
-function appendPlanLine(chapterName, planDetails) {
+function appendPlanLine(chapterName, planDetails, planPoints) {
     var structure = $('#strategy_structure');
+    var $totalPoints = $('#total_points');
     var row = $('<tr>');
     // Chapter name cell
     var nameCell = $('<td>').text(chapterName);
@@ -114,8 +175,9 @@ function appendPlanLine(chapterName, planDetails) {
     var upBtn = $('<span>').addClass('fa fa-arrow-circle-up fake-link text-primary mr-2');
     var downBtn = $('<span>').addClass('fa fa-arrow-circle-down fake-link text-primary mr-2');
     var deleteBtn = $('<span>').addClass('fa fa-trash-alt text-danger fake-link ml-5');
-    var planString = $('<input>').val(JSON.stringify(planDetails));
-    upBtn.click(function() {
+    var planString = $('<input type="text" readonly hidden>').val(JSON.stringify(planDetails));
+    var planPointsInput = $('<input type="number">').val(planPoints);
+    upBtn.click(function () {
         var myRow = $(this).parent().parent();
         var lastRow = myRow.prev('tr');
         if (lastRow[0]) {
@@ -124,7 +186,7 @@ function appendPlanLine(chapterName, planDetails) {
             return alert('已是第一项！');
         }
     });
-    downBtn.click(function() {
+    downBtn.click(function () {
         var myRow = $(this).parent().parent();
         var nextRow = myRow.next('tr');
         if (nextRow[0]) {
@@ -133,24 +195,33 @@ function appendPlanLine(chapterName, planDetails) {
             return alert('已是最后一项！');
         }
     });
-    deleteBtn.click(function() {
+    deleteBtn.click(function () {
         var rowToDelete = $(this).parent().parent();
         rowToDelete.remove();
+        $totalPoints.text(parseInt($totalPoints.text()) - planPoints);
     });
-    planString.attr('hidden', true);
-    planString.attr('readonly', true);
-    functionCell.append(upBtn, downBtn, deleteBtn, planString);
+    functionCell.append(upBtn, downBtn, deleteBtn, planString, planPointsInput);
     // Append all cells to the row
     row.append(nameCell);
-    for (i = 1; i <= 7; i++) {
+    for (var i = 1; i <= 7; i++) {
         row.append($('<td>').text(planDetails[i]));
     }
     row.append(functionCell);
     structure.append(row);
+    // Update total points
+    $totalPoints.text(planPoints + parseInt($totalPoints.text()));
 }
 
 $('#add_strategy').click(function () {
-    $('#strategy_modal').modal('show');
+    displayModal('add', 'strategy');
+});
+
+$('#edit_strategy').click(function () {
+    displayModal('edit', 'strategy');
+});
+
+$('#duplicate_strategy').click(function () {
+    displayModal('duplicate', 'strategy');
 });
 
 $('#add_chapter').click(function () {
@@ -201,38 +272,39 @@ $('#id_chapter_subject').change(function () {
     setChapterInfo(0);
 });
 
-$('#id_chapter_chapter').change(function() {
+$('#id_chapter_chapter').change(function () {
     setChapterInfo(parseInt($(this).val()));
 });
 
-$('#btn_add_chapter').click(function() {
+$('#btn_add_chapter').click(function () {
     var chapterId = $('#id_chapter_chapter').val();
     var chapterName = $("#id_chapter_chapter option:selected").text();
     if (chapterId === '' || chapterId === null || chapterId === undefined) {
         return alert('请选择一个章节！');
     }
-    var i = 1, planDetails = [parseInt(chapterId)];
+    var i = 1, planDetails = [parseInt(chapterId)], planPoint = 0;
     for (; i <= 7; i++) {
         var maxNumber = parseInt($('#cell_chapter_q_num' + i).text());
         var selectedNumber = parseInt($('#cell_chapter_selected_q_num' + i).val());
+        var typePoints = parseInt($('#cell_chapter_point' + i).text());
         if (selectedNumber < 0 || selectedNumber > maxNumber) {
             return alert('选择的题目数量不符合要求！');
         }
+        planPoint += typePoints * selectedNumber;
         planDetails.push(selectedNumber);
     }
-    appendPlanLine(chapterName, planDetails);
+    appendPlanLine(chapterName, planDetails, planPoint);
     $('#chapter_modal').modal('hide');
 });
 
-$('#id_save_structure').click(function() {
+$('#id_save_structure').click(function () {
     var $strategy = $('#id_selected_strategy');
     var $plan = $('#id_strategy_plan');
     if ($strategy.val() === '') {
         return alert('请先选择一个策略！');
     }
     var $structure = $('#strategy_structure');
-    var allPlanStrings = $structure.find('input');
-    console.log(allPlanStrings);
+    var allPlanStrings = $structure.find('input[type="text"]');
     var finalJson = [];
     for (var i = 0; i < allPlanStrings.length; i++) {
         finalJson.push(JSON.parse(allPlanStrings[i]['value']));
