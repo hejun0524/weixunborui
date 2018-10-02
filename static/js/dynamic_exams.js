@@ -176,7 +176,7 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     var downBtn = $('<span>').addClass('fa fa-arrow-circle-down fake-link text-primary mr-2');
     var deleteBtn = $('<span>').addClass('fa fa-trash-alt text-danger fake-link ml-5');
     var planString = $('<input type="text" readonly hidden>').val(JSON.stringify(planDetails));
-    var planPointsInput = $('<input type="number">').val(planPoints);
+    var planPointsInput = $('<input type="number" readonly hidden>').val(planPoints);
     upBtn.click(function () {
         var myRow = $(this).parent().parent();
         var lastRow = myRow.prev('tr');
