@@ -4,6 +4,7 @@ from django.contrib import messages
 from pool.models import Category, Subject, Chapter
 from .models import *
 import json
+import re
 
 # Create your views here.
 
@@ -58,6 +59,39 @@ def exams(request):
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
+
+
+def certification(request):
+    context = {
+        'all_certifications': GovernmentCertification.objects.all().order_by('-created'),
+    }
+    if request.method == 'POST':
+        new_object = GovernmentCertification(
+            name=request.POST.get('certification_name'),
+            project=request.POST.get('certification_project'),
+            verified=request.POST.get('certification_verified'),
+            school=request.POST.get('certification_school'),
+            subject=request.POST.get('certification_subject')
+        )
+        students = request.POST.get('students').split('\r\n')
+        student_json = {}
+        for student in students:
+            student = student.strip()
+            if student:
+                r = re.match('(.*)-(.*)-(.*)', student)
+                if r:
+                    if r.group(1) in student_json:
+                        messages.error(request, '您有重复的考试号！考试号：{}'.format(r.group(1)))
+                        return redirect('exam:certification')
+                    student_json[r.group(1)] = (r.group(2), r.group(3),)
+                else:
+                    messages.error(request, '学生列表输入格式有误！位置：{}'.format(student))
+                    return redirect('exam:certification')
+        new_object.student_list = student_json
+        new_object.save()
+        messages.success(request, '操作成功！')
+        return redirect('exam:certification')
+    return render(request, 'exam/certification.html', context)
 
 
 # AJAX functions
@@ -121,7 +155,7 @@ def get_strategy(request, strategy_id):
 
 def calculate_total_points(plan_list):
     chapter = Chapter.objects.get(id=plan_list[0])
-    return sum([x*y for x,y in zip(plan_list[1:], chapter.points)])
+    return sum([x * y for x, y in zip(plan_list[1:], chapter.points)])
 
 
 def generate_gxb():

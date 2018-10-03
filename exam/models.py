@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres import fields
+from pool.models import RenameUploads
 
 
 # Create your models here.
@@ -9,7 +10,7 @@ class Strategy(models.Model):
     index = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     timer = models.IntegerField(default=100)
-    plan = fields.JSONField(null=True)
+    plan = fields.JSONField(blank=True, null=True)
     created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -26,12 +27,28 @@ class Exam(models.Model):
 
 
 class GovernmentCertification(models.Model):
-    project = models.CharField(max_length=100)
-    verified = models.CharField(max_length=100)
-    school = models.CharField(max_length=100)
-    subject = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, blank=True)
+    project = models.CharField(max_length=100, blank=True)
+    verified = models.CharField(max_length=100, blank=True)
+    school = models.CharField(max_length=100, blank=True)
+    subject = models.CharField(max_length=100, blank=True)
+    student_list = fields.JSONField()
+    created = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        if not self.name:
+            return '未命名认证包'
+        return self.name
 
 
 class StudentList(models.Model):
-    exam = models.ForeignKey('Exam', on_delete=models.CASCADE)
+    exam = models.ForeignKey('Exam', on_delete=models.CASCADE, blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True)
     student_list = fields.JSONField()
+    created = models.DateTimeField(auto_now=True)
+
+
+class Student(models.Model):
+    name = models.CharField(max_length=100)
+    student_id = models.CharField(max_length=100)
+    photo = models.ImageField(upload_to=RenameUploads('student/'), blank=True)

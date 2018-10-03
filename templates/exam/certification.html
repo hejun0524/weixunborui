@@ -1,0 +1,120 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}工信认证{% endblock %}
+{% block canvas_title %}生成工信部认证包{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <!-- Student list input -->
+        <div class="col-md-4">
+            <label for="id_students" class="font-weight-bold required">学生名单</label>
+            <div class="alert alert-secondary">
+                <small>
+                    每行一位学生，格式为考试号-姓名-证件号。例：<br>
+                    1A-大卫-2018FCS025<br>
+                    1B-迈克-2018SEN026<br>
+                    您也可以<span class="fake-link text-primary" id="search_student_list">点此</span>搜索已存名单
+                </small>
+            </div>
+            <textarea class="form-control notes mb-3" rows="15" id="id_students"
+                      name="students" form="form_certification" required></textarea>
+        </div>
+        <!-- Other information inputs -->
+        <form role="form" method="post" id="form_certification" class="col-md-4" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p class="font-weight-bold mb-2">其他信息</p>
+            <div class="alert alert-secondary">
+                <small>
+                    照片格式不限，命名方式为考试号-姓名。例：<br>
+                    1A-大卫.jpg<br>
+                    1B-迈克.png<br>
+                    同时，您可以<span class="fake-link text-primary" id="search_student_list">点此</span>搜索科目
+                </small>
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_name" class="col-sm-3 col-form-label">名称</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_certification_name" name="certification_name">
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_project" class="col-sm-3 col-form-label">项目</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm" value="NCAE"
+                       id="id_certification_project" name="certification_project">
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_verified" class="col-sm-3 col-form-label">通过方式</label>
+                <select class="col-sm-9 custom-select" id="id_certification_verified"
+                        name="certification_verified">
+                    <option value="" selected>请选择</option>
+                    <option value="已通过验证">已通过验证</option>
+                    <option value="未通过验证">未通过验证</option>
+                </select>
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_school" class="col-sm-3 col-form-label">学校</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_certification_school" name="certification_school">
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_subject" class="col-sm-3 col-form-label">科目</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_certification_subject" name="certification_subject">
+            </div>
+            <div class="form-group row">
+                <span class="col-sm-3 col-form-label">照片</span>
+                <div class="col-sm-9 input-group px-0">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="id_certification_photos"
+                               name="certification_photos" accept="image/*" multiple>
+                        <label class="custom-file-label" for="id_certification_photos">上传照片（可多选）</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_photos">
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">生成认证包</button>
+        </form>
+        <!-- Saved lists -->
+        <div class="col-md-4">
+            <p class="font-weight-bold mb-2">已保存认证包</p>
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col" class="cell-4">名称</th>
+                    <th scope="col" class="cell-1"></th>
+                    <th scope="col" class="cell-5">创建时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for object in all_certifications %}
+                    <tr>
+                        <td>{{ object }}</td>
+                        <td class="fake-link-plus" onclick="showButtons(this);">
+                            <span class="fa fa-plus-circle"></span>
+                        </td>
+                        <td class="text-muted">{{ object.created }}</td>
+                    </tr>
+                    <tr class="table-secondary" hidden>
+                        <td colspan="3">
+                            <a href="" role="button"
+                               class="btn btn-sm btn-primary">下载</a>
+                            <a href="javascript:" onclick="copyLink({{ d.id }})" role="button"
+                               class="btn btn-sm btn-success">复制链接</a>
+                            <a href="" role="button"
+                               class="btn btn-sm btn-danger">删除</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/dynamic_certification.js' %}"></script>
+{% endblock %}

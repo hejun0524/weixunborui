@@ -1,8 +1,10 @@
 {% for message in messages %}
     <div class="alert {{ message.tags }} alert-dismissible fade show mx-2 mt-3">
-        <strong>{{ message }}</strong>
-        <button type="button" class="close font-xs" data-dismiss="alert">
-            <span class="fa fa-times"></span>
-        </button>
+        <small>
+            <strong>{{ message }}</strong>
+            <button type="button" class="close font-xs" data-dismiss="alert">
+                <span class="fa fa-times"></span>
+            </button>
+        </small>
     </div>
 {% endfor %}

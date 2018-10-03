@@ -58,10 +58,10 @@
                 <thead>
                 <tr>
                     <th scope="col">附件名</th>
-                    <th scope="col"></th>
-                    <th scope="col">版本</th>
-                    <th scope="col">公开性</th>
-                    <th scope="col">更新日期</th>
+                    <th scope="col" class="cell-half"></th>
+                    <th scope="col" class="cell-1">版本</th>
+                    <th scope="col" class="cell-2">公开性</th>
+                    <th scope="col" class="cell-3">更新日期</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -73,7 +73,7 @@
                         </td>
                         <td>{{ d.version }}</td>
                         <td>{{ d.file_type }}</td>
-                        <td class="text-muted">{{ d.date|date:"Y年m月d日" }}</td>
+                        <td class="text-muted">{{ d.date }}</td>
                     </tr>
                     <tr class="table-secondary" hidden>
                         <td colspan="5">
