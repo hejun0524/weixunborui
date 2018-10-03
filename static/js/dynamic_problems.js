@@ -186,17 +186,18 @@ function ajaxChangeProblemPreview(callerType, codes, $caller) {
             // Clear right table
             var $preview = $('#problem_preview');
             $preview.html('');
-            formatProblemPreview(data);
+            formatProblemPreview(data, codes);
             if (data.hasOwnProperty('sub')) {
                 for (var i = 0; i < data['sub'].length; i++) {
-                    formatProblemPreview(data['sub'][i]);
+                    codes = [codes[0], codes[1], i + 1];
+                    formatProblemPreview(data['sub'][i], codes);
                 }
             }
         }
     });
 }
 
-function formatProblemPreview(data) {
+function formatProblemPreview(data, codes) {
     var $preview = $('#problem_preview');
     // All components
     // 0 - Paths

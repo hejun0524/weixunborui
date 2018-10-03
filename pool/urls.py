@@ -14,4 +14,5 @@ urlpatterns = [
     path('get_problem_set/<int:category_id>/<int:subject_id>/<int:chapter_id>/', views.get_problem_set),
     path('get_problem/<slug:problem_type>/<int:problem_id>/', views.get_problem),
     path('delete_problem/<slug:problem_type>/<int:problem_id>/', views.delete_problem),
+    path('delete_problem/cp/<int:problem_id>/<int:order>/', views.delete_sub_problem),
 ]

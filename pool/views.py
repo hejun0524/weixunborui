@@ -650,3 +650,20 @@ def delete_problem(request, problem_type, problem_id):
     this_problem.delete()
     messages.success(request, '成功删除本题！')
     return redirect('pool:problems')
+
+
+def delete_sub_problem(request, problem_id, order):
+    this_problem = Comprehensive.objects.get(pk=problem_id)
+    all_subs = []
+    for sub_class in sub_class_list:
+        sub_class_set = getattr(this_problem, '{}_set'.format(sub_class.__name__.lower())).all()
+        all_subs.extend(list(sub_class_set))
+    all_subs.sort(key=lambda x: x.order)
+    for this_sub in all_subs:
+        if this_sub.order == order:
+            this_sub.delete()
+        elif this_sub.order > order:
+            this_sub.order -= 1
+            this_sub.save()
+    messages.success(request, '成功删除本题！')
+    return redirect('pool:problems')
