@@ -603,7 +603,6 @@ def get_problem(request, problem_type, problem_id):
 
 
 def get_problem_details(this_problem, type_index):
-    print(str(this_problem.description))
     result = {
         'type_sc': type_sc_full[type_index],
         'desc_lines': str(this_problem).split('\r\n')
