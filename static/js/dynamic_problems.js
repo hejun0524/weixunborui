@@ -258,7 +258,7 @@ function formatProblemPreview(data) {
                 infoRow.append($('<td></td>').html(infoRawData ? '允许考生上传附件' : '禁止考生上传附件'));
             } else if (infoAttributes[ii] === 'chance') {
                 infoRow.append($('<td></td>').html('允许机会：' + infoRawData + '次'));
-            } else if (infoAttributes[ii] === 'need_answer' && infoRawData) {
+            } else if (infoAttributes[ii] === 'need_answer' && !infoRawData) {
                 infoRow.append($('<td></td>').html('本题不需要文字作答'));
             }
             $info.push(infoRow);
@@ -482,5 +482,5 @@ $('#group_delete').click(function () {
 });
 
 $('#id_questions').keyup(function () {
-    $('#max_input').text(800 - $(this).val().length);
+    $('#max_input').text(2000 - $(this).val().length);
 });

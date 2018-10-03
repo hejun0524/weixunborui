@@ -11,7 +11,7 @@ sub_class_list = (SubMultipleChoice, SubMultipleResponse, SubTrueOrFalse, SubTex
 type_sc_abbr = ('单选', '多选', '判断', '文填', '数填', '陈述', '综合')
 type_sc_full = ('单项选择题', '多项选择题', '判断题', '文本填空题', '数字填空题', '陈述题', '综合题')
 type_en_abbr = ('mc', 'mr', 'tf', 'tb', 'nb', 'dc', 'cp')
-old_sc_full = {'单选题': 1, '多选题': 2, '判断题': 3, '文本填空': 4, '数字填空': 5, '简答题': 6, '主观题': 6, '陈述题': 6}
+old_sc_full = {'单选题': 1, '多选题': 2, '判断题': 3, '文本填空': 4, '数字填空': 5, '简答题': 6, '主观题': 6}
 
 
 def problems(request):
@@ -270,7 +270,7 @@ def validate_comprehensive(lines):
             previous_order = index  # Update it
             result[index] = {}
             result[index]['description'] = identifier[2]
-        elif current_code == 10 or current_code == 20:
+        elif current_code % 10 == 0:
             result[index]['description'] += '\r\n' + identifier[1]
         elif previous_order == 0:
             return wrong_message('综合题主干只允许包括索引号和题干描述！位置：{}'.format(line))
@@ -278,9 +278,9 @@ def validate_comprehensive(lines):
             if identifier[1] in old_sc_full:
                 result[index]['question_type'] = old_sc_full[identifier[1]]
             elif identifier[1] in type_sc_full:
-                result[index]['question_type'] = type_sc_full.index(identifier[1])
+                result[index]['question_type'] = type_sc_full.index(identifier[1]) + 1
             elif identifier[1] in type_sc_abbr:
-                result[index]['question_type'] = type_sc_abbr.index(identifier[1])
+                result[index]['question_type'] = type_sc_abbr.index(identifier[1]) + 1
         elif current_code == 3:
             result[index]['percentage'] = identifier[1]
         elif current_code == 6:
@@ -370,7 +370,7 @@ def validate_problem(question_type, result, is_sub=False):
 
 
 def smart_identifier(line, current_code):
-    r = re.match('([A-Za-z0-9]*)[\t\s](.*)', line)
+    r = re.match('([A-Za-z0-9]+)[\t\s](.*)', line)
     if r:  # Code 1: Start of the description with index
         return 1, r.group(1).strip(), r.group(2).strip()
     r = re.match('[(（](\d+)[）)](.*)', line)
@@ -603,6 +603,7 @@ def get_problem(request, problem_type, problem_id):
 
 
 def get_problem_details(this_problem, type_index):
+    print(str(this_problem.description))
     result = {
         'type_sc': type_sc_full[type_index],
         'desc_lines': str(this_problem).split('\r\n')
