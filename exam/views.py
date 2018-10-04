@@ -64,6 +64,11 @@ def exams(request):
 def certification(request):
     context = {
         'all_certifications': GovernmentCertification.objects.all().order_by('-created'),
+        'all_exams': Exam.objects.all(),
+        'all_student_lists': StudentList.objects.all(),
+        'all_categories': Category.objects.all().order_by('index'),
+        'all_strategies': Strategy.objects.all().order_by('index'),
+        'all_subjects': Subject.objects.all().order_by('index'),
     }
     if request.method == 'POST':
         new_object = GovernmentCertification(
@@ -83,15 +88,32 @@ def certification(request):
                     if r.group(1) in student_json:
                         messages.error(request, '您有重复的考试号！考试号：{}'.format(r.group(1)))
                         return redirect('exam:certification')
-                    student_json[r.group(1)] = (r.group(2), r.group(3),)
+                    student_json[r.group(1).strip()] = (r.group(2).strip(), r.group(3).strip(),)
                 else:
                     messages.error(request, '学生列表输入格式有误！位置：{}'.format(student))
                     return redirect('exam:certification')
+        student_photos = request.FILES.getlist('certification_photos')
         new_object.student_list = student_json
         new_object.save()
         messages.success(request, '操作成功！')
         return redirect('exam:certification')
     return render(request, 'exam/certification.html', context)
+
+
+def get_certification(request, certification_id):
+    pass
+
+
+def delete_certification(request, certification_id):
+    this_object = GovernmentCertification.objects.get(pk=certification_id)
+    student_json = this_object.student_list
+    for exam_id in student_json:
+        student_name, student_id = student_json[exam_id]
+        potential_students = Student.objects.filter(name=student_name, student_id=student_id)
+        for potential_student in potential_students:
+            potential_student.delete()
+    this_object.delete()
+    return redirect('exam:certification')
 
 
 # AJAX functions
