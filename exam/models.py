@@ -15,13 +15,3 @@ class Strategy(models.Model):
 
     def __str__(self):
         return '{} - {}'.format(self.index, self.name)
-
-
-class Exam(models.Model):
-    title = models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
-    section = models.CharField(max_length=100)
-    date = models.CharField(max_length=100)
-    strategy_detail = fields.JSONField()
-    package = models.FileField(upload_to=RenameUploads('exam/'), blank=True, null=True)
-    created = models.DateTimeField(auto_now=True)
