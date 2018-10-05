@@ -1,10 +1,18 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
+from django.core.files.base import ContentFile
+from django.utils.encoding import escape_uri_path
+from wsgiref.util import FileWrapper
 from pool.models import Category, Subject, Chapter
 from .models import *
+from PIL import Image
+from zipfile import ZipFile
+from io import BytesIO
 import json
 import re
+import uuid
+import xlwt
 
 # Create your views here.
 
@@ -66,54 +74,153 @@ def certification(request):
         'all_certifications': GovernmentCertification.objects.all().order_by('-created'),
         'all_exams': Exam.objects.all(),
         'all_student_lists': StudentList.objects.all(),
-        'all_categories': Category.objects.all().order_by('index'),
+        'all_code_categories': CodeCategory.objects.all().order_by('index'),
         'all_strategies': Strategy.objects.all().order_by('index'),
-        'all_subjects': Subject.objects.all().order_by('index'),
+        'all_code_subjects': CodeSubject.objects.all().order_by('code'),
     }
     if request.method == 'POST':
-        new_object = GovernmentCertification(
-            name=request.POST.get('certification_name'),
-            project=request.POST.get('certification_project'),
-            verified=request.POST.get('certification_verified'),
-            school=request.POST.get('certification_school'),
-            subject=request.POST.get('certification_subject')
-        )
-        students = request.POST.get('students').split('\r\n')
-        student_json = {}
-        for student in students:
-            student = student.strip()
-            if student:
-                r = re.match('(.*)-(.*)-(.*)', student)
-                if r:
-                    if r.group(1) in student_json:
-                        messages.error(request, '您有重复的考试号！考试号：{}'.format(r.group(1)))
+        if 'btn_certification' in request.POST:
+            new_object = GovernmentCertification(
+                name=request.POST.get('certification_name'),
+                project=request.POST.get('certification_project'),
+                verified=request.POST.get('certification_verified'),
+                school=request.POST.get('certification_school')
+            )
+            new_object_subject = request.POST.get('certification_subject')
+            if new_object_subject is None:
+                new_object_subject = ''
+            new_object.subject = new_object_subject
+            # Parse students
+            students = request.POST.get('students').split('\r\n')
+            student_json = {}
+            for student in students:
+                student = student.strip()
+                if student:
+                    r = re.match('(.*)-(.*)-(.*)', student)
+                    if r:
+                        if r.group(1) in student_json:
+                            messages.error(request, '您有重复的考试号！考试号：{}'.format(r.group(1)))
+                            return redirect('exam:certification')
+                        student_json[r.group(1).strip()] = (r.group(2).strip(), r.group(3).strip(),)
+                    else:
+                        messages.error(request, '学生列表输入格式有误！位置：{}'.format(student))
                         return redirect('exam:certification')
-                    student_json[r.group(1).strip()] = (r.group(2).strip(), r.group(3).strip(),)
+            student_photos = request.FILES.getlist('certification_photos')
+            student_photos_dict = {}
+            # Validate photos first
+            for photo in student_photos:
+                photo_name = photo.name.strip()
+                r = re.match('(.*)-(.*)\.(.*)', photo_name)
+                if r:
+                    if r.group(1) in student_photos_dict:
+                        messages.error(request, '学生照片带有重复的考试号，文件名为{}'.format(photo_name))
+                        return redirect('exam:certification')
+                    if r.group(1) in student_json:
+                        student_name, student_id = student_json[r.group(1)]
+                        if student_name != r.group(2):
+                            messages.error(request, '学生照片名与列表不符，文件名为{}'.format(photo_name))
+                            return redirect('exam:certification')
+                        student_photos_dict[r.group(1)] = photo
+                    else:
+                        messages.error(request, '您有多余的学生照片，文件名为{}'.format(photo_name))
+                        return redirect('exam:certification')
                 else:
-                    messages.error(request, '学生列表输入格式有误！位置：{}'.format(student))
+                    messages.error(request, '您有多余的学生照片，文件名为{}'.format(photo_name))
                     return redirect('exam:certification')
-        student_photos = request.FILES.getlist('certification_photos')
-        new_object.student_list = student_json
-        new_object.save()
+            # Prepare the big zip
+            buffer_zf = BytesIO()
+            zf = ZipFile(buffer_zf, 'w')
+            for exam_id in student_photos_dict:
+                photo = student_photos_dict[exam_id]
+                buffer_photo = BytesIO()
+                try:
+                    pil_image = Image.open(photo)
+                    pil_image = pil_image.convert('RGB')
+                    pil_image.save(buffer_photo, format='JPEG')
+                    zf.writestr('{}-{}.jpeg'.format(exam_id, student_json[exam_id][0]), buffer_photo.getvalue())
+                finally:
+                    buffer_photo.close()
+            zf.writestr('{}.xls'.format(new_object.name), generate_excel({
+                'student_json': student_json,
+                'name': new_object.name,
+                'project': new_object.project,
+                'verified': new_object.verified,
+                'school': new_object.school,
+                'subject': new_object.subject,
+            }))
+            zf.close()
+            new_object.student_list = student_json
+            new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf.getvalue()))
+        elif 'btn_add_code' in request.POST:
+            code_category_id = int(request.POST.get('code_category'))
+            new_object = CodeSubject(
+                name=request.POST.get('code_name'),
+                code=request.POST.get('code_code')
+            )
+            if code_category_id == 0:
+                new_code_category = CodeCategory(
+                    name=request.POST.get('new_code_category'),
+                    index=request.POST.get('new_code_category_index')
+                )
+                new_code_category.save()
+                new_object.category = new_code_category
+            else:
+                new_object.category_id = code_category_id
+            if request.POST.get('code_price'):
+                new_object.price = float(request.POST.get('code_price'))
+            if request.POST.get('code_description'):
+                new_object.description = request.POST.get('code_description')
+            new_object.save()
         messages.success(request, '操作成功！')
         return redirect('exam:certification')
     return render(request, 'exam/certification.html', context)
 
 
 def get_certification(request, certification_id):
-    pass
+    this_file = GovernmentCertification.objects.get(id=certification_id)
+    file_path = 'media/{}'.format(this_file.package.name)
+    response = HttpResponse(FileWrapper(open(file_path, 'rb')), content_type='application/zip')
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}.zip".format(escape_uri_path(this_file.name))
+    return response
 
 
 def delete_certification(request, certification_id):
     this_object = GovernmentCertification.objects.get(pk=certification_id)
-    student_json = this_object.student_list
-    for exam_id in student_json:
-        student_name, student_id = student_json[exam_id]
-        potential_students = Student.objects.filter(name=student_name, student_id=student_id)
-        for potential_student in potential_students:
-            potential_student.delete()
     this_object.delete()
     return redirect('exam:certification')
+
+
+def generate_excel(form_data, is_sign=False):
+    buffer_excel = BytesIO()
+    student_json = form_data['student_json']
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('考生名单')
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    # First the header
+    headers = [
+        '序号', '姓名', '考试项目', '课程/级别', '通过方式',
+        '证书编号', '身份证号', '成绩', '考试时间', '学校',
+    ]
+    if is_sign:
+        headers = ['考试编号', '考生姓名', '证件号', '签名']
+    for col_num in range(len(headers)):
+        ws.write(row_num, col_num, headers[col_num], font_style)
+        ws.col(col_num).width = 256 * 20
+    # Now comes the info
+    for exam_id in student_json:
+        student_name, student_id = student_json[exam_id]
+        student_info = [
+            exam_id, student_name, form_data['project'], form_data['subject'], form_data['verified'],
+            '', student_id, '', '', form_data['school'],
+        ]
+        row_num += 1
+        for col_num in range(len(student_info)):
+            ws.write(row_num, col_num, student_info[col_num], font_style)
+    wb.save(buffer_excel)
+    buffer_value = buffer_excel.getvalue()
+    buffer_excel.close()
+    return buffer_value
 
 
 # AJAX functions

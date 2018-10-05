@@ -46,7 +46,7 @@ def get_download(request, file_id):
     filename_as_list = this_file.file.name.split('.')
     filename_as_list[0] = this_file.name
     filename = '.'.join(filename_as_list)
-    file_path = 'media/' + this_file.file.name
+    file_path = 'media/{}'.format(this_file.file.name)
     response = HttpResponse(FileWrapper(open(file_path, 'rb')), content_type=mimetypes.guess_type(file_path))
     response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(filename))
     return response

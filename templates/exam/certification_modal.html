@@ -33,44 +33,60 @@
     </div>
 </div>
 
-<!-- Subject modal -->
-<div class="modal fade" id="subject_modal" tabindex="-1" role="dialog">
+<!-- Code modal -->
+<div class="modal fade" id="code_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">搜索科目</h5>
+                <h5 class="modal-title">添加科目代码</h5>
             </div>
-            <div class="modal-body pr-5">
+            <form role="form" method="post" class="modal-body pr-5">
+                {% csrf_token %}
                 <div class="form-group row">
-                    <label for="id_subject_category" class="col-sm-3 col-form-label">选择类别</label>
-                    <select class="col-sm-9 custom-select" id="id_subject_category">
-                        <option value="0" selected>全部</option>
-                        {% for object in all_categories %}
-                            <option value="{{ object.id }}">{{ object }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group row">
-                    <label for="id_subject_strategy" class="col-sm-3 col-form-label">或者选择策略</label>
-                    <select class="col-sm-9 custom-select" id="id_subject_strategy">
-                        <option value="0" disabled selected>全部</option>
-                        {% for object in all_strategies %}
-                            <option value="{{ object.id }}">{{ object }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group row">
-                    <label for="id_subject_subject" class="col-sm-3 col-form-label">选择科目</label>
-                    <select class="col-sm-9 custom-select" id="id_subject_subject">
+                    <label for="id_code_category" class="col-sm-3 col-form-label required">代码类别</label>
+                    <select class="col-sm-9 custom-select" id="id_code_category" name="code_category" required>
                         <option value="" disabled selected>请选择</option>
-                        {% for object in all_subjects %}
+                        {% for object in all_code_categories %}
                             <option value="{{ object.id }}">{{ object }}</option>
                         {% endfor %}
+                        <option value="0">新建代码类别...</option>
                     </select>
+                </div>
+                <div class="form-group row" hidden>
+                    <label for="id_new_code_category"
+                           class="col-sm-3 col-form-label text-success required">新类别</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_new_code_category"
+                           name="new_code_category">
+                </div>
+                <div class="form-group row" hidden>
+                    <label for="id_new_code_category_index"
+                           class="col-sm-3 col-form-label text-success required">新类别索引</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_new_code_category_index"
+                           name="new_code_category_index">
+                </div>
+                <div class="form-group row">
+                    <label for="id_code_name" class="col-sm-3 col-form-label required">科目名称</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_code_name"
+                           name="code_name" required>
+                </div>
+                <div class="form-group row">
+                    <label for="id_code_code" class="col-sm-3 col-form-label required">科目代码</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_code_code"
+                           name="code_code" required>
+                </div>
+                <div class="form-group row">
+                    <label for="id_code_price" class="col-sm-3 col-form-label">参考价格</label>
+                    <input type="number" class="col-sm-9 form-control form-control-sm" id="id_code_price"
+                           name="code_price">
+                </div>
+                <div class="form-group row">
+                    <label for="id_code_description" class="col-sm-3 col-form-label">说明</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_code_description"
+                           name="code_description">
                 </div>
                 <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
-                <button class="btn btn-sm btn-primary" type="submit" id="btn_add_subject">确认选择</button>
-            </div>
+                <button class="btn btn-sm btn-primary" type="submit" name="btn_add_code">确认添加</button>
+            </form>
         </div>
     </div>
 </div>

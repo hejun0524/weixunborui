@@ -41,10 +41,6 @@ $('#search_student_list').click(function () {
     $('#student_list_modal').modal('show');
 });
 
-$('#search_subject').click(function () {
-    $('#subject_modal').modal('show');
-});
-
 $('#btn_add_list').click(function () {
     var $list = $('#id_list_list');
     if ($list.val() === null) {
@@ -53,11 +49,24 @@ $('#btn_add_list').click(function () {
     $('#student_list_modal').modal('hide');
 });
 
-$('#btn_add_subject').click(function () {
-    var $subject = $('#id_subject_subject');
-    if ($subject.val() === null) {
-        return alert('请选择一个科目！');
+$('#search_subject').click(function () {
+    $('#code_modal').modal('show');
+});
+
+$('#id_code_category').change(function () {
+    var $newCategory = $(this).parent().next();
+    var $newIndex = $newCategory.next();
+    var $inputName = $('#id_new_code_category');
+    var $inputIndex = $('#id_new_code_category_index');
+    if ($(this).val() === '0') {
+        $newCategory.attr('hidden', false);
+        $newIndex.attr('hidden', false);
+        $inputName.attr('required', true);
+        $inputIndex.attr('required', true);
+    } else {
+        $newCategory.attr('hidden', true);
+        $newIndex.attr('hidden', true);
+        $inputName.attr('required', false);
+        $inputIndex.attr('required', false);
     }
-    $('#id_certification_subject').val($('#id_subject_subject option:selected').text());
-    $('#subject_modal').modal('hide');
 });
