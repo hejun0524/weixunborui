@@ -106,7 +106,7 @@ def certification(request):
                         if this_exam_id in student_json:
                             return wrong_message(request, '您有重复的考试号！考试号：{}'.format(this_exam_id), url_name)
                         student_json[this_exam_id] = (this_student_name, this_student_id,)
-                        student_photos_dict['{}{}'.format(this_student_name, this_student_id)] = None
+                        student_photos_dict['{}{}'.format(this_exam_id, this_student_name)] = None
                     else:
                         return wrong_message(request, '学生列表输入格式有误！位置：{}'.format(student), url_name)
             student_photos = request.FILES.getlist('certification_photos')
@@ -135,10 +135,10 @@ def certification(request):
                         pil_image = Image.open(photo)
                         pil_image = pil_image.convert('RGB')
                         pil_image.save(buffer_photo, format='JPEG')
-                        zf.writestr('{}.jpeg'.format(id_name), buffer_photo.getvalue())
+                        zf.writestr('{}.jpg'.format(id_name), buffer_photo.getvalue())
                     finally:
                         buffer_photo.close()
-            zf.writestr('{}.xls'.format(new_object.name), generate_excel({
+            zf.writestr('{}.xls'.format(new_object.name if new_object.name else '未命名表单'), generate_excel({
                 'student_json': student_json,
                 'name': new_object.name,
                 'project': new_object.project,
@@ -177,8 +177,9 @@ def certification(request):
 def get_certification(request, certification_id):
     this_file = GovernmentCertification.objects.get(id=certification_id)
     file_path = 'media/{}'.format(this_file.package.name)
+    file_name = this_file.name if this_file.name else '未命名认证包'
     response = HttpResponse(FileWrapper(open(file_path, 'rb')), content_type='application/zip')
-    response['Content-Disposition'] = "attachment; filename*=utf-8''{}.zip".format(escape_uri_path(this_file.name))
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}.zip".format(escape_uri_path(file_name))
     return response
 
 
@@ -221,7 +222,6 @@ def generate_excel(form_data, is_sign=False):
             exam_id, student_name, form_data['project'], subject, form_data['verified'],
             '', student_id, '', '', form_data['school'],
         ]
-        print(student_info)
         row_num += 1
         for col_num in range(len(student_info)):
             ws.write(row_num, col_num, student_info[col_num], font_style)
