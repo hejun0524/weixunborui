@@ -90,3 +90,40 @@
         </div>
     </div>
 </div>
+
+
+<!-- Check modal -->
+<div class="modal fade" id="photo_check_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">核对照片</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row px-2">
+                    <div class="col-md-6 px-2">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col">与学生名单相对应的照片</th>
+                            </tr>
+                            </thead>
+                            <tbody id="necessary_photos"></tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6 px-2">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col">多余/重复的照片</th>
+                            </tr>
+                            </thead>
+                            <tbody id="unnecessary_photos"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -70,6 +70,7 @@ def exams(request):
 
 
 def certification(request):
+    url_name = 'exam:certification'
     context = {
         'all_certifications': GovernmentCertification.objects.all().order_by('-created'),
         'all_exams': Exam.objects.all(),
@@ -93,53 +94,50 @@ def certification(request):
             # Parse students
             students = request.POST.get('students').split('\r\n')
             student_json = {}
+            student_photos_dict = {}
             for student in students:
                 student = student.strip()
                 if student:
                     r = re.match('(.*)-(.*)-(.*)', student)
                     if r:
-                        if r.group(1) in student_json:
-                            messages.error(request, '您有重复的考试号！考试号：{}'.format(r.group(1)))
-                            return redirect('exam:certification')
-                        student_json[r.group(1).strip()] = (r.group(2).strip(), r.group(3).strip(),)
+                        this_exam_id = r.group(1).strip()
+                        this_student_name = r.group(2).strip()
+                        this_student_id = r.group(3).strip()
+                        if this_exam_id in student_json:
+                            return wrong_message(request, '您有重复的考试号！考试号：{}'.format(this_exam_id), url_name)
+                        student_json[this_exam_id] = (this_student_name, this_student_id,)
+                        student_photos_dict['{}{}'.format(this_student_name, this_student_id)] = None
                     else:
-                        messages.error(request, '学生列表输入格式有误！位置：{}'.format(student))
-                        return redirect('exam:certification')
+                        return wrong_message(request, '学生列表输入格式有误！位置：{}'.format(student), url_name)
             student_photos = request.FILES.getlist('certification_photos')
-            student_photos_dict = {}
             # Validate photos first
             for photo in student_photos:
                 photo_name = photo.name.strip()
-                r = re.match('(.*)-(.*)\.(.*)', photo_name)
+                r = re.match('(.*)\.(.*)', photo_name)
                 if r:
-                    if r.group(1) in student_photos_dict:
-                        messages.error(request, '学生照片带有重复的考试号，文件名为{}'.format(photo_name))
-                        return redirect('exam:certification')
-                    if r.group(1) in student_json:
-                        student_name, student_id = student_json[r.group(1)]
-                        if student_name != r.group(2):
-                            messages.error(request, '学生照片名与列表不符，文件名为{}'.format(photo_name))
-                            return redirect('exam:certification')
-                        student_photos_dict[r.group(1)] = photo
-                    else:
-                        messages.error(request, '您有多余的学生照片，文件名为{}'.format(photo_name))
-                        return redirect('exam:certification')
+                    id_name = r.group(1).strip()
+                    if id_name not in student_photos_dict:
+                        return wrong_message(request, '您有多余的学生照片，文件名为{}'.format(photo_name), url_name)
+                    if student_photos_dict[id_name] is not None:
+                        return wrong_message(request, '您有重复学生照片，文件名为{}'.format(photo_name), url_name)
+                    student_photos_dict[id_name] = photo
                 else:
-                    messages.error(request, '您有多余的学生照片，文件名为{}'.format(photo_name))
+                    messages.error(request, '无法识别的文件，文件名为{}'.format(photo_name))
                     return redirect('exam:certification')
             # Prepare the big zip
             buffer_zf = BytesIO()
             zf = ZipFile(buffer_zf, 'w')
-            for exam_id in student_photos_dict:
-                photo = student_photos_dict[exam_id]
-                buffer_photo = BytesIO()
-                try:
-                    pil_image = Image.open(photo)
-                    pil_image = pil_image.convert('RGB')
-                    pil_image.save(buffer_photo, format='JPEG')
-                    zf.writestr('{}-{}.jpeg'.format(exam_id, student_json[exam_id][0]), buffer_photo.getvalue())
-                finally:
-                    buffer_photo.close()
+            for id_name in student_photos_dict:
+                photo = student_photos_dict[id_name]
+                if photo:
+                    buffer_photo = BytesIO()
+                    try:
+                        pil_image = Image.open(photo)
+                        pil_image = pil_image.convert('RGB')
+                        pil_image.save(buffer_photo, format='JPEG')
+                        zf.writestr('{}.jpeg'.format(id_name), buffer_photo.getvalue())
+                    finally:
+                        buffer_photo.close()
             zf.writestr('{}.xls'.format(new_object.name), generate_excel({
                 'student_json': student_json,
                 'name': new_object.name,
@@ -190,6 +188,11 @@ def delete_certification(request, certification_id):
     return redirect('exam:certification')
 
 
+def wrong_message(request, msg, redirect_to):
+    messages.error(request, msg)
+    return redirect(redirect_to)
+
+
 def generate_excel(form_data, is_sign=False):
     buffer_excel = BytesIO()
     student_json = form_data['student_json']
@@ -209,11 +212,16 @@ def generate_excel(form_data, is_sign=False):
         ws.col(col_num).width = 256 * 20
     # Now comes the info
     for exam_id in student_json:
-        student_name, student_id = student_json[exam_id]
+        student_name, student_id = list(student_json[exam_id])
+        subject = form_data['subject']
+        r = re.match('(.*)-(.*)', subject)
+        if r:
+            subject = r.group(2).strip()
         student_info = [
-            exam_id, student_name, form_data['project'], form_data['subject'], form_data['verified'],
+            exam_id, student_name, form_data['project'], subject, form_data['verified'],
             '', student_id, '', '', form_data['school'],
         ]
+        print(student_info)
         row_num += 1
         for col_num in range(len(student_info)):
             ws.write(row_num, col_num, student_info[col_num], font_style)
