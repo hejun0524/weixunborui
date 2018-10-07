@@ -64,6 +64,14 @@ def exams(request):
         elif 'delete_strategy' in request.POST:
             this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
             this_object.delete()
+        elif 'add_student_list' in request.POST:
+            pass
+        elif 'add_exam' in request.POST:
+            pass
+        elif 'add_ad' in request.POST:
+            pass
+        elif 'add_agreement' in request.POST:
+            pass
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
