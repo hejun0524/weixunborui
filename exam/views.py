@@ -29,6 +29,9 @@ def exams(request):
         'all_subjects': Subject.objects.all().order_by('index'),
         'all_chapters': Chapter.objects.all().order_by('index'),
         'all_strategies': Strategy.objects.all().order_by('index'),
+        'all_ads': Advertisement.objects.all(),
+        'all_agreements': Agreement.objects.all(),
+        'all_exams': Exam.objects.all().order_by('-created'),
         'type_sc_abbr': type_sc_abbr,
         'chapter_info': tuple(zip(type_sc_full, chapter_points, chapter_difficulties, chapter_q_nums)),
     }
@@ -67,11 +70,21 @@ def exams(request):
         elif 'add_student_list' in request.POST:
             pass
         elif 'add_exam' in request.POST:
-            pass
-        elif 'add_ad' in request.POST:
-            pass
-        elif 'add_agreement' in request.POST:
-            pass
+            new_object = Exam(
+                title=request.POST.get('exam_title'),
+                location=request.POST.get('exam_location'),
+                section=request.POST.get('exam_section')
+            )
+        elif 'btn_add_ad' in request.POST:
+            new_object = Advertisement(name=request.POST.get('ad_name'), image=request.FILES.get('ad_image'))
+            if request.POST.get('ad_description'):
+                new_object.description = request.POST.get('ad_description')
+            new_object.save()
+        elif 'btn_add_agreement' in request.POST:
+            new_object = Agreement(name=request.POST.get('agreement_name'), image=request.FILES.get('agreement_image'))
+            if request.POST.get('agreement_description'):
+                new_object.description = request.POST.get('agreement_description')
+            new_object.save()
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
@@ -303,13 +316,13 @@ def calculate_total_points(plan_list):
     return sum([x * y for x, y in zip(plan_list[1:], chapter.points)])
 
 
-def generate_gxb():
-    pass
+def get_picture(request, picture_type, picture_id):
+    aa_dict = {
+        'ad': ('/static/img/ad_sc.jpg', Advertisement, ),
+        'agreement': ('/static/img/agreement_sc.png', Agreement, ),
+    }
+    if picture_id == 0:
+        return JsonResponse({'image_path': aa_dict[picture_type][0]})
+    this_object = aa_dict[picture_type][1].objects.get(id=picture_id)
+    return JsonResponse({'image_path': '/media/' + str(this_object.image)})
 
-
-def generate_list():
-    pass
-
-
-def generate_package():
-    pass

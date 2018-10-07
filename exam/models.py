@@ -26,6 +26,9 @@ class Exam(models.Model):
     package = models.FileField(upload_to=RenameUploads('exam/'))
     created = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return '{} - {}/{}'.format(self.title, self.location, self.section)
+
 
 class GovernmentCertification(models.Model):
     name = models.CharField(max_length=100, blank=True)
@@ -67,3 +70,21 @@ class CodeSubject(models.Model):
 
     def __str__(self):
         return '{} - {}'.format(self.code, self.name)
+
+
+class Advertisement(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to=RenameUploads('ad/'))
+
+    def __str__(self):
+        return self.name
+
+
+class Agreement(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to=RenameUploads('agreement/'))
+
+    def __str__(self):
+        return self.name

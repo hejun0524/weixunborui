@@ -98,134 +98,49 @@
                     <label for="id_strategy_plan">策略JSON</label>
                     <input type="text" id="id_strategy_plan" name="strategy_plan" readonly>
                 </div>
-                <button type="button" class="btn btn-sm btn-primary" id="id_save_structure">保存修改</button>
             </form>
+            <button class="btn btn-sm btn-dark" id="save_structure">保存修改</button>
+            <button class="btn btn-sm btn-dark" id="generate_exam">生成考试</button>
         </div>
     </div>
     <hr>
+    {% include 'exam/generate_exam.html' %}
     <div class="row">
-        <!-- Student list input -->
-        <div class="col-md-4">
-            <label for="id_students" class="font-weight-bold required">学生名单</label>
-            <div class="alert alert-secondary">
-                <small>
-                    每行一位学生，格式为考试号-姓名-证件号。例：<br>
-                    1A-大卫-2018FCS025<br>
-                    1B-迈克-2018SEN026<br>
-                    您也可以<span class="fake-link text-primary" id="search_student_list">点此</span>搜索已存名单
-                </small>
-            </div>
-            <textarea class="form-control notes mb-3" rows="14" id="id_students" name="students"
-                      form="form_exam" required></textarea>
+        <div class="col-md-9">
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col" class="cell-4">已保存考试包</th>
+                    <th scope="col" class="cell-1"></th>
+                    <th scope="col" class="cell-5">创建时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for object in all_exams %}
+                    <tr>
+                        <td>{{ object }}</td>
+                        <td class="fake-link-plus" onclick="showButtons(this);">
+                            <span class="fa fa-plus-circle"></span>
+                        </td>
+                        <td class="text-muted">{{ object.created }}</td>
+                    </tr>
+                    <tr class="table-secondary" hidden>
+                        <td colspan="3">
+                            <a href="{% url 'exam:get_certification' object.id %}" role="button"
+                               class="btn btn-sm btn-primary">下载</a>
+                            <a href="javascript:" onclick="copyLink({{ object.id }})" role="button"
+                               class="btn btn-sm btn-success">复制链接</a>
+                            <a href="{% url 'exam:delete_certification' object.id %}" role="button"
+                               class="btn btn-sm btn-danger">删除</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <!-- Other information inputs -->
-        <form role="form" method="post" id="form_exam" class="col-md-5" enctype="multipart/form-data">
-            {% csrf_token %}
-            <p class="font-weight-bold mb-2">其他信息</p>
-            <div class="alert alert-secondary">
-                <small>
-                    照片格式不限，命名方式为考试号+姓名。例：<br>
-                    1A大卫.jpg<br>
-                    1B迈克.png<br>
-                    同时，您可以<span class="fake-link text-primary" id="check_photos">点此</span>核对照片
-                </small>
-            </div>
-            <div class="form-group row" hidden>
-                <label for="id_exam_strategy_id" class="col-sm-3 col-form-label required">策略ID</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm" id="id_exam_strategy_id"
-                       name="exam_strategy_id" required readonly>
-            </div>
-            <div class="form-group row">
-                <label for="id_exam_strategy" class="col-sm-3 col-form-label required">策略</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm" id="id_exam_strategy"
-                       name="exam_strategy" placeholder="请在上方选择一个策略" required readonly>
-            </div>
-            <div class="form-group row">
-                <label for="id_exam_location" class="col-sm-3 col-form-label required">考点</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm" id="id_exam_location"
-                       name="exam_location" required>
-            </div>
-            <div class="form-group row">
-                <label for="id_exam_section" class="col-sm-3 col-form-label required">场次</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm" id="id_exam_section"
-                       name="exam_section" required>
-            </div>
-            <div class="form-group row">
-                <label for="id_exam_date" class="col-sm-3 col-form-label required">考试日期</label>
-                <input type="date" class="col-sm-9 form-control form-control-sm" id="id_exam_date"
-                       name="exam_date" required>
-            </div>
-            <div class="form-group row">
-                <label for="id_exam_title" class="col-sm-3 col-form-label">准考证标题</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm" id="id_exam_title"
-                       name="exam_title">
-            </div>
-            <div class="form-group row">
-                <label for="id_exam_agreement" class="col-sm-3 col-form-label">考试须知</label>
-                <div class="col-sm-9 input-group px-0">
-                    <select class="custom-select" id="id_exam_agreement" name="exam_agreement">
-                        <option value="0" selected>默认考试须知</option>
-                        {% for object in all_agreements %}
-                            <option value="{{ object.id }}">{{ object }}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="input-group-append">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_new_agreement">
-                            新增
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="id_exam_ad" class="col-sm-3 col-form-label">宣传图</label>
-                <div class="col-sm-9 input-group px-0">
-                    <select class="custom-select" id="id_exam_ad" name="exam_ad">
-                        <option value="0" selected>默认宣传图</option>
-                        {% for object in all_ads %}
-                            <option value="{{ object.id }}">{{ object }}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="input-group-append">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_new_ad">
-                            新增
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group row">
-                <span class="col-sm-3 col-form-label">照片</span>
-                <div class="col-sm-9 input-group px-0">
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="id_exam_photos"
-                               name="exam_photos" accept="image/*" multiple>
-                        <label class="custom-file-label" for="id_exam_photos">上传照片（可多选）</label>
-                    </div>
-                    <div class="input-group-append">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_photos">
-                            重置
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <button type="submit" form="form_exam" class="btn btn-sm btn-primary" name="add_exam">生成考试包</button>
-        </form>
-        <div class="col-md-3">
-            <p class="font-weight-bold mb-2">辅助功能</p>
-            <div class="card mb-3">
-                <div class="card-header">考试须知图预览</div>
-                <img class="card-img-bottom" src="{% static 'img/agreement_sc.png' %}">
-            </div>
-            <div class="card mb-3">
-                <div class="card-header">宣传图预览</div>
-                <img class="card-img-bottom" src="{% static 'img/ad_sc.jpg' %}">
-            </div>
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-
     </div>
     {% include 'exam/strategy_modal.html' %}
+    {% include 'exam/students_modal.html' %}
 {% endblock %}
 
 {% block js %}

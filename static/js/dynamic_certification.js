@@ -28,6 +28,25 @@ function changeFileInput(target, clear, msg) {
     $target.next().text(msg);
 }
 
+function appendPlainTextTable($table, header, content, zeroMsg) {
+    if (content.length === 0) {
+        var zeroRow = $('<tr></tr>');
+        var zeroCell = $('<td></td>').html('<span class="fa fa-thumbs-up"></span> ' + zeroMsg);
+        zeroCell.attr('class', 'text-success');
+        zeroRow.append(zeroCell);
+        $table.append(zeroRow);
+    } else {
+        for (var i = 0; i < content.length; i++) {
+            for (var j = 0; j < content[i].length; j++) {
+                var row = $('<tr></tr>');
+                var cell = $('<td></td>').html(header + content[i][j]);
+                row.append(cell);
+                $table.append(row);
+            }
+        }
+    }
+}
+
 $('#id_certification_photos').change(function () {
     var files = $(this)[0].files;
     changeFileInput('#id_certification_photos', false, '已选择' + files.length + '个文件');
@@ -128,23 +147,3 @@ $('#check_photos').click(function () {
     appendPlainTextTable($unnecessary, '[多余] ', extra, '没有多余的文件');
     $('#photo_check_modal').modal('show');
 });
-
-
-function appendPlainTextTable($table, header, content, zeroMsg) {
-    if (content.length === 0) {
-        var zeroRow = $('<tr></tr>');
-        var zeroCell = $('<td></td>').html('<span class="fa fa-thumbs-up"></span> ' + zeroMsg);
-        zeroCell.attr('class', 'text-success');
-        zeroRow.append(zeroCell);
-        $table.append(zeroRow);
-    } else {
-        for (var i = 0; i < content.length; i++) {
-            for (var j = 0; j < content[i].length; j++) {
-                var row = $('<tr></tr>');
-                var cell = $('<td></td>').html(header + content[i][j]);
-                row.append(cell);
-                $table.append(row);
-            }
-        }
-    }
-}
