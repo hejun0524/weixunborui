@@ -126,9 +126,9 @@ function displayModal(action, type) {
 function setStrategyInfo(pk) {
     var targets = ['#cell_strategy_name', '#cell_strategy_index', '#cell_strategy_description', '#cell_strategy_timer'];
     var entries = ['full_path', 'full_index', 'description', 'timer'];
-    var specialTargets = ['#id_selected_strategy', '#strategy_structure'];
-    var specialEntries = ['strategy', 'plan'];
-    var specialAttributes = ['value', 'plan'];
+    var specialTargets = ['#id_selected_strategy', '#id_exam_strategy_id', '#id_exam_strategy', '#strategy_structure'];
+    var specialEntries = ['strategy', 'strategy', 'full_path', 'plan'];
+    var specialAttributes = ['value', 'value', 'value', 'plan'];
     $('#total_points').text(0);
     if (pk === 0) { // reset
         for (var i = 0; i < targets.length; i++) {
@@ -136,6 +136,8 @@ function setStrategyInfo(pk) {
             emptyCell.text('请先选择一个章节');
         }
         $('#id_selected_strategy').val('');
+        $('#id_exam_strategy_id').val('');
+        $('#id_exam_strategy').val('');
         $('#strategy_structure').html('');
     } else {
         ajaxChangeTable('exam', 'get_strategy', pk, targets, entries, specialTargets, specialEntries, specialAttributes);
