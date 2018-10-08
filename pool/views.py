@@ -175,7 +175,7 @@ def smart_add(request, chapter_id, question_type, smart_text, smart_images, smar
             q = class_list[question_id_type['type'] - 1].objects.get(pk=question_id_type['id'])
         for attribute in question_files:
             if attribute == 'choice_images':
-                for option in question_files[attribute]:
+                for option in question_files.get(attribute, []):
                     replace_or_create(q.__class__.__name__, q.id, option, question_files[attribute][option])
             if question_files[attribute]:
                 setattr(q, attribute, question_files[attribute])

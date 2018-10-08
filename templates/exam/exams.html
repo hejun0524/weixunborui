@@ -126,11 +126,11 @@
                     </tr>
                     <tr class="table-secondary" hidden>
                         <td colspan="3">
-                            <a href="{% url 'exam:get_certification' object.id %}" role="button"
+                            <a href="{% url 'exam:get_exam' object.id %}" role="button"
                                class="btn btn-sm btn-primary">下载</a>
                             <a href="javascript:" onclick="copyLink({{ object.id }})" role="button"
                                class="btn btn-sm btn-success">复制链接</a>
-                            <a href="{% url 'exam:delete_certification' object.id %}" role="button"
+                            <a href="{% url 'exam:delete_exam' object.id %}" role="button"
                                class="btn btn-sm btn-danger">删除</a>
                         </td>
                     </tr>

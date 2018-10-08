@@ -5,20 +5,21 @@ from django.core.files.base import ContentFile
 from django.utils.encoding import escape_uri_path
 from wsgiref.util import FileWrapper
 from pool.models import Category, Subject, Chapter
+from pool.views import class_list, sub_class_list, type_sc_abbr, type_sc_full, type_en_abbr
 from .models import *
 from PIL import Image
 from zipfile import ZipFile
 from io import BytesIO
+from dateutil import parser
 import json
 import re
 import uuid
 import xlwt
+import random
+import string
+
 
 # Create your views here.
-
-type_sc_abbr = ('单选', '多选', '判断', '文填', '数填', '陈述', '综合')
-type_sc_full = ('单项选择题', '多项选择题', '判断题', '文本填空题', '数字填空题', '陈述题', '综合题')
-
 
 def exams(request):
     chapter_points = tuple(map(lambda num: 'point{}'.format(num), range(1, 8)))
@@ -67,14 +68,6 @@ def exams(request):
         elif 'delete_strategy' in request.POST:
             this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
             this_object.delete()
-        elif 'add_student_list' in request.POST:
-            pass
-        elif 'add_exam' in request.POST:
-            new_object = Exam(
-                title=request.POST.get('exam_title'),
-                location=request.POST.get('exam_location'),
-                section=request.POST.get('exam_section')
-            )
         elif 'btn_add_ad' in request.POST:
             new_object = Advertisement(name=request.POST.get('ad_name'), image=request.FILES.get('ad_image'))
             if request.POST.get('ad_description'):
@@ -85,13 +78,52 @@ def exams(request):
             if request.POST.get('agreement_description'):
                 new_object.description = request.POST.get('agreement_description')
             new_object.save()
+        elif 'add_student_list' in request.POST:
+            pass
+        elif 'add_exam' in request.POST:
+            title = request.POST.get('exam_title')
+            location = request.POST.get('exam_location')
+            section = request.POST.get('exam_section')
+            date = request.POST.get('exam_date')
+            # noinspection PyBroadException
+            try:
+                dt = parser.parse(date)
+                date = '{}{:0>2}{:0>2}'.format(dt.year, dt.month, dt.day)
+            except Exception:
+                messages.error(request, '日期格式错误！')
+                return redirect('exam:exams')
+            this_strategy = Strategy.objects.get(id=int(request.POST.get('exam_strategy_id')))
+            plan = this_strategy.plan
+            # Parse students and photos
+            students = request.POST.get('students').split('\r\n')
+            student_photos = request.FILES.getlist('exam_photos')
+            fvr = validate_students(students, student_photos)
+            if not fvr[0]:
+                messages.error(request, fvr[1])
+                return redirect('exam:exams')
+            student_json, student_photos_dict = fvr[2]
+            # Parse strategy plans
+            exam_set = get_exam_set(plan, student_json)
+            if not exam_set[0]:
+                messages.success(request, exam_set[1])
+                return redirect('exam:exams')
+            # Prepare the zip file
+            buffer_excel = generate_excel({'student_json': student_json, }, True)
+            buffer_zf = generate_zip(student_photos_dict, 'exams', {
+                'problems': exam_set[2],
+                'students': exam_set[3],
+            })
+            # Save objects to database
+            new_object = Exam(title=title, location=location, section=section, date=date, plan=plan)
+            new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf))
+            new_student_list_file = StudentListFile(exam_id=new_object.id)
+            new_student_list_file.student_list.save('{}.xls'.format(uuid.uuid4().hex), ContentFile(buffer_excel))
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
 
 
 def certification(request):
-    url_name = 'exam:certification'
     context = {
         'all_certifications': GovernmentCertification.objects.all().order_by('-created'),
         'all_exams': Exam.objects.all(),
@@ -112,64 +144,28 @@ def certification(request):
             if new_object_subject is None:
                 new_object_subject = ''
             new_object.subject = new_object_subject
-            # Parse students
+            # Parse students and photos
             students = request.POST.get('students').split('\r\n')
-            student_json = {}
-            student_photos_dict = {}
-            for student in students:
-                student = student.strip()
-                if student:
-                    r = re.match('(.*)-(.*)-(.*)', student)
-                    if r:
-                        this_exam_id = r.group(1).strip()
-                        this_student_name = r.group(2).strip()
-                        this_student_id = r.group(3).strip()
-                        if this_exam_id in student_json:
-                            return wrong_message(request, '您有重复的考试号！考试号：{}'.format(this_exam_id), url_name)
-                        student_json[this_exam_id] = (this_student_name, this_student_id,)
-                        student_photos_dict['{}{}'.format(this_exam_id, this_student_name)] = None
-                    else:
-                        return wrong_message(request, '学生列表输入格式有误！位置：{}'.format(student), url_name)
             student_photos = request.FILES.getlist('certification_photos')
-            # Validate photos first
-            for photo in student_photos:
-                photo_name = photo.name.strip()
-                r = re.match('(.*)\.(.*)', photo_name)
-                if r:
-                    id_name = r.group(1).strip()
-                    if id_name not in student_photos_dict:
-                        return wrong_message(request, '您有多余的学生照片，文件名为{}'.format(photo_name), url_name)
-                    if student_photos_dict[id_name] is not None:
-                        return wrong_message(request, '您有重复学生照片，文件名为{}'.format(photo_name), url_name)
-                    student_photos_dict[id_name] = photo
-                else:
-                    messages.error(request, '无法识别的文件，文件名为{}'.format(photo_name))
-                    return redirect('exam:certification')
-            # Prepare the big zip
-            buffer_zf = BytesIO()
-            zf = ZipFile(buffer_zf, 'w')
-            for id_name in student_photos_dict:
-                photo = student_photos_dict[id_name]
-                if photo:
-                    buffer_photo = BytesIO()
-                    try:
-                        pil_image = Image.open(photo)
-                        pil_image = pil_image.convert('RGB')
-                        pil_image.save(buffer_photo, format='JPEG')
-                        zf.writestr('{}.jpg'.format(id_name), buffer_photo.getvalue())
-                    finally:
-                        buffer_photo.close()
-            zf.writestr('{}.xls'.format(new_object.name if new_object.name else '未命名表单'), generate_excel({
+            fvr = validate_students(students, student_photos)
+            if not fvr[0]:
+                messages.error(request, fvr[1])
+                return redirect('exam:certification')
+            student_json, student_photos_dict = fvr[2]
+            # Prepare the zip file
+            buffer_student_list = generate_excel({
                 'student_json': student_json,
                 'name': new_object.name,
                 'project': new_object.project,
                 'verified': new_object.verified,
                 'school': new_object.school,
                 'subject': new_object.subject,
-            }))
-            zf.close()
+            })
+            buffer_zf = generate_zip(student_photos_dict, 'certification', {
+                'excel': ('{}.xls'.format(new_object.name if new_object.name else '未命名表单'), buffer_student_list)
+            })
             new_object.student_list = student_json
-            new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf.getvalue()))
+            new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf))
         elif 'btn_add_code' in request.POST:
             code_category_id = int(request.POST.get('code_category'))
             new_object = CodeSubject(
@@ -195,6 +191,21 @@ def certification(request):
     return render(request, 'exam/certification.html', context)
 
 
+def get_exam(request, exam_id):
+    this_file = Exam.objects.get(id=exam_id)
+    file_path = 'media/{}'.format(this_file.package.name)
+    file_name = '-'.join([this_file.title, this_file.location, this_file.section, this_file.date, ])
+    response = HttpResponse(FileWrapper(open(file_path, 'rb')), content_type='application/zip')
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}.zip".format(escape_uri_path(file_name))
+    return response
+
+
+def delete_exam(request, exam_id):
+    this_object = Exam.objects.get(id=exam_id)
+    this_object.delete()
+    return redirect('exam:exams')
+
+
 def get_certification(request, certification_id):
     this_file = GovernmentCertification.objects.get(id=certification_id)
     file_path = 'media/{}'.format(this_file.package.name)
@@ -210,12 +221,88 @@ def delete_certification(request, certification_id):
     return redirect('exam:certification')
 
 
-def wrong_message(request, msg, redirect_to):
-    messages.error(request, msg)
-    return redirect(redirect_to)
+def wrong_message(warning):
+    return False, warning, {}
 
 
-def generate_excel(form_data, is_sign=False):
+def validate_students(students, photos):
+    student_json = {}
+    student_photos_dict = {}
+    for student in students:
+        student = student.strip()
+        if student:
+            r = re.match('(.*)-(.*)-(.*)', student)
+            if r:
+                this_exam_id = r.group(1).strip()
+                this_student_name = r.group(2).strip()
+                this_student_id = r.group(3).strip()
+                if this_exam_id in student_json:
+                    return wrong_message('您有重复的考试号！考试号：{}'.format(this_exam_id))
+                student_json[this_exam_id] = (this_student_name, this_student_id,)
+                student_photos_dict['{}{}'.format(this_exam_id, this_student_name)] = None
+            else:
+                return wrong_message('学生列表输入格式有误！位置：{}'.format(student))
+    for photo in photos:
+        photo_name = photo.name.strip()
+        r = re.match('(.*)\.(.*)', photo_name)
+        if r:
+            id_name = r.group(1).strip()
+            if id_name not in student_photos_dict:
+                return wrong_message('您有多余的学生照片，文件名为{}'.format(photo_name))
+            if student_photos_dict[id_name] is not None:
+                return wrong_message('您有重复学生照片，文件名为{}'.format(photo_name))
+            student_photos_dict[id_name] = photo
+        else:
+            return wrong_message('无法识别的文件，文件名为{}'.format(photo_name))
+    return True, '', (student_json, student_photos_dict,)
+
+
+def get_exam_set(plan, students):
+    # Get all questions, skip 0 plan selection
+    all_problems = {}
+    for plan_line in plan:
+        chapter = Chapter.objects.get(pk=plan_line[0])
+        chapter_set = {}
+        for i in range(7):
+            if plan_line[i + 1] > 0:
+                chapter_problem_set = getattr(chapter, '{}_set'.format(class_list[i].__name__.lower())).all()
+                chapter_set.update({type_en_abbr[i]: chapter_problem_set, })
+            else:
+                chapter_set.update({type_en_abbr[i]: None, })
+        all_problems.update({plan_line[0]: chapter_set, })
+    # Form random exams for each student and append questions to selected set
+    problems = {}
+    student_info = {}
+    for exam_id in students:
+        my_problems = []
+        for plan_line in plan:
+            my_chapter = {plan_line[0]: {}}
+            for i in range(7):
+                potential_problems = all_problems[plan_line[0]][type_en_abbr[i]]
+                if potential_problems:
+                    selected_problems = []
+                    if len(potential_problems) < plan_line[i + 1]:
+                        return wrong_message('选择的题量超出录入量，请检查！')
+                    for j in random.sample(range(len(potential_problems)), plan_line[i + 1]):
+                        selected_problems.append(potential_problems[j].id)
+                        # Get problem detail and update general problem set (aka problems)
+                        if not type_en_abbr[i] in problems:
+                            problems[type_en_abbr[i]] = {}
+                        if not potential_problems[j].id in problems[type_en_abbr[i]]:
+                            problem_detail = get_problem_details(type_en_abbr[i], potential_problems[j].id)
+                            problems[type_en_abbr[i]][potential_problems[j].id] = problem_detail
+                    my_chapter[plan_line[0]][type_en_abbr[i]] = selected_problems
+            my_problems.append(my_chapter)
+        student_info[exam_id] = {
+            'name': students[exam_id][0],
+            'student_id': students[exam_id][1],
+            'problems': my_problems,
+            'key': ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+        }
+    return True, '', problems, student_info
+
+
+def generate_excel(form_data, is_sign_sheet=False):
     buffer_excel = BytesIO()
     student_json = form_data['student_json']
     wb = xlwt.Workbook(encoding='utf-8')
@@ -227,7 +314,7 @@ def generate_excel(form_data, is_sign=False):
         '序号', '姓名', '考试项目', '课程/级别', '通过方式',
         '证书编号', '身份证号', '成绩', '考试时间', '学校',
     ]
-    if is_sign:
+    if is_sign_sheet:
         headers = ['考试编号', '考生姓名', '证件号', '签名']
     for col_num in range(len(headers)):
         ws.write(row_num, col_num, headers[col_num], font_style)
@@ -235,14 +322,16 @@ def generate_excel(form_data, is_sign=False):
     # Now comes the info
     for exam_id in student_json:
         student_name, student_id = list(student_json[exam_id])
-        subject = form_data['subject']
-        r = re.match('(.*)-(.*)', subject)
-        if r:
-            subject = r.group(2).strip()
-        student_info = [
-            exam_id, student_name, form_data['project'], subject, form_data['verified'],
-            '', student_id, '', '', form_data['school'],
-        ]
+        student_info = [exam_id, student_name, student_id, ]
+        if not is_sign_sheet:
+            subject = form_data['subject']
+            r = re.match('(.*)-(.*)', subject)
+            if r:
+                subject = r.group(2).strip()
+            student_info = [
+                exam_id, student_name, form_data['project'], subject, form_data['verified'],
+                '', student_id, '', '', form_data['school'],
+            ]
         row_num += 1
         for col_num in range(len(student_info)):
             ws.write(row_num, col_num, student_info[col_num], font_style)
@@ -250,6 +339,118 @@ def generate_excel(form_data, is_sign=False):
     buffer_value = buffer_excel.getvalue()
     buffer_excel.close()
     return buffer_value
+
+
+def generate_zip(photos, caller, other_files):
+    buffer_zf = BytesIO()
+    zf = ZipFile(buffer_zf, 'w')
+    for id_name in photos:
+        photo = photos[id_name]
+        if photo:
+            buffer_photo = BytesIO()
+            try:
+                pil_image = Image.open(photo)
+                pil_image = pil_image.convert('RGB')
+                pil_image.save(buffer_photo, format='JPEG')
+                zf.writestr('photos/{}.jpg'.format(id_name), buffer_photo.getvalue())
+            finally:
+                buffer_photo.close()
+    if caller == 'certification':
+        my_excel = other_files.get('excel')
+        zf.writestr(my_excel[0], my_excel[1])
+    elif caller == 'exams':
+        # student.json
+        buffer_students_json = BytesIO(str.encode(json.dumps(other_files.get('students'))))
+        zf.writestr('students.json', buffer_students_json.getvalue())
+        # Files
+        problems = other_files.get('problems')
+        for problem_type in problems:
+            for problem_id in problems[problem_type]:
+                this_problem = problems[problem_type][problem_id]
+                media_attributes = ['image', 'attachment', 'answer_image', ]
+                if 'choice_image_keys' in this_problem:
+                    media_attributes.extend(this_problem['choice_image_keys'])
+                for media in media_attributes:
+                    if media in this_problem:
+                        ext = '.'.join(this_problem[media].split('.')[1:])
+                        archive_name = '{}-{}-{}.{}'.format(problem_type, problem_id, media, ext)
+                        zf.write(this_problem[media], 'files/{}'.format(archive_name))
+                        problems[problem_type][problem_id][media] = archive_name
+                if problem_type == 'cp':
+                    for sub in problems[problem_type][problem_id]['sub']:
+                        media_attributes = ['image', 'attachment', 'answer_image', ]
+                        if 'choice_image_keys' in sub:
+                            media_attributes.extend(sub['choice_image_keys'])
+                        for media in media_attributes:
+                            if media in sub:
+                                ext = '.'.join(sub[media].split('.')[1:])
+                                archive_name = 'sub{}-{}-{}.{}'.format(sub['type_en'], sub['id'], media, ext)
+                                zf.write(sub[media], 'files/{}'.format(archive_name))
+                                problems[problem_type][problem_id]['sub'][media] = archive_name
+        buffer_problems_json = BytesIO(str.encode(json.dumps(other_files.get('problems'))))
+        zf.writestr('problems.json', buffer_problems_json.getvalue())
+
+    zf.close()
+    return buffer_zf.getvalue()
+
+
+def get_problem_details(problem_type, problem_id, is_sub=False):
+    type_index = type_en_abbr.index(problem_type)
+    problem_class = sub_class_list[type_index] if is_sub else class_list[type_index]
+    this_problem = problem_class.objects.get(id=problem_id)
+    result = {
+        'id': problem_id,
+        'type_en': problem_type,
+        'type_sc': type_sc_full[type_index],
+        'desc_lines': str(this_problem).split('\r\n')
+    }
+    if type_index != 6:
+        if type(this_problem.answer) == list:
+            result['ans_lines'] = '答案：{}'.format(''.join(this_problem.answer)).split('\r\n')
+        elif not this_problem.answer:
+            result['ans_lines'] = '答案：略。'
+        else:
+            result['ans_lines'] = '答案：{}'.format(this_problem.answer).split('\r\n')
+        if type_index == 0 or type_index == 1:
+            choice_lines = []
+            for i in range(len(this_problem.choices)):
+                choice = this_problem.choices[i]
+                choice_lines.append('(' + chr(65 + i) + ')' + choice)
+            result['choice_lines'] = choice_lines
+    else:  # Comprehensive part
+        result_sub = []
+        all_subs = []
+        for sub_class in sub_class_list:
+            sub_class_set = getattr(this_problem, '{}_set'.format(sub_class.__name__.lower())).all()
+            all_subs.extend(list(sub_class_set))
+        all_subs.sort(key=lambda x: x.order)
+        for this_sub in all_subs:
+            sub_index = sub_class_list.index(this_sub.__class__)
+            result_sub.append(get_problem_details(type_en_abbr[sub_index], this_sub.id, is_sub=True))
+        result['sub'] = result_sub
+    info_attributes = ('student_upload', 'need_answer', 'error', 'percentage', 'order')
+    for info in info_attributes:
+        if hasattr(this_problem, info):
+            result[info] = getattr(this_problem, info)
+    result.update(get_media_set(this_problem))
+    return result
+
+
+def get_media_set(this_problem):
+    media_set = {}
+    media_set_names = ('image', 'attachment', 'answer_image',)
+    for media in media_set_names:
+        if hasattr(this_problem, media):
+            if getattr(this_problem, media):
+                media_set[media] = '/media/{}'.format(str(getattr(this_problem, media)))
+    image_set = this_problem.__class__.__name__.lower() + 'image_set'
+    if hasattr(this_problem, image_set):
+        choice_image_keys = []
+        for choice_image in getattr(this_problem, image_set).all():
+            media_set[choice_image.choice] = '/media/{}'.format(str(choice_image.image))
+            choice_image_keys.append(choice_image.choice)
+        media_set['choice_image_keys'] = choice_image_keys
+    return media_set
 
 
 # AJAX functions
@@ -318,11 +519,10 @@ def calculate_total_points(plan_list):
 
 def get_picture(request, picture_type, picture_id):
     aa_dict = {
-        'ad': ('/static/img/ad_sc.jpg', Advertisement, ),
-        'agreement': ('/static/img/agreement_sc.png', Agreement, ),
+        'ad': ('/static/img/ad_sc.jpg', Advertisement,),
+        'agreement': ('/static/img/agreement_sc.png', Agreement,),
     }
     if picture_id == 0:
         return JsonResponse({'image_path': aa_dict[picture_type][0]})
     this_object = aa_dict[picture_type][1].objects.get(id=picture_id)
     return JsonResponse({'image_path': '/media/' + str(this_object.image)})
-

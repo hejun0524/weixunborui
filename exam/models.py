@@ -22,12 +22,18 @@ class Exam(models.Model):
     location = models.CharField(max_length=100)
     section = models.CharField(max_length=100)
     date = models.CharField(max_length=100)
-    strategy_detail = fields.JSONField()
+    plan = fields.JSONField()
     package = models.FileField(upload_to=RenameUploads('exam/'))
     created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return '{} - {}/{}'.format(self.title, self.location, self.section)
+
+
+class StudentListFile(models.Model):
+    # This model directly links to exam object
+    exam = models.ForeignKey('Exam', on_delete=models.CASCADE)
+    student_list = models.FileField(upload_to=RenameUploads('list/'))
 
 
 class GovernmentCertification(models.Model):
