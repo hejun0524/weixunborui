@@ -375,8 +375,9 @@ def generate_zip(photos, caller, other_files):
                         ext = '.'.join(this_problem[media].split('.')[1:])
                         archive_name = '{}-{}-{}.{}'.format(problem_type, problem_id, media, ext)
                         zf.write(this_problem[media], 'files/{}'.format(archive_name))
-                        problems[problem_type][problem_id][media] = archive_name
+                        this_problem[media] = archive_name
                 if problem_type == 'cp':
+                    i = 0
                     for sub in problems[problem_type][problem_id]['sub']:
                         media_attributes = ['image', 'attachment', 'answer_image', ]
                         if 'choice_image_keys' in sub:
@@ -386,7 +387,7 @@ def generate_zip(photos, caller, other_files):
                                 ext = '.'.join(sub[media].split('.')[1:])
                                 archive_name = 'sub{}-{}-{}.{}'.format(sub['type_en'], sub['id'], media, ext)
                                 zf.write(sub[media], 'files/{}'.format(archive_name))
-                                problems[problem_type][problem_id]['sub'][media] = archive_name
+                                sub[media] = archive_name
         buffer_problems_json = BytesIO(str.encode(json.dumps(other_files.get('problems'))))
         zf.writestr('problems.json', buffer_problems_json.getvalue())
 
@@ -442,12 +443,12 @@ def get_media_set(this_problem):
     for media in media_set_names:
         if hasattr(this_problem, media):
             if getattr(this_problem, media):
-                media_set[media] = '/media/{}'.format(str(getattr(this_problem, media)))
+                media_set[media] = 'media/{}'.format(str(getattr(this_problem, media)))
     image_set = this_problem.__class__.__name__.lower() + 'image_set'
     if hasattr(this_problem, image_set):
         choice_image_keys = []
         for choice_image in getattr(this_problem, image_set).all():
-            media_set[choice_image.choice] = '/media/{}'.format(str(choice_image.image))
+            media_set[choice_image.choice] = 'media/{}'.format(str(choice_image.image))
             choice_image_keys.append(choice_image.choice)
         media_set['choice_image_keys'] = choice_image_keys
     return media_set
