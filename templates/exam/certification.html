@@ -61,7 +61,7 @@
                     <select class="custom-select" id="id_certification_subject" name="certification_subject">
                         <option value="" selected>请选择</option>
                         {% for object in all_code_subjects %}
-                            <option value="{{ object }}">{{ object }}</option>
+                            <option value="{{ object.name }}">{{ object }}</option>
                         {% endfor %}
                     </select>
                     <div class="input-group-append">

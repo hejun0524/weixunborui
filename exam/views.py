@@ -11,12 +11,14 @@ from PIL import Image
 from zipfile import ZipFile
 from io import BytesIO
 from dateutil import parser
+from Crypto.Cipher import AES
 import json
 import re
 import uuid
 import xlwt
 import random
 import string
+import base64
 
 
 # Create your views here.
@@ -85,6 +87,8 @@ def exams(request):
             location = request.POST.get('exam_location')
             section = request.POST.get('exam_section')
             date = request.POST.get('exam_date')
+            agreement = request.POST.get('exam_agreement')
+            ad = request.POST.get('exam_ad')
             # noinspection PyBroadException
             try:
                 dt = parser.parse(date)
@@ -112,6 +116,16 @@ def exams(request):
             buffer_zf = generate_zip(student_photos_dict, 'exams', {
                 'problems': exam_set[2],
                 'students': exam_set[3],
+                'agreement': int(agreement),
+                'ad': int(ad),
+                'basics': {
+                    'title': title,
+                    'location': location,
+                    'section': section,
+                    'date': date,
+                    'timer': this_strategy.timer,
+                    'subject': str(this_strategy.subject)
+                }
             })
             # Save objects to database
             new_object = Exam(title=title, location=location, section=section, date=date, plan=plan)
@@ -196,7 +210,7 @@ def get_exam(request, exam_id):
     file_path = 'media/{}'.format(this_file.package.name)
     file_name = '-'.join([this_file.title, this_file.location, this_file.section, this_file.date, ])
     response = HttpResponse(FileWrapper(open(file_path, 'rb')), content_type='application/zip')
-    response['Content-Disposition'] = "attachment; filename*=utf-8''{}.zip".format(escape_uri_path(file_name))
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}.exam".format(escape_uri_path(file_name))
     return response
 
 
@@ -246,7 +260,7 @@ def validate_students(students, photos):
         photo_name = photo.name.strip()
         r = re.match('(.*)\.(.*)', photo_name)
         if r:
-            id_name = r.group(1).strip()
+            id_name = digest_id_name(r.group(1).strip())
             if id_name not in student_photos_dict:
                 return wrong_message('您有多余的学生照片，文件名为{}'.format(photo_name))
             if student_photos_dict[id_name] is not None:
@@ -255,6 +269,19 @@ def validate_students(students, photos):
         else:
             return wrong_message('无法识别的文件，文件名为{}'.format(photo_name))
     return True, '', (student_json, student_photos_dict,)
+
+
+def digest_id_name(id_name):
+    r = re.match('(.*)-(.*)', id_name)
+    if r:
+        id_name = '{}{}'.format(r.group(1).strip(), r.group(2).strip())
+    r = re.match('(.*)[\t\s]+(.*)', id_name)
+    if r:
+        id_name = '{}{}'.format(r.group(1).strip(), r.group(2).strip())
+    r = re.match('(\d+)(.*)', id_name)
+    if r:
+        id_name = '{}{}'.format(int(r.group(1).strip()), r.group(2).strip())
+    return id_name
 
 
 def get_exam_set(plan, students):
@@ -324,12 +351,8 @@ def generate_excel(form_data, is_sign_sheet=False):
         student_name, student_id = list(student_json[exam_id])
         student_info = [exam_id, student_name, student_id, ]
         if not is_sign_sheet:
-            subject = form_data['subject']
-            r = re.match('(.*)-(.*)', subject)
-            if r:
-                subject = r.group(2).strip()
             student_info = [
-                exam_id, student_name, form_data['project'], subject, form_data['verified'],
+                exam_id, student_name, form_data['project'], form_data['subject'], form_data['verified'],
                 '', student_id, '', '', form_data['school'],
             ]
         row_num += 1
@@ -359,8 +382,10 @@ def generate_zip(photos, caller, other_files):
         my_excel = other_files.get('excel')
         zf.writestr(my_excel[0], my_excel[1])
     elif caller == 'exams':
+        # key and iv
+        key = iv = 'WXBR.1683.dev-30'
         # student.json
-        buffer_students_json = BytesIO(str.encode(json.dumps(other_files.get('students'))))
+        buffer_students_json = BytesIO(get_encrypted_buffer(json.dumps(other_files.get('students')), key, iv))
         zf.writestr('students.json', buffer_students_json.getvalue())
         # Files
         problems = other_files.get('problems')
@@ -374,10 +399,11 @@ def generate_zip(photos, caller, other_files):
                     if media in this_problem:
                         ext = '.'.join(this_problem[media].split('.')[1:])
                         archive_name = '{}-{}-{}.{}'.format(problem_type, problem_id, media, ext)
-                        zf.write(this_problem[media], 'files/{}'.format(archive_name))
+                        with open(this_problem[media], 'rb') as f:
+                            buffer_file = BytesIO(get_encrypted_buffer(f.read(), key, iv))
+                            zf.writestr('files/{}'.format(archive_name), buffer_file.getvalue())
                         this_problem[media] = archive_name
                 if problem_type == 'cp':
-                    i = 0
                     for sub in problems[problem_type][problem_id]['sub']:
                         media_attributes = ['image', 'attachment', 'answer_image', ]
                         if 'choice_image_keys' in sub:
@@ -386,11 +412,34 @@ def generate_zip(photos, caller, other_files):
                             if media in sub:
                                 ext = '.'.join(sub[media].split('.')[1:])
                                 archive_name = 'sub{}-{}-{}.{}'.format(sub['type_en'], sub['id'], media, ext)
-                                zf.write(sub[media], 'files/{}'.format(archive_name))
+                                with open(sub[media], 'rb') as f:
+                                    buffer_file = BytesIO(get_encrypted_buffer(f.read(), key, iv))
+                                    zf.writestr('files/{}'.format(archive_name), buffer_file.getvalue())
                                 sub[media] = archive_name
-        buffer_problems_json = BytesIO(str.encode(json.dumps(other_files.get('problems'))))
+        # problems.json
+        buffer_problems_json = BytesIO(get_encrypted_buffer(json.dumps(other_files.get('problems')), key, iv))
         zf.writestr('problems.json', buffer_problems_json.getvalue())
-
+        # answers.json
+        buffer_answers_json = BytesIO()
+        zf.writestr('answers.json', buffer_answers_json.getvalue())
+        # basics.json
+        buffer_basics_json = BytesIO(get_encrypted_buffer(json.dumps(other_files.get('basics')), key, iv))
+        zf.writestr('basics.json', buffer_basics_json.getvalue())
+        # ad and agreement
+        ad_id = other_files.get('ad')
+        agreement_id = other_files.get('agreement')
+        ad_path = 'static/img/ad_sc.jpg'
+        agreement_path = 'static/img/agreement_sc.png'
+        if ad_id != 0:
+            ad_object = Advertisement.objects.get(pk=ad_id)
+            ad_path = 'media/{}'.format(str(ad_object.image))
+        if agreement_id != 0:
+            agreement_object = Agreement.objects.get(pk=agreement_id)
+            agreement_path = 'media/{}'.format(str(agreement_object.image))
+        ad_ext = ad_path.split('.')[-1]
+        agreement_ext = agreement_path.split('.')[-1]
+        zf.write(ad_path, 'ad.{}'.format(ad_ext))
+        zf.write(agreement_path, 'agreement.{}'.format(agreement_ext))
     zf.close()
     return buffer_zf.getvalue()
 
@@ -407,11 +456,11 @@ def get_problem_details(problem_type, problem_id, is_sub=False):
     }
     if type_index != 6:
         if type(this_problem.answer) == list:
-            result['ans_lines'] = '答案：{}'.format(''.join(this_problem.answer)).split('\r\n')
+            result['ans_lines'] = ''.join(this_problem.answer).split('\r\n')
         elif not this_problem.answer:
-            result['ans_lines'] = '答案：略。'
+            result['ans_lines'] = '略。'
         else:
-            result['ans_lines'] = '答案：{}'.format(this_problem.answer).split('\r\n')
+            result['ans_lines'] = this_problem.answer.split('\r\n')
         if type_index == 0 or type_index == 1:
             choice_lines = []
             for i in range(len(this_problem.choices)):
@@ -452,6 +501,21 @@ def get_media_set(this_problem):
             choice_image_keys.append(choice_image.choice)
         media_set['choice_image_keys'] = choice_image_keys
     return media_set
+
+
+def get_encrypted_buffer(raw_data, key, iv):
+    def _pad(s):
+        padding = AES.block_size - len(s) % AES.block_size
+        return s + (padding * chr(padding)).encode()
+
+    text_bytes = raw_data
+    if not (type(raw_data) is bytes):
+        text_bytes = raw_data.encode('utf-8')
+
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    msg = base64.b64encode(cipher.encrypt(_pad(text_bytes)))
+
+    return msg
 
 
 # AJAX functions
