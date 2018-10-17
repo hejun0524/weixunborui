@@ -464,7 +464,7 @@ def get_problem_details(problem_type, problem_id, is_sub=False):
         elif not this_problem.answer:
             result['ans_lines'] = '略。'
         else:
-            result['ans_lines'] = this_problem.answer.split('\r\n')
+            result['ans_lines'] = '{}'.format(this_problem.answer).split('\r\n')
         if type_index == 0 or type_index == 1:
             choice_lines = []
             for i in range(len(this_problem.choices)):
