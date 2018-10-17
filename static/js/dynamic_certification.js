@@ -47,6 +47,26 @@ function appendPlainTextTable($table, header, content, zeroMsg) {
     }
 }
 
+function digestPhotoNames(fileName) {
+    var regExHyphen = /^(.*)-(.*)$/;
+    var regExBlank = /^(.*)[\t\s]+(.*)$/;
+    var regExNumbers = /^(\d+)(.*)$/;
+    var regExArray;
+    if (regExHyphen.test(fileName)) {
+        regExArray = regExHyphen.exec(fileName);
+        fileName = regExArray[1].trim() + regExArray[2].trim();
+    }
+    if (regExBlank.test(fileName)) {
+        regExArray = regExBlank.exec(fileName);
+        fileName = regExArray[1].trim() + regExArray[2].trim();
+    }
+    if (regExNumbers.test(fileName)) {
+        regExArray = regExNumbers.exec(fileName);
+        fileName = parseInt(regExArray[1].trim()).toString() + regExArray[2].trim();
+    }
+    return fileName;
+}
+
 $('#id_certification_photos').change(function () {
     var files = $(this)[0].files;
     changeFileInput('#id_certification_photos', false, '已选择' + files.length + '个文件');
@@ -114,7 +134,7 @@ $('#check_photos').click(function () {
     }
     // Check files, get extra and duplicates
     for (i = 0; i < fileNames.length; i++) {
-        var thisFileName = fileNames[i];
+        var thisFileName = digestPhotoNames(fileNames[i].trim());
         if (necessary.hasOwnProperty(thisFileName)) {
             if (necessary[thisFileName]['has_file']) {
                 duplicates.push([thisFileName]);
