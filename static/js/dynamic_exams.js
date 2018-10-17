@@ -257,6 +257,26 @@ function showButtons(e) {
     }
 }
 
+function digestPhotoNames(fileName) {
+    var regExHyphen = /^(.*)-(.*)$/;
+    var regExBlank = /^(.*)[\t\s]+(.*)$/;
+    var regExNumbers = /^(\d+)(.*)$/;
+    var regExArray;
+    if (regExHyphen.test(fileName)) {
+        regExArray = regExHyphen.exec(fileName);
+        fileName = regExArray[1].trim() + regExArray[2].trim();
+    }
+    if (regExBlank.test(fileName)) {
+        regExArray = regExBlank.exec(fileName);
+        fileName = regExArray[1].trim() + regExArray[2].trim();
+    }
+    if (regExNumbers.test(fileName)) {
+        regExArray = regExNumbers.exec(fileName);
+        fileName = parseInt(regExArray[1].trim()).toString() + regExArray[2].trim();
+    }
+    return fileName;
+}
+
 function changeFileInput(target, clear, msg) {
     var $target = $(target);
     if (clear) $target.val('');
@@ -400,7 +420,7 @@ $('#check_photos').click(function () {
     }
     // Check files, get extra and duplicates
     for (i = 0; i < fileNames.length; i++) {
-        var thisFileName = fileNames[i];
+        var thisFileName = digestPhotoNames(fileNames[i].trim());
         if (necessary.hasOwnProperty(thisFileName)) {
             if (necessary[thisFileName]['has_file']) {
                 duplicates.push([thisFileName]);
