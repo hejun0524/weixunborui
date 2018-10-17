@@ -38,106 +38,103 @@ def exams(request):
         'type_sc_abbr': type_sc_abbr,
         'chapter_info': tuple(zip(type_sc_full, chapter_points, chapter_difficulties, chapter_q_nums)),
     }
-    try:
-        if request.method == 'POST':
-            if 'add_strategy' in request.POST:
-                new_object = Strategy(
-                    subject_id=int(request.POST.get('strategy_subject')),
-                    name=request.POST.get('strategy_name'),
-                    index=request.POST.get('strategy_index'),
-                )
-                new_object.description = request.POST.get('strategy_description')
-                if request.POST.get('strategy_timer'):
-                    new_object.timer = int(request.POST.get('strategy_timer'))
-                new_object.save()
-            elif 'strategy_plan' in request.POST:
-                this_object = Strategy.objects.get(id=int(request.POST.get('selected_strategy')))
-                plan = json.loads(request.POST.get('strategy_plan'))
-                this_object.plan = plan
-                this_object.save()
-            elif 'edit_strategy' in request.POST or 'duplicate_strategy' in request.POST:
-                this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
-                this_object.subject_id = int(request.POST.get('strategy_subject'))
-                this_object.name = request.POST.get('strategy_name')
-                this_object.index = request.POST.get('strategy_index')
-                this_object.description = request.POST.get('strategy_description')
-                if request.POST.get('strategy_timer'):
-                    this_object.timer = int(request.POST.get('strategy_timer'))
-                else:
-                    this_object.timer = 100
-                if 'duplicate_strategy' in request.POST:
-                    this_object.pk = None
-                this_object.save()
-            elif 'delete_strategy' in request.POST:
-                this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
-                this_object.delete()
-            elif 'btn_add_ad' in request.POST:
-                new_object = Advertisement(name=request.POST.get('ad_name'), image=request.FILES.get('ad_image'))
-                if request.POST.get('ad_description'):
-                    new_object.description = request.POST.get('ad_description')
-                new_object.save()
-            elif 'btn_add_agreement' in request.POST:
-                new_object = Agreement(name=request.POST.get('agreement_name'),
-                                       image=request.FILES.get('agreement_image'))
-                if request.POST.get('agreement_description'):
-                    new_object.description = request.POST.get('agreement_description')
-                new_object.save()
-            elif 'add_student_list' in request.POST:
-                pass
-            elif 'add_exam' in request.POST:
-                title = request.POST.get('exam_title')
-                location = request.POST.get('exam_location')
-                section = request.POST.get('exam_section')
-                date = request.POST.get('exam_date')
-                agreement = request.POST.get('exam_agreement')
-                ad = request.POST.get('exam_ad')
-                # noinspection PyBroadException
-                try:
-                    dt = parser.parse(date)
-                    date = '{}{:0>2}{:0>2}'.format(dt.year, dt.month, dt.day)
-                except Exception:
-                    messages.error(request, '日期格式错误！')
-                    return redirect('exam:exams')
-                this_strategy = Strategy.objects.get(id=int(request.POST.get('exam_strategy_id')))
-                plan = this_strategy.plan
-                # Parse students and photos
-                students = request.POST.get('students').split('\r\n')
-                student_photos = request.FILES.getlist('exam_photos')
-                fvr = validate_students(students, student_photos)
-                if not fvr[0]:
-                    messages.error(request, fvr[1])
-                    return redirect('exam:exams')
-                student_json, student_photos_dict = fvr[2]
-                # Parse strategy plans
-                exam_set = get_exam_set(plan, student_json)
-                if not exam_set[0]:
-                    messages.success(request, exam_set[1])
-                    return redirect('exam:exams')
-                # Prepare the zip file
-                buffer_excel = generate_excel({'student_json': student_json, }, True)
-                buffer_zf = generate_zip(student_photos_dict, 'exams', {
-                    'problems': exam_set[2],
-                    'students': exam_set[3],
-                    'agreement': int(agreement),
-                    'ad': int(ad),
-                    'basics': {
-                        'title': title,
-                        'location': location,
-                        'section': section,
-                        'date': date,
-                        'timer': this_strategy.timer,
-                        'subject': str(this_strategy.subject)
-                    }
-                })
-                # Save objects to database
-                new_object = Exam(title=title, location=location, section=section, date=date, plan=plan)
-                new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf))
-                new_student_list_file = StudentListFile(exam_id=new_object.id)
-                new_student_list_file.student_list.save('{}.xls'.format(uuid.uuid4().hex), ContentFile(buffer_excel))
-            messages.success(request, '操作成功！')
-            return redirect('exam:exams')
-    except Exception as e:
-        return HttpResponse('<p>{}</p>'.format(e))
+    if request.method == 'POST':
+        if 'add_strategy' in request.POST:
+            new_object = Strategy(
+                subject_id=int(request.POST.get('strategy_subject')),
+                name=request.POST.get('strategy_name'),
+                index=request.POST.get('strategy_index'),
+            )
+            new_object.description = request.POST.get('strategy_description')
+            if request.POST.get('strategy_timer'):
+                new_object.timer = int(request.POST.get('strategy_timer'))
+            new_object.save()
+        elif 'strategy_plan' in request.POST:
+            this_object = Strategy.objects.get(id=int(request.POST.get('selected_strategy')))
+            plan = json.loads(request.POST.get('strategy_plan'))
+            this_object.plan = plan
+            this_object.save()
+        elif 'edit_strategy' in request.POST or 'duplicate_strategy' in request.POST:
+            this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
+            this_object.subject_id = int(request.POST.get('strategy_subject'))
+            this_object.name = request.POST.get('strategy_name')
+            this_object.index = request.POST.get('strategy_index')
+            this_object.description = request.POST.get('strategy_description')
+            if request.POST.get('strategy_timer'):
+                this_object.timer = int(request.POST.get('strategy_timer'))
+            else:
+                this_object.timer = 100
+            if 'duplicate_strategy' in request.POST:
+                this_object.pk = None
+            this_object.save()
+        elif 'delete_strategy' in request.POST:
+            this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
+            this_object.delete()
+        elif 'btn_add_ad' in request.POST:
+            new_object = Advertisement(name=request.POST.get('ad_name'), image=request.FILES.get('ad_image'))
+            if request.POST.get('ad_description'):
+                new_object.description = request.POST.get('ad_description')
+            new_object.save()
+        elif 'btn_add_agreement' in request.POST:
+            new_object = Agreement(name=request.POST.get('agreement_name'),
+                                   image=request.FILES.get('agreement_image'))
+            if request.POST.get('agreement_description'):
+                new_object.description = request.POST.get('agreement_description')
+            new_object.save()
+        elif 'add_student_list' in request.POST:
+            pass
+        elif 'add_exam' in request.POST:
+            title = request.POST.get('exam_title')
+            location = request.POST.get('exam_location')
+            section = request.POST.get('exam_section')
+            date = request.POST.get('exam_date')
+            agreement = request.POST.get('exam_agreement')
+            ad = request.POST.get('exam_ad')
+            # noinspection PyBroadException
+            try:
+                dt = parser.parse(date)
+                date = '{}{:0>2}{:0>2}'.format(dt.year, dt.month, dt.day)
+            except Exception:
+                messages.error(request, '日期格式错误！')
+                return redirect('exam:exams')
+            this_strategy = Strategy.objects.get(id=int(request.POST.get('exam_strategy_id')))
+            plan = this_strategy.plan
+            # Parse students and photos
+            students = request.POST.get('students').split('\r\n')
+            student_photos = request.FILES.getlist('exam_photos')
+            fvr = validate_students(students, student_photos)
+            if not fvr[0]:
+                messages.error(request, fvr[1])
+                return redirect('exam:exams')
+            student_json, student_photos_dict = fvr[2]
+            # Parse strategy plans
+            exam_set = get_exam_set(plan, student_json)
+            if not exam_set[0]:
+                messages.success(request, exam_set[1])
+                return redirect('exam:exams')
+            # Prepare the zip file
+            buffer_excel = generate_excel({'student_json': student_json, }, True)
+            buffer_zf = generate_zip(student_photos_dict, 'exams', {
+                'problems': exam_set[2],
+                'students': exam_set[3],
+                'agreement': int(agreement),
+                'ad': int(ad),
+                'basics': {
+                    'title': title,
+                    'location': location,
+                    'section': section,
+                    'date': date,
+                    'timer': this_strategy.timer,
+                    'subject': str(this_strategy.subject)
+                }
+            })
+            # Save objects to database
+            new_object = Exam(title=title, location=location, section=section, date=date, plan=plan)
+            new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf))
+            new_student_list_file = StudentListFile(exam_id=new_object.id)
+            new_student_list_file.student_list.save('{}.xls'.format(uuid.uuid4().hex), ContentFile(buffer_excel))
+        messages.success(request, '操作成功！')
+        return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
 
 
@@ -423,9 +420,6 @@ def generate_zip(photos, caller, other_files):
         # problems.json
         buffer_problems_json = BytesIO(get_encrypted_buffer(json.dumps(other_files.get('problems')), key, iv))
         zf.writestr('problems.json', buffer_problems_json.getvalue())
-        # answers.json
-        buffer_answers_json = BytesIO()
-        zf.writestr('answers.json', buffer_answers_json.getvalue())
         # basics.json
         buffer_basics_json = BytesIO(get_encrypted_buffer(json.dumps(other_files.get('basics')), key, iv))
         zf.writestr('basics.json', buffer_basics_json.getvalue())
