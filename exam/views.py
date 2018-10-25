@@ -452,6 +452,8 @@ def get_problem_details(problem_type, problem_id, is_sub=False):
         'type_sc': type_sc_full[type_index],
         'desc_lines': str(this_problem).split('\r\n')
     }
+    if not is_sub:
+        result['points'] = this_problem.chapter.points[type_index]
     if type_index != 6:
         if type(this_problem.answer) == list:
             result['ans_lines'] = ''.join(this_problem.answer).split('\r\n')
