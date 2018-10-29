@@ -9,12 +9,7 @@
 <body>
 
 <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-    <div class="navbar-brand col-md-2 mr-0">威训博锐</div>
-    <ul class="navbar-nav px-3">
-        <li class="nav-item text-nowrap">
-            <a class="nav-link" href="{% url 'home:logout' %}">退出系统</a>
-        </li>
-    </ul>
+    <a class="navbar-brand col-md-2 mr-0" href="{% url 'home:dashboard' %}">威训博锐工作台</a>
 </nav>
 <div class="container-fluid">
     <div class="row">
@@ -68,6 +63,11 @@
                             <i class="fa fa-download"></i> 附件管理
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:logout' %}">
+                            <i class="fa fa-sign-out-alt"></i> 退出系统
+                        </a>
+                    </li>
                 </ul>
                 {% include 'messages.html' %}
             </div>
@@ -75,7 +75,9 @@
         <!-- Main canvas -->
         <main role="main" class="col-md-10 ml-sm-auto px-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">{% block canvas_title %}{% endblock %}</h1>
+                <h2 class="h2">
+                    {% block canvas_title %}{% endblock %}
+                </h2>
             </div>
             <div class="container-fluid px-0 mb-5">
                 {% block content %}

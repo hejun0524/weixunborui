@@ -3,10 +3,64 @@
 {% block title %}工作台 - {{ user.profile.full_name }}{% endblock %}
 {% block canvas_title %}工作台{% endblock %}
 {% block content %}
-    <!-- Forms -->
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-5">欢迎使用新版工作台！</h1>
+            <p class="lead">请点击导航栏链接开始使用。</p>
+        </div>
+    </div>
     <div class="row">
-        <div class="col-md-6 pr-md-5">
-            <p class="font-weight-bold">欢迎使用新版工作台！</p>
+        <div class="col-md-6">
+            <table class="table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">题库/试卷管理</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'pool:problems' %}">题库管理</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'exam:exams' %}">组成试卷</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'exam:certification' %}">工信认证</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <table class="table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">控制面板</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'control:account' %}">账户管理</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'control:download' %}">附件管理</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'home:logout' %}" class="text-danger">退出系统</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 {% endblock %}
