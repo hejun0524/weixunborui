@@ -219,7 +219,7 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     // Append points row
     var pointsRow = $('<tr>');
     for (i = 1; i <= 7; i++) {
-        pointsRow.append($('<td>').text(planDetails[i][1]));
+        pointsRow.append($('<td>').text(planDetails[i][1] + '分'));
     }
     structure.append(pointsRow);
     // Update total points
