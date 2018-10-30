@@ -292,7 +292,7 @@ def get_exam_set(plan, students):
         chapter = Chapter.objects.get(pk=plan_line[0])
         chapter_set = {}
         for i in range(7):
-            if plan_line[i + 1] > 0:
+            if plan_line[i + 1][0] > 0:
                 chapter_problem_set = getattr(chapter, '{}_set'.format(class_list[i].__name__.lower())).all()
                 chapter_set.update({type_en_abbr[i]: chapter_problem_set, })
             else:
@@ -306,12 +306,13 @@ def get_exam_set(plan, students):
         for plan_line in plan:
             my_chapter = {plan_line[0]: {}}
             for i in range(7):
-                potential_problems, problem_points = all_problems[plan_line[0]][type_en_abbr[i]]
+                potential_problems = all_problems[plan_line[0]][type_en_abbr[i]]
+                num_of_problems, problem_points = plan_line[i + 1]
                 if potential_problems:
                     selected_problems = []
-                    if len(potential_problems) < plan_line[i + 1]:
+                    if len(potential_problems) < num_of_problems:
                         return wrong_message('选择的题量超出录入量，请检查！')
-                    for j in random.sample(range(len(potential_problems)), plan_line[i + 1]):
+                    for j in random.sample(range(len(potential_problems)), num_of_problems):
                         selected_problems.append(potential_problems[j].id)
                         # Get problem detail and update general problem set (aka problems)
                         if not type_en_abbr[i] in problems:
