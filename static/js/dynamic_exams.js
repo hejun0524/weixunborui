@@ -152,8 +152,11 @@ function setChapterInfo(pk) {
     var specialAttributes = ['src'];
     var i = 1;
     for (; i <= 7; i++) {
-        targets.push('#cell_chapter_point' + i, '#cell_chapter_difficulty' + i, '#cell_chapter_q_num' + i);
-        entries.push('point' + i, 'difficulty' + i, 'q_num' + i);
+        specialTargets.push('#cell_chapter_point' + i);
+        specialEntries.push('point' + i);
+        specialAttributes.push('value');
+        targets.push('#cell_chapter_difficulty' + i, '#cell_chapter_q_num' + i);
+        entries.push('difficulty' + i, 'q_num' + i);
         $('#cell_chapter_selected_q_num' + i).val(0);
     }
     if (pk === 0) { // reset
@@ -172,8 +175,10 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     var row = $('<tr>');
     // Chapter name cell
     var nameCell = $('<td>').text(chapterName);
+    nameCell.attr('rowspan', 2);
     // Button cell
     var functionCell = $('<td>');
+    functionCell.attr('rowspan', 2);
     var upBtn = $('<span>').addClass('fa fa-arrow-circle-up fake-link text-primary mr-2');
     var downBtn = $('<span>').addClass('fa fa-arrow-circle-down fake-link text-primary mr-2');
     var deleteBtn = $('<span>').addClass('fa fa-trash-alt text-danger fake-link ml-5');
@@ -205,11 +210,19 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     functionCell.append(upBtn, downBtn, deleteBtn, planString, planPointsInput);
     // Append all cells to the row
     row.append(nameCell);
-    for (var i = 1; i <= 7; i++) {
-        row.append($('<td>').text(planDetails[i]));
-    }
     row.append(functionCell);
+    var i;
+    for (i = 1; i <= 7; i++) {
+        row.append($('<td>').text(planDetails[i][0]));
+    }
     structure.append(row);
+    // Append points row
+    var pointsRow = $('<tr>');
+    pointsRow.append(pointsRowTitle);
+    for (i = 1; i <= 7; i++) {
+        pointsRow.append($('<td>').text(planDetails[i][1]));
+    }
+    structure.append(pointsRow);
     // Update total points
     $totalPoints.text(planPoints + parseInt($totalPoints.text()));
 }
@@ -357,12 +370,12 @@ $('#btn_add_chapter').click(function () {
     for (; i <= 7; i++) {
         var maxNumber = parseInt($('#cell_chapter_q_num' + i).text());
         var selectedNumber = parseInt($('#cell_chapter_selected_q_num' + i).val());
-        var typePoints = parseInt($('#cell_chapter_point' + i).text());
+        var typePoints = parseInt($('#cell_chapter_point' + i).val());
         if (selectedNumber < 0 || selectedNumber > maxNumber) {
             return alert('选择的题目数量不符合要求！');
         }
         planPoint += typePoints * selectedNumber;
-        planDetails.push(selectedNumber);
+        planDetails.push([selectedNumber, typePoints]);
     }
     appendPlanLine(chapterName, planDetails, planPoint);
     $('#chapter_modal').modal('hide');

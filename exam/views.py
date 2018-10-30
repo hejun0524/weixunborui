@@ -36,7 +36,7 @@ def exams(request):
         'all_agreements': Agreement.objects.all(),
         'all_exams': Exam.objects.all().order_by('-created'),
         'type_sc_abbr': type_sc_abbr,
-        'chapter_info': tuple(zip(type_sc_full, chapter_points, chapter_difficulties, chapter_q_nums)),
+        'chapter_info': tuple(zip(type_sc_abbr, chapter_points, chapter_difficulties, chapter_q_nums)),
     }
     if request.method == 'POST':
         if 'add_strategy' in request.POST:
