@@ -577,7 +577,8 @@ def get_strategy(request, strategy_id):
             'plan': plan,
         }
     except Exception as e:
-        return HttpResponse('<p>{}</p>'.format(e))
+        with open('error.log', 'w') as f:
+            f.write(str(e))
     return JsonResponse(res)
 
 
