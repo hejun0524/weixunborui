@@ -186,18 +186,25 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     var planPointsInput = $('<input type="number" readonly hidden>').val(planPoints);
     upBtn.click(function () {
         var myRow = $(this).parent().parent();
-        var lastRow = myRow.prev('tr');
+        var myPointsRow = myRow.next('tr');
+        var lastRow = myRow.prev('tr').prev('tr');
+        var lastPointsRow = lastRow.next('tr');
         if (lastRow[0]) {
-            myRow.after(lastRow);
+            myRow.after(myPointsRow);
+            myPointsRow.after(lastRow);
+            lastRow.after(lastPointsRow);
         } else {
             return alert('已是第一项！');
         }
     });
     downBtn.click(function () {
         var myRow = $(this).parent().parent();
-        var nextRow = myRow.next('tr');
+        var myPointsRow = myRow.next('tr');
+        var nextRow = myPointsRow.next('tr');
+        var nextPointsRow = nextRow.next('tr');
         if (nextRow[0]) {
-            myRow.before(nextRow);
+            nextPointsRow.after(myRow);
+            myRow.after(myPointsRow);
         } else {
             return alert('已是最后一项！');
         }
@@ -215,12 +222,13 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
         row.append($('<td>').text(planDetails[i][0]));
     }
     row.append(functionCell);
-    structure.append(row);
-    // Append points row
+    // Construct points row
     var pointsRow = $('<tr>');
     for (i = 1; i <= 7; i++) {
         pointsRow.append($('<td>').text(planDetails[i][1] + '分'));
     }
+    // Append rows
+    structure.append(row);
     structure.append(pointsRow);
     // Update total points
     $totalPoints.text(planPoints + parseInt($totalPoints.text()));
