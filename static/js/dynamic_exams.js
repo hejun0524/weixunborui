@@ -218,7 +218,6 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     structure.append(row);
     // Append points row
     var pointsRow = $('<tr>');
-    pointsRow.append(pointsRowTitle);
     for (i = 1; i <= 7; i++) {
         pointsRow.append($('<td>').text(planDetails[i][1]));
     }
