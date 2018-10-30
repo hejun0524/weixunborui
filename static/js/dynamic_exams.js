@@ -210,11 +210,11 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     functionCell.append(upBtn, downBtn, deleteBtn, planString, planPointsInput);
     // Append all cells to the row
     row.append(nameCell);
-    row.append(functionCell);
     var i;
     for (i = 1; i <= 7; i++) {
         row.append($('<td>').text(planDetails[i][0]));
     }
+    row.append(functionCell);
     structure.append(row);
     // Append points row
     var pointsRow = $('<tr>');
