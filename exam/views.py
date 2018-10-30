@@ -550,41 +550,32 @@ def change_subject(request, category_id, subject_id):
 
 
 def get_strategy(request, strategy_id):
-    try:
-        this_object = Strategy.objects.get(id=strategy_id)
-        this_parent = this_object.subject
-        this_grandparent = this_object.subject.category
-        plan = []
-        plan_matrix = this_object.plan
-        if plan_matrix is not None:
-            for plan_list in plan_matrix:
-                plan.append({
-                    'plan_list': plan_list,
-                    'chapter_name': str(Chapter.objects.get(id=plan_list[0])),
-                    'list_total_points': calculate_total_points(plan_list),
-                })
-        res = {
-            'category': this_grandparent.id,
-            'subject': this_parent.id,
-            'strategy': this_object.id,
-            'name': this_object.name,
-            'index': this_object.index,
-            'full_path': '/'.join((this_grandparent.name, this_parent.name, this_object.name)),
-            'full_index': '/'.join((this_grandparent.index, this_parent.index, this_object.index)),
-            'description': this_object.description,
-            'timer': '{}分钟'.format(this_object.timer),
-            'timer_num': this_object.timer,
-            'plan': plan,
-        }
-    except Exception as e:
-        with open('error.log', 'w') as f:
-            f.write(str(e))
+    this_object = Strategy.objects.get(id=strategy_id)
+    this_parent = this_object.subject
+    this_grandparent = this_object.subject.category
+    plan = []
+    plan_matrix = this_object.plan
+    if plan_matrix is not None:
+        for plan_list in plan_matrix:
+            plan.append({
+                'plan_list': plan_list,
+                'chapter_name': str(Chapter.objects.get(id=plan_list[0])),
+                'list_total_points': sum([x * y for x, y in plan_list[1:]]),
+            })
+    res = {
+        'category': this_grandparent.id,
+        'subject': this_parent.id,
+        'strategy': this_object.id,
+        'name': this_object.name,
+        'index': this_object.index,
+        'full_path': '/'.join((this_grandparent.name, this_parent.name, this_object.name)),
+        'full_index': '/'.join((this_grandparent.index, this_parent.index, this_object.index)),
+        'description': this_object.description,
+        'timer': '{}分钟'.format(this_object.timer),
+        'timer_num': this_object.timer,
+        'plan': plan,
+    }
     return JsonResponse(res)
-
-
-def calculate_total_points(plan_list):
-    chapter = Chapter.objects.get(id=plan_list[0])
-    return sum([x * y for x, y in zip(plan_list[1:], chapter.points)])
 
 
 def get_picture(request, picture_type, picture_id):
