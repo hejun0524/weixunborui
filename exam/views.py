@@ -306,7 +306,7 @@ def get_exam_set(plan, students):
         for plan_line in plan:
             my_chapter = {plan_line[0]: {}}
             for i in range(7):
-                potential_problems = all_problems[plan_line[0]][type_en_abbr[i]]
+                potential_problems, problem_points = all_problems[plan_line[0]][type_en_abbr[i]]
                 if potential_problems:
                     selected_problems = []
                     if len(potential_problems) < plan_line[i + 1]:
@@ -317,7 +317,8 @@ def get_exam_set(plan, students):
                         if not type_en_abbr[i] in problems:
                             problems[type_en_abbr[i]] = {}
                         if not potential_problems[j].id in problems[type_en_abbr[i]]:
-                            problem_detail = get_problem_details(type_en_abbr[i], potential_problems[j].id)
+                            problem_detail = get_problem_details(type_en_abbr[i], potential_problems[j].id,
+                                                                 problem_points)
                             problems[type_en_abbr[i]][potential_problems[j].id] = problem_detail
                     my_chapter[plan_line[0]][type_en_abbr[i]] = selected_problems
             my_problems.append(my_chapter)
@@ -442,7 +443,7 @@ def generate_zip(photos, caller, other_files):
     return buffer_zf.getvalue()
 
 
-def get_problem_details(problem_type, problem_id, is_sub=False):
+def get_problem_details(problem_type, problem_id, problem_points, is_sub=False):
     type_index = type_en_abbr.index(problem_type)
     problem_class = sub_class_list[type_index] if is_sub else class_list[type_index]
     this_problem = problem_class.objects.get(id=problem_id)
@@ -453,7 +454,7 @@ def get_problem_details(problem_type, problem_id, is_sub=False):
         'desc_lines': str(this_problem).split('\r\n')
     }
     if not is_sub:
-        result['points'] = this_problem.chapter.points[type_index]
+        result['points'] = problem_points
     if type_index != 6:
         if type(this_problem.answer) == list:
             result['ans_lines'] = ''.join(this_problem.answer).split('\r\n')
@@ -476,7 +477,7 @@ def get_problem_details(problem_type, problem_id, is_sub=False):
         all_subs.sort(key=lambda x: x.order)
         for this_sub in all_subs:
             sub_index = sub_class_list.index(this_sub.__class__)
-            result_sub.append(get_problem_details(type_en_abbr[sub_index], this_sub.id, is_sub=True))
+            result_sub.append(get_problem_details(type_en_abbr[sub_index], this_sub.id, 0, is_sub=True))
         result['sub'] = result_sub
     info_attributes = ('student_upload', 'need_answer', 'error', 'percentage', 'order')
     for info in info_attributes:
@@ -549,31 +550,34 @@ def change_subject(request, category_id, subject_id):
 
 
 def get_strategy(request, strategy_id):
-    this_object = Strategy.objects.get(id=strategy_id)
-    this_parent = this_object.subject
-    this_grandparent = this_object.subject.category
-    plan = []
-    plan_matrix = this_object.plan
-    if plan_matrix is not None:
-        for plan_list in plan_matrix:
-            plan.append({
-                'plan_list': plan_list,
-                'chapter_name': str(Chapter.objects.get(id=plan_list[0])),
-                'list_total_points': calculate_total_points(plan_list),
-            })
-    res = {
-        'category': this_grandparent.id,
-        'subject': this_parent.id,
-        'strategy': this_object.id,
-        'name': this_object.name,
-        'index': this_object.index,
-        'full_path': '/'.join((this_grandparent.name, this_parent.name, this_object.name)),
-        'full_index': '/'.join((this_grandparent.index, this_parent.index, this_object.index)),
-        'description': this_object.description,
-        'timer': '{}分钟'.format(this_object.timer),
-        'timer_num': this_object.timer,
-        'plan': plan,
-    }
+    try:
+        this_object = Strategy.objects.get(id=strategy_id)
+        this_parent = this_object.subject
+        this_grandparent = this_object.subject.category
+        plan = []
+        plan_matrix = this_object.plan
+        if plan_matrix is not None:
+            for plan_list in plan_matrix:
+                plan.append({
+                    'plan_list': plan_list,
+                    'chapter_name': str(Chapter.objects.get(id=plan_list[0])),
+                    'list_total_points': calculate_total_points(plan_list),
+                })
+        res = {
+            'category': this_grandparent.id,
+            'subject': this_parent.id,
+            'strategy': this_object.id,
+            'name': this_object.name,
+            'index': this_object.index,
+            'full_path': '/'.join((this_grandparent.name, this_parent.name, this_object.name)),
+            'full_index': '/'.join((this_grandparent.index, this_parent.index, this_object.index)),
+            'description': this_object.description,
+            'timer': '{}分钟'.format(this_object.timer),
+            'timer_num': this_object.timer,
+            'plan': plan,
+        }
+    except Exception as e:
+        return HttpResponse('<p>{}</p>'.format(e))
     return JsonResponse(res)
 
 
