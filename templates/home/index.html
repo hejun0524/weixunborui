@@ -1,3 +1,21 @@
 {% extends 'base_home.html' %}
 {% load static %}
 {% block title %}威训博锐{% endblock %}
+
+{% block content %}
+    <div class="container mb-3">
+        <div class="row mb-3">
+            <div class="col">
+                <img src="{% static 'img/temp0.jpg' %}" class="img-fluid">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <img src="{% static 'img/temp1.jpg' %}" class="img-fluid">
+            </div>
+            <div class="col-md-6">
+                <img src="{% static 'img/temp2.jpg' %}" class="img-fluid">
+            </div>
+        </div>
+    </div>
+{% endblock %}
