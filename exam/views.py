@@ -321,6 +321,8 @@ def get_exam_set(plan, students):
                             problem_detail = get_problem_details(type_en_abbr[i], potential_problems[j].id,
                                                                  problem_points)
                             problems[type_en_abbr[i]][potential_problems[j].id] = problem_detail
+                    # Sort selected problems based on their index
+                    selected_problems.sort(key=lambda x: x.index, reverse=False)
                     my_chapter[plan_line[0]][type_en_abbr[i]] = selected_problems
             my_problems.append(my_chapter)
         student_info[exam_id] = {
