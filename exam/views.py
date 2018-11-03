@@ -313,7 +313,7 @@ def get_exam_set(plan, students):
                     if len(potential_problems) < num_of_problems:
                         return wrong_message('选择的题量超出录入量，请检查！')
                     for j in random.sample(range(len(potential_problems)), num_of_problems):
-                        selected_problems.append(potential_problems[j].id)
+                        selected_problems.append(potential_problems[j])
                         # Get problem detail and update general problem set (aka problems)
                         if not type_en_abbr[i] in problems:
                             problems[type_en_abbr[i]] = {}
@@ -323,7 +323,7 @@ def get_exam_set(plan, students):
                             problems[type_en_abbr[i]][potential_problems[j].id] = problem_detail
                     # Sort selected problems based on their index
                     selected_problems.sort(key=lambda x: x.index, reverse=False)
-                    my_chapter[plan_line[0]][type_en_abbr[i]] = selected_problems
+                    my_chapter[plan_line[0]][type_en_abbr[i]] = list(map(lambda x: x.id, selected_problems))
             my_problems.append(my_chapter)
         student_info[exam_id] = {
             'name': students[exam_id][0],

@@ -211,7 +211,9 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     });
     deleteBtn.click(function () {
         var rowToDelete = $(this).parent().parent();
+        var pointRowToDelete = rowToDelete.next('tr');
         rowToDelete.remove();
+        pointRowToDelete.remote();
         $totalPoints.text(parseInt($totalPoints.text()) - planPoints);
     });
     functionCell.append(upBtn, downBtn, deleteBtn, planString, planPointsInput);
