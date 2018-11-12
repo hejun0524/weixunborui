@@ -1,0 +1,112 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}下属管理{% endblock %}
+{% block canvas_title %}下属管理{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 pr-md-5">
+            <p class="font-weight-bold">添加下属</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label for="id_inf_username" class="col-sm-3 col-form-label required">用户名</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_inf_username" name="inf_username" required>
+                </div>
+                <div class="form-group row">
+                    <label for="id_inf_full_name" class="col-sm-3 col-form-label">姓名</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_inf_full_name" name="inf_full_name">
+                </div>
+                <div class="form-group row">
+                    <label for="id_inf_area" class="col-sm-3 col-form-label">地区</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_inf_area" name="inf_area">
+                </div>
+                <div class="form-group row">
+                    <label for="id_inf_school" class="col-sm-3 col-form-label">学校</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_inf_school" name="inf_school">
+                </div>
+                <div class="form-group row">
+                    <label for="id_inf_department" class="col-sm-3 col-form-label">部门</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_inf_department" name="inf_department">
+                </div>
+                <div class="form-group row">
+                    <label for="id_inf_role" class="col-sm-3 col-form-label required">权限</label>
+                    <select class="col-sm-9 custom-select" id="id_inf_role" name="inf_role" required>
+                        <option selected disabled>请选择</option>
+                        {% for role in roles %}
+                            <option value="{{ role.0 }}">{{ role.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" type="submit" id="btn_add_ind" name="btn_add_inf">
+                    添加下属
+                </button>
+            </form>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-6 pr-md-5">
+            <p class="font-weight-bold">分配密钥</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label for="id_grader_username" class="col-sm-3 col-form-label required">用户名</label>
+                    <select class="col-sm-9 custom-select" id="id_grader_username" name="grader_username" required>
+                        <option selected disabled>请选择</option>
+                        {% for object in all_users %}
+                            <option value="{{ object.profile }}">{{ object.profile }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group row">
+                    <label for="id_grader_plan" class="col-sm-3 col-form-label required">期限</label>
+                    <select class="col-sm-9 custom-select" id="id_grader_plan" name="grader_plan" required>
+                        <option selected>请选择</option>
+                        <option value="1">1个月</option>
+                        <option value="2">2个月</option>
+                        <option value="3">3个月</option>
+                        <option value="6">6个月</option>
+                        <option value="12">1年</option>
+                    </select>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" type="submit" id="btn_add_grader" name="btn_add_grader">
+                    生成密钥
+                </button>
+            </form>
+        </div>
+        <div class="col-md-6 pr-md-5">
+            <p class="font-weight-bold">订阅详情</p>
+            <table class="table table-sm table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col" class="cell-2">用户名</th>
+                    <th scope="col" class="cell-2">订阅时长</th>
+                    <th scope="col" class="cell-2">过期日</th>
+                    <th scope="col" class="cell-4">密钥</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for g in all_graders %}
+                    <tr>
+                        <td scope="row">{{ g.username }}</td>
+                        <td>{{ g.plan_detail }}</td>
+                        <td>{{ g.date_expire_string }}</td>
+                        <td>{{ g.enc_key }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td scope="row" colspan="4">暂无订阅者</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+

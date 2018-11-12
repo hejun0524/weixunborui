@@ -60,32 +60,6 @@ def delete_download(request, file_id):
 
 
 @login_required()
-def grade(request):
-    all_graders = Grader.objects.all()
-    context = {
-        'all_graders': all_graders,
-        'all_users': User.objects.all().order_by('username')
-    }
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        user_profile = Profile.objects.get(user__username=username)
-        plan = int(request.POST.get('plan'))
-        today = datetime.date.today()
-        extension_length = relativedelta.relativedelta(months=+plan)
-        if Grader.objects.filter(username=user_profile).exists():
-            this_grader = Grader.objects.get(username=user_profile)
-            this_grader.plan = plan
-            start_date = today if this_grader.date_expire < today else this_grader.date_expire
-            this_grader.date_expire = start_date + extension_length
-            this_grader.save()
-        else:
-            this_grader = Grader(username=user_profile, plan=plan, date_expire=today + extension_length)
-            this_grader.save()
-        return redirect('control:account')
-    return redirect('control:account')
-
-
-@login_required()
 def account(request):
     roles = ['超级用户', '系统管理员', '校园管理员', '题库编辑', '教师', '学生']
     roles = list(zip(list(range(len(roles))), roles))
@@ -108,7 +82,18 @@ def account(request):
                 messages.success(request, '更改成功！')
             else:
                 messages.error(request, '您的旧密码输入有误！')
-        elif 'btn_add_inf' in request.POST:
+        return redirect('control:account')
+    return render(request, 'control/account.html', context)
+
+
+@login_required()
+def inferior(request):
+    context = {
+        'all_graders': Grader.objects.all().order_by('username'),
+        'all_users': User.objects.all().order_by('username')
+    }
+    if request.method == 'POST':
+        if 'btn_add_inf' in request.POST:
             username = request.POST.get('inf_username')
             password = 'myweixun001'
             level = request.POST.get('inf_role')
@@ -118,7 +103,7 @@ def account(request):
             full_name = request.POST.get('inf_full_name').strip()
             if User.objects.filter(username=username).exists():
                 messages.error(request, '此用户名已存在！')
-                return redirect('control:account')
+                return redirect('control:inferior')
             new_user = User.objects.create_user(username.strip(), None, password)
             new_user.save()
             new_profile = new_user.profile
@@ -132,5 +117,21 @@ def account(request):
                 new_profile.department = department
             new_profile.save()
             messages.success(request, '成功创建用户！用户名：{}，初始密码：{}'.format(username, password))
-        return redirect('control:account')
-    return render(request, 'control/account.html', context)
+        elif 'btn_add_grader' in request.POST:
+            if request.method == 'POST':
+                username = request.POST.get('grader_username')
+                user_profile = Profile.objects.get(user__username=username)
+                plan = int(request.POST.get('grader_plan'))
+                today = datetime.date.today()
+                extension_length = relativedelta.relativedelta(months=+plan)
+                if Grader.objects.filter(username=user_profile).exists():
+                    this_grader = Grader.objects.get(username=user_profile)
+                    this_grader.plan = plan
+                    start_date = today if this_grader.date_expire < today else this_grader.date_expire
+                    this_grader.date_expire = start_date + extension_length
+                    this_grader.save()
+                else:
+                    this_grader = Grader(username=user_profile, plan=plan, date_expire=today + extension_length)
+                    this_grader.save()
+        return redirect('control:inferior')
+    return render(request, 'control/inferior.html', context)

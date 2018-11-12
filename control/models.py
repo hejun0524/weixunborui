@@ -72,10 +72,13 @@ class Grader(models.Model):
     def plan_detail(self):
         if self.plan <= 0:
             return '无计划'
-        date_expire = ' - 于{}年{}月{}日过期'.format(self.date_expire.year, self.date_expire.month, self.date_expire.day)
         if self.plan % 12 == 0:
-            return '{}年'.format(self.plan // 12) + date_expire
-        return '{}个月'.format(self.plan) + date_expire
+            return '{}年'.format(self.plan // 12)
+        return '{}个月'.format(self.plan)
+
+    @property
+    def date_expire_string(self):
+        return '{}/{:02}/{:02}'.format(self.date_expire.year, self.date_expire.month, self.date_expire.day)
 
     @property
     def enc_key(self):
