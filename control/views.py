@@ -12,6 +12,8 @@ from dateutil import relativedelta
 
 # Create your views here.
 app_name = "control"
+roles = ['超级用户', '系统管理员', '校园管理员', '题库编辑', '教师', '学生']
+roles = list(zip(list(range(len(roles))), roles))
 
 
 @login_required()
@@ -61,15 +63,10 @@ def delete_download(request, file_id):
 
 @login_required()
 def account(request):
-    roles = ['超级用户', '系统管理员', '校园管理员', '题库编辑', '教师', '学生']
-    roles = list(zip(list(range(len(roles))), roles))
     operator = User.objects.get(username=request.user.username)
     operator_level = operator.profile.level
     if operator_level == len(roles) - 1:
         return redirect('home:dashboard')  # Get rid of it
-    context = {
-        'roles': roles[operator_level + 1:],
-    }
     if request.method == 'POST':
         if 'btn_password' in request.POST:
             # Verify old password
@@ -83,14 +80,19 @@ def account(request):
             else:
                 messages.error(request, '您的旧密码输入有误！')
         return redirect('control:account')
-    return render(request, 'control/account.html', context)
+    return render(request, 'control/account.html')
 
 
 @login_required()
 def inferior(request):
+    operator = User.objects.get(username=request.user.username)
+    operator_level = operator.profile.level
+    if operator_level == len(roles) - 1:
+        return redirect('home:dashboard')  # Get rid of it
     context = {
         'all_graders': Grader.objects.all().order_by('username'),
-        'all_users': User.objects.all().order_by('username')
+        'all_users': User.objects.all().order_by('username'),
+        'roles': roles[operator_level + 1:],
     }
     if request.method == 'POST':
         if 'btn_add_inf' in request.POST:
