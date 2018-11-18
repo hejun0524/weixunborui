@@ -53,7 +53,7 @@ def exams(request):
             new_object.save()
         elif 'sample_check' in request.POST:
             this_object = Strategy.objects.get(id=int(request.POST.get('selected_strategy')))
-            return generate_sample(this_object.plan)
+            return generate_sample(this_object.plan, str(this_object))
         elif 'strategy_plan' in request.POST:
             this_object = Strategy.objects.get(id=int(request.POST.get('selected_strategy')))
             plan = json.loads(request.POST.get('strategy_plan'))
@@ -339,7 +339,7 @@ def get_exam_set(plan, students):
     return True, '', problems, student_info
 
 
-def generate_sample(plan):
+def generate_sample(plan, strategy_name):
     exam_set = get_exam_set(plan, {'SAMPLE': ['S_NAME', 'S_ID']})
     problems = exam_set[2]
     problem_list = exam_set[3]['SAMPLE']['problems']
@@ -350,7 +350,7 @@ def generate_sample(plan):
     zf.close()
     buffer_zf.seek(0)
     response = HttpResponse(buffer_zf.read(), content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename=myfile.zip'
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}.zip".format(escape_uri_path(strategy_name))
     buffer_zf.close()
     return response
 
@@ -370,7 +370,7 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                     index += 1
                     content = problems[problem_type][problem_id]
                     # Shared parts - Header and Body
-                    if problem_type == 'cp':
+                    if problem_type == 'cp' and index > 1:
                         word_content.append(None)
                     word_content.append([f'第{index}题 {content["type_sc"]}（{content["points"]}分）', 'bold'])
                     word_content.extend(content['desc_lines'])
@@ -381,7 +381,7 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                         for sub in content['sub']:
                             sub_points = round(content['points'] * sub['percentage'] / 100)
                             word_content.append([f'第{sub["order"]}小题 {sub["type_sc"]}（{sub_points}分）', 'bold'])
-                            word_content.extend(content['desc_lines'])
+                            word_content.extend(sub['desc_lines'])
                             if 'image' in sub:
                                 word_content.append([sub['image'], 'image'])
                             # Body cont'd
@@ -404,8 +404,11 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                                     word_content.append([content[chr(65 + 1)], 'image'])
                         # Footer
                         ans_lines = '\n'.join(content['ans_lines'])
+                        if 'error' in content:
+                            ans_lines += f'（±{content["error"]}%）'
                         word_content.append(f'答案：{ans_lines if is_answer_sheet else "___________"}')
                         word_content.append('')
+    word_content = word_content if word_content[-1] is not None else word_content[:-1]
     for paragraph in word_content:
         if paragraph is None:
             document.add_page_break()
