@@ -393,6 +393,7 @@ $('#btn_add_chapter').click(function () {
 $('#save_structure').click(function () {
     var $strategy = $('#id_selected_strategy');
     var $plan = $('#id_strategy_plan');
+    var $sample = $('#id_sample_check');
     if ($strategy.val() === '') {
         return alert('请先选择一个策略！');
     }
@@ -403,6 +404,7 @@ $('#save_structure').click(function () {
         finalJson.push(JSON.parse(allPlanStrings[i]['value']));
     }
     $plan.val(JSON.stringify(finalJson));
+    $sample.prop('checked', false);
     $('#form_save_structure').submit();
 });
 
@@ -412,6 +414,16 @@ $('#generate_exam').click(function () {
         return alert('请先选择一个策略！');
     }
     $('#generate_exam_collapse').collapse('toggle');
+});
+
+$('#generate_sample').click(function () {
+    var $strategy = $('#id_selected_strategy');
+    if ($strategy.val() === '') {
+        return alert('请先选择一个策略！');
+    }
+    var $sample = $('#id_sample_check');
+    $sample.prop('checked', true);
+    $('#form_save_structure').submit();
 });
 
 $('#search_student_list').click(function () {

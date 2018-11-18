@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.utils.encoding import escape_uri_path
@@ -12,6 +12,8 @@ from zipfile import ZipFile
 from io import BytesIO
 from dateutil import parser
 from Crypto.Cipher import AES
+from docx import Document
+from docx.oxml.ns import qn
 import json
 import re
 import uuid
@@ -49,6 +51,9 @@ def exams(request):
             if request.POST.get('strategy_timer'):
                 new_object.timer = int(request.POST.get('strategy_timer'))
             new_object.save()
+        elif 'sample_check' in request.POST:
+            this_object = Strategy.objects.get(id=int(request.POST.get('selected_strategy')))
+            return generate_sample(this_object.plan)
         elif 'strategy_plan' in request.POST:
             this_object = Strategy.objects.get(id=int(request.POST.get('selected_strategy')))
             plan = json.loads(request.POST.get('strategy_plan'))
@@ -332,6 +337,92 @@ def get_exam_set(plan, students):
             'key': ''.join(random.choices(string.ascii_letters + string.digits, k=16))
         }
     return True, '', problems, student_info
+
+
+def generate_sample(plan):
+    exam_set = get_exam_set(plan, {'SAMPLE': ['S_NAME', 'S_ID']})
+    problems = exam_set[2]
+    problem_list = exam_set[3]['SAMPLE']['problems']
+    buffer_zf = BytesIO()
+    zf = ZipFile(buffer_zf, 'w')
+    zf.writestr('样卷.docx', generate_word(problems, problem_list))
+    zf.writestr('样卷答案.docx', generate_word(problems, problem_list, True))
+    zf.close()
+    buffer_zf.seek(0)
+    response = HttpResponse(buffer_zf.read(), content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=myfile.zip'
+    buffer_zf.close()
+    return response
+
+
+def generate_word(problems, problem_list, is_answer_sheet=False):
+    buffer_word = BytesIO()
+    document = Document()
+    document.styles['Normal'].font.name = 'Times New Roman'
+    document.styles['Normal'].element.rPr.rFonts.set(qn('w:eastAsia'), '宋体')
+    word_content = []
+    # Unpack problem list
+    index = 0
+    for chapter in problem_list:
+        for chapter_id in chapter:
+            for problem_type in chapter[chapter_id]:
+                for problem_id in chapter[chapter_id][problem_type]:
+                    index += 1
+                    content = problems[problem_type][problem_id]
+                    # Shared parts - Header and Body
+                    if problem_type == 'cp':
+                        word_content.append(None)
+                    word_content.append([f'第{index}题 {content["type_sc"]}（{content["points"]}分）', 'bold'])
+                    word_content.extend(content['desc_lines'])
+                    if 'image' in content:
+                        word_content.append([content['image'], 'image'])
+                    if problem_type == 'cp':
+                        word_content.append('')
+                        for sub in content['sub']:
+                            sub_points = round(content['points'] * sub['percentage'] / 100)
+                            word_content.append([f'第{sub["order"]}小题 {sub["type_sc"]}（{sub_points}分）', 'bold'])
+                            word_content.extend(content['desc_lines'])
+                            if 'image' in sub:
+                                word_content.append([sub['image'], 'image'])
+                            # Body cont'd
+                            if 'choice_lines' in sub:
+                                for i in range(len(sub['choice_lines'])):
+                                    word_content.append(sub['choice_lines'][i])
+                                    if chr(65 + i) in sub:
+                                        word_content.append([sub[chr(65 + 1)], 'image'])
+                            # Footer
+                            ans_lines = '\n'.join(sub['ans_lines'])
+                            word_content.append(f'答案：{ans_lines if is_answer_sheet else "___________"}')
+                            word_content.append('')
+                        word_content.append(None)
+                    else:
+                        # Body cont'd
+                        if 'choice_lines' in content:
+                            for i in range(len(content['choice_lines'])):
+                                word_content.append(content['choice_lines'][i])
+                                if chr(65 + i) in content:
+                                    word_content.append([content[chr(65 + 1)], 'image'])
+                        # Footer
+                        ans_lines = '\n'.join(content['ans_lines'])
+                        word_content.append(f'答案：{ans_lines if is_answer_sheet else "___________"}')
+                        word_content.append('')
+    for paragraph in word_content:
+        if paragraph is None:
+            document.add_page_break()
+        elif isinstance(paragraph, list):
+            if paragraph[1] == 'bold':
+                p = document.add_paragraph()
+                p.add_run(paragraph[0]).bold = True
+                p.style = document.styles['Normal']
+            elif paragraph[1] == 'image':
+                document.add_picture(paragraph[0])
+        else:
+            p = document.add_paragraph(paragraph)
+            p.style = document.styles['Normal']
+    document.save(buffer_word)
+    buffer_value = buffer_word.getvalue()
+    buffer_word.close()
+    return buffer_value
 
 
 def generate_excel(form_data, is_sign_sheet=False):
