@@ -27,6 +27,7 @@ class RenameUploads(object):
 class Download(models.Model):
     name = models.CharField(max_length=100)
     version = models.CharField(max_length=100, blank=True)
+    category = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     update_log = models.TextField(blank=True)
     date = models.DateField(auto_now=True)

@@ -40,6 +40,16 @@
                            id="id_version" name="version">
                 </div>
                 <div class="form-group row">
+                    <label for="id_file_category" class="col-sm-3 col-form-label required">文件类型</label>
+                    <select class="col-sm-9 custom-select" id="id_file_category" name="file_category" required>
+                        <option selected disabled>请选择</option>
+                        <option value="E">考试端</option>
+                        <option value="S">服务端</option>
+                        <option value="G">阅卷端</option>
+                        <option value="O">其他</option>
+                    </select>
+                </div>
+                <div class="form-group row">
                     <label for="id_description" class="col-sm-3 col-form-label">文件描述</label>
                     <input type="text" class="col-sm-9 form-control form-control-sm"
                            id="id_description" name="description">
@@ -65,36 +75,41 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for d in all_downloads %}
+                {% for category, download_list in all_downloads.items %}
                     <tr>
-                        <td scope="row">{{ d.name }}</td>
-                        <td class="fake-link-plus" onclick="showButtons(this);">
-                            <span class="fa fa-plus-circle"></span>
-                        </td>
-                        <td>{{ d.version }}</td>
-                        <td>{{ d.file_type }}</td>
-                        <td class="text-muted">{{ d.date }}</td>
+                        <th scope="row" colspan="5">{{ category }}</th>
                     </tr>
-                    <tr class="table-secondary" hidden>
-                        <td colspan="5">
-                            {% if d.description %}
-                                {{ d.description }}<br>
-                            {% endif %}
-                            {% if d.update_log %}
-                                {{ d.update_log }}<br>
-                            {% endif %}
-                            <a href="{% url 'control:get_download' d.id %}" role="button"
-                               class="btn btn-sm btn-primary">下载</a>
-                            <a href="javascript:" onclick="copyLink({{ d.id }})" role="button"
-                               class="btn btn-sm btn-success">复制链接</a>
-                            <a href="{% url 'control:delete_download' d.id %}" role="button"
-                               class="btn btn-sm btn-danger">删除</a>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td scope="row" colspan="4">暂无附件</td>
-                    </tr>
+                    {% for d in download_list %}
+                        <tr>
+                            <td scope="row">{{ d.name }}</td>
+                            <td class="fake-link-plus" onclick="showButtons(this);">
+                                <span class="fa fa-plus-circle"></span>
+                            </td>
+                            <td>{{ d.version }}</td>
+                            <td>{{ d.file_type }}</td>
+                            <td class="text-muted">{{ d.date }}</td>
+                        </tr>
+                        <tr class="table-secondary" hidden>
+                            <td colspan="5">
+                                {% if d.description %}
+                                    {{ d.description }}<br>
+                                {% endif %}
+                                {% if d.update_log %}
+                                    {{ d.update_log }}<br>
+                                {% endif %}
+                                <a href="{% url 'control:get_download' d.id %}" role="button"
+                                   class="btn btn-sm btn-primary">下载</a>
+                                <a href="javascript:" onclick="copyLink({{ d.id }})" role="button"
+                                   class="btn btn-sm btn-success">复制链接</a>
+                                <a href="{% url 'control:delete_download' d.id %}" role="button"
+                                   class="btn btn-sm btn-danger">删除</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td scope="row" colspan="5" class="bg-light text-secondary">暂无附件</td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
                 </tbody>
             </table>

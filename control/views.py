@@ -18,7 +18,12 @@ roles = list(zip(list(range(len(roles))), roles))
 
 @login_required()
 def download(request):
-    all_downloads = Download.objects.all().order_by('-id')
+    all_downloads = {
+        '考试端': Download.objects.filter(category='E').order_by('-id'),
+        '服务端': Download.objects.filter(category='S').order_by('-id'),
+        '阅卷端': Download.objects.filter(category='G').order_by('-id'),
+        '其他': Download.objects.filter(category='').order_by('-id'),
+    }
     context = {
         'all_downloads': all_downloads,
     }
@@ -29,13 +34,16 @@ def download(request):
         update_log_text = request.POST.get('update_log')
         file = request.FILES['file']
         file_type = request.POST.get('file_type')
+        file_category = request.POST.get('file_category')
+        file_category = '' if file_category == 'O' else file_category
         new_download = Download(
             name=name,
             version=version,
             description=description,
             update_log=update_log_text,
             file=file,
-            file_type=file_type
+            file_type=file_type,
+            category=file_category
         )
         new_download.save()
         return redirect('control:download')
