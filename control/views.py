@@ -8,6 +8,7 @@ from wsgiref.util import FileWrapper
 from .models import *
 import mimetypes
 import datetime
+import re
 from dateutil import relativedelta
 
 # Create your views here.
@@ -105,6 +106,11 @@ def inferior(request):
     if request.method == 'POST':
         if 'btn_add_inf' in request.POST:
             username = request.POST.get('inf_username')
+            r = re.match('[A-Za-z]+[A-Za-z0-9_]*', username)
+            if not r:
+                messages.error(request, '用户名只能包括大小写英文字母、数字和下划线！')
+                return redirect('control:inferior')
+            # this is a non-ascii character. Do something.
             password = 'myweixun001'
             level = request.POST.get('inf_role')
             area = request.POST.get('inf_area').strip()
