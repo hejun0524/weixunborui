@@ -14,6 +14,7 @@ from dateutil import parser
 from Crypto.Cipher import AES
 from docx import Document
 from docx.oxml.ns import qn
+from docx.shared import Inches
 import json
 import re
 import uuid
@@ -389,7 +390,7 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                                 for i in range(len(sub['choice_lines'])):
                                     word_content.append(sub['choice_lines'][i])
                                     if chr(65 + i) in sub:
-                                        word_content.append([sub[chr(65 + 1)], 'image'])
+                                        word_content.append([sub[chr(65 + i)], 'image'])
                             # Footer
                             ans_lines = '\n'.join(sub['ans_lines'])
                             word_content.append(f'答案：{ans_lines if is_answer_sheet else "___________"}')
@@ -401,7 +402,7 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                             for i in range(len(content['choice_lines'])):
                                 word_content.append(content['choice_lines'][i])
                                 if chr(65 + i) in content:
-                                    word_content.append([content[chr(65 + 1)], 'image'])
+                                    word_content.append([content[chr(65 + i)], 'image'])
                         # Footer
                         ans_lines = '\n'.join(content['ans_lines'])
                         if 'error' in content:
@@ -418,7 +419,12 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                 p.add_run(paragraph[0]).bold = True
                 p.style = document.styles['Normal']
             elif paragraph[1] == 'image':
-                document.add_picture(paragraph[0])
+                p = document.add_paragraph()
+                run = p.add_run()
+                inline_shape = run.add_picture(paragraph[0])
+                if inline_shape.width > Inches(5):
+                    inline_shape.height = Inches(5 * inline_shape.height / inline_shape.width)
+                    inline_shape.width = Inches(5)
         else:
             p = document.add_paragraph(paragraph)
             p.style = document.styles['Normal']
