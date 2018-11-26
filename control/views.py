@@ -27,7 +27,7 @@ def download(request):
         '阅卷端': Download.objects.filter(category='G').order_by('-id'),
         '其他': Download.objects.filter(category='').order_by('-id'),
     }
-    if operator_level >= 1:
+    if operator_level > 1:
         all_downloads = {
             '考试端': Download.objects.filter(category='E', file_type='公开').order_by('-id'),
             '服务端': Download.objects.filter(category='S', file_type='公开').order_by('-id'),
@@ -35,6 +35,7 @@ def download(request):
             '其他': Download.objects.filter(category='', file_type='公开').order_by('-id'),
         }
     context = {
+        'can_upload': operator_level <= 1,
         'all_downloads': all_downloads,
     }
     if request.method == 'POST':
