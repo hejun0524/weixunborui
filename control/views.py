@@ -19,12 +19,21 @@ roles = list(zip(list(range(len(roles))), roles))
 
 @login_required()
 def download(request):
+    operator = User.objects.get(username=request.user.username)
+    operator_level = operator.profile.level
     all_downloads = {
         '考试端': Download.objects.filter(category='E').order_by('-id'),
         '服务端': Download.objects.filter(category='S').order_by('-id'),
         '阅卷端': Download.objects.filter(category='G').order_by('-id'),
         '其他': Download.objects.filter(category='').order_by('-id'),
     }
+    if operator_level >= 1:
+        all_downloads = {
+            '考试端': Download.objects.filter(category='E', file_type='公开').order_by('-id'),
+            '服务端': Download.objects.filter(category='S', file_type='公开').order_by('-id'),
+            '阅卷端': Download.objects.filter(category='G', file_type='公开').order_by('-id'),
+            '其他': Download.objects.filter(category='', file_type='公开').order_by('-id'),
+        }
     context = {
         'all_downloads': all_downloads,
     }
