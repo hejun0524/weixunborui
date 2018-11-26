@@ -410,10 +410,13 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                         word_content.append(f'答案：{ans_lines if is_answer_sheet else "___________"}')
                         word_content.append('')
     word_content = word_content if word_content[-1] is not None else word_content[:-1]
+    on_content = False
     for paragraph in word_content:
-        if paragraph is None:
+        if paragraph is None and on_content:
+            on_content = False
             document.add_page_break()
         elif isinstance(paragraph, list):
+            on_content = True
             if paragraph[1] == 'bold':
                 p = document.add_paragraph()
                 p.add_run(paragraph[0]).bold = True
@@ -426,6 +429,7 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                     inline_shape.height = Inches(5 * inline_shape.height / inline_shape.width)
                     inline_shape.width = Inches(5)
         else:
+            on_content = True
             p = document.add_paragraph(paragraph)
             p.style = document.styles['Normal']
     document.save(buffer_word)
