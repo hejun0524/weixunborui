@@ -4,42 +4,53 @@
 <head>
     {% load static %}
     {% include 'global_css.html' %}
-    <link rel="stylesheet" href="{% static 'css/carousel.css' %}">
+    <link rel="stylesheet" href="{% static 'css/blog.css' %}">
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-<!-- Navigation -->
-<header>
-    <nav class="navbar  navbar-expand-lg navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-md-2 mr-0" href="{% url 'home:index' %}">威训博锐</a>
+
+<div class="container">
+    <header class="blog-header py-3">
+        <div class="row flex-nowrap justify-content-between align-items-center">
+            <div class="col-4 pt-1"></div>
+            <div class="col-4 text-center">
+                <a class="blog-header-logo text-dark" href="{% url 'home:index' %}">威训博锐</a>
+            </div>
+            <div class="col-4 d-flex"></div>
+        </div>
+    </header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-2">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="fa fa-list"></span>
+            <span class="navbar-toggler-icon"></span>
         </button>
-        <div id="navbarNavDropdown" class="navbar-collapse collapse px-3">
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'home:index' %}">主页 <span class="sr-only">(current)</span></a>
+                <li class="nav-item{% if n_bar == 'index' %} active{% endif %}">
+                    <a class="nav-link" href="{% url 'home:index' %}">主页</a>
+                </li>
+                <li class="nav-item{% if n_bar == 'about' %} active{% endif %}">
+                    <a class="nav-link" href="{% url 'home:about' %}">关于我们</a>
+                </li>
+                <li class="nav-item{% if n_bar == 'courses' %} active{% endif %}">
+                    <a class="nav-link" href="{% url 'home:courses' %}">智能学堂</a>
+                </li>
+                <li class="nav-item{% if n_bar == 'assessment' %} active{% endif %}">
+                    <a class="nav-link" href="{% url 'home:assessment' %}">人才评测</a>
+                </li>
+                <li class="nav-item{% if n_bar == 'contact' %} active{% endif %}">
+                    <a class="nav-link" href="{% url 'home:contact' %}">联系我们</a>
                 </li>
             </ul>
             <ul class="navbar-nav">
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home:dashboard' %}">工作台</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home:logout' %}">退出系统</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home:login' %}">登录</a>
-                    </li>
-                {% endif %}
+                <li class="nav-item {% if n_bar == 'login' %} active{% endif %}">
+                    <a class="nav-link" href="{% url 'home:login' %}">登入工作台</a>
+                </li>
             </ul>
         </div>
     </nav>
-</header>
-<main role="main">
+</div>
+<main role="main" class="container">
     {% block content %}
     {% endblock %}
     <!-- FOOTER -->

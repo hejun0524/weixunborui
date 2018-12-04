@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from exam.models import CodeCategory, CodeSubject
 
 
 # Create your views here.
@@ -25,6 +26,32 @@ def login(request):
             pass
     context = {'n_bar': 'login'}
     return render(request, 'home/login.html', context)
+
+
+def about(request):
+    context = {'n_bar': 'about'}
+    return render(request, 'home/about.html', context)
+
+
+def assessment(request):
+    all_codes = {}
+    for code_category in CodeCategory.objects.all().order_by('index'):
+        all_codes[str(code_category)] = code_category.codesubject_set.order_by('code')
+    context = {
+        'n_bar': 'assessment',
+        'codes': all_codes
+    }
+    return render(request, 'home/assessment.html', context)
+
+
+def contact(request):
+    context = {'n_bar': 'contact'}
+    return render(request, 'home/contact.html', context)
+
+
+def courses(request):
+    context = {'n_bar': 'courses'}
+    return render(request, 'home/courses.html', context)
 
 
 @login_required()

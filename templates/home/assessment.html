@@ -1,0 +1,66 @@
+{% extends 'base_home.html' %}
+{% load static %}
+{% block title %}人才评测{% endblock %}
+
+{% block content %}
+    <div class="jumbotron p-3 p-md-5 text-white bg-dark">
+        <h1 class="display-4">人才评测</h1>
+        <p class="lead my-3">
+            全国信息化应用人才测评项目（The National Certification of Industry and Information Technology Application Engineer -
+            NCAE）由中华人民共和国工业和信息化部人才交流中心主办，并负责组织与实施。
+        </p>
+        <p class="lead my-3">
+            该证书由中华人民共和国工业和信息化部人才交流中心统一印刷、颁发，证书编号全国统一，每个科目证书均附有证书持有者所具备能力的摘要。
+        </p>
+        <p class="lead my-3">
+            该证书全国通用，是持有人信息化技术应用能力的证明，也可供用人部门录用和考核工作人员时参考，同样也将对您的业务水平与技术实力是一种最具权威性的证明，它可为您提供强有力的择业市场竞争优势。
+        </p>
+    </div>
+
+    <div class="jumbotron p-3 p-md-5 text-dark bg-light">
+        <h1 class="display-5">证书颁发和查询</h1>
+        <p class="lead my-3">
+            通过全国工业和信息化人才测评的学员，即可获得工业和信息化人才交流中心印刷并颁发的全国工业和信息化应用人才测评证书。
+        </p>
+        <p class="lead my-3">
+            证书持有人可通过中心指定官方网站
+            <a href="http://www.ncie.gov.cn" target="_blank">http://www.ncie.gov.cn</a> 或
+            <a href="http://www.ncie.org.cn" target="_blank">http://www.ncie.org.cn</a> 查询证书真伪。
+        </p>
+        <p class="lead my-3">证书范本：</p>
+        <img class="img-fluid" src="{% static 'img/sample_certificate.png' %}">
+    </div>
+
+    <div class="jumbotron p-3 p-md-5 text-white bg-secondary">
+        <h1 class="display-5">测评科目</h1>
+        <table class="table table-striped my-3">
+            <thead>
+            <tr>
+                <th scope="col" class="cell-2">项目编号</th>
+                <th scope="col" class="cell-3">项目名称</th>
+                <th scope="col" class="cell-5">证书描述</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for code_category, code_subjects in codes.items %}
+                <tr>
+                    <th scope="row" colspan="3" class="bg-dark">{{ code_category }}</th>
+                </tr>
+                {% for code_subject in code_subjects %}
+                    <tr>
+                        <th scope="row">{{ code_subject.code }}</th>
+                        <th>{{ code_subject.name }}</th>
+                        <th>{{ code_subject.description }}</th>
+                    </tr>
+                    {% empty %}
+                    <th scope="row" colspan="3">暂无。</th>
+                {% endfor %}
+                {% empty %}
+                <tr>
+                    <th scope="row" colspan="3">暂无。</th>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

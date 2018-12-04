@@ -412,9 +412,10 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
     word_content = word_content if word_content[-1] is not None else word_content[:-1]
     on_content = False
     for paragraph in word_content:
-        if paragraph is None and on_content:
-            on_content = False
-            document.add_page_break()
+        if paragraph is None:
+            if on_content:
+                on_content = False
+                document.add_page_break()
         elif isinstance(paragraph, list):
             on_content = True
             if paragraph[1] == 'bold':
