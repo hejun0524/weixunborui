@@ -394,7 +394,7 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                             # Footer
                             ans_lines = '\n'.join(sub['ans_lines'])
                             word_content.append(f'答案：{ans_lines if is_answer_sheet else "___________"}')
-                            if 'answer_image' in sub:
+                            if is_answer_sheet and 'answer_image' in sub:
                                 word_content.append([sub['answer_image'], 'image'])
                             word_content.append('')
                         word_content.append(None)
@@ -410,7 +410,7 @@ def generate_word(problems, problem_list, is_answer_sheet=False):
                         if 'error' in content:
                             ans_lines += f'（±{content["error"]}%）'
                         word_content.append(f'答案：{ans_lines if is_answer_sheet else "___________"}')
-                        if 'answer_image' in content:
+                        if is_answer_sheet and 'answer_image' in content:
                             word_content.append([content['answer_image'], 'image'])
                         word_content.append('')
     word_content = word_content if word_content[-1] is not None else word_content[:-1]
