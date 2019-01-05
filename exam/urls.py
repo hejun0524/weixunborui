@@ -7,6 +7,7 @@ urlpatterns = [
     path('exams/', views.exams, name='exams'),
     path('exams/get/<int:exam_id>/', views.get_exam, name='get_exam'),
     path('exams/delete/<int:exam_id>/', views.delete_exam, name='delete_exam'),
+    path('exams/get_list/<int:exam_id>/', views.get_exam_list, name='get_exam_list'),
     path('certification/', views.certification, name='certification'),
     path('certification/get/<int:certification_id>', views.get_certification, name='get_certification'),
     path('certification/delete/<int:certification_id>', views.delete_certification, name='delete_certification'),

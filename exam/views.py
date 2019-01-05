@@ -242,6 +242,16 @@ def delete_certification(request, certification_id):
     return redirect('exam:certification')
 
 
+def get_exam_list(request, exam_id):
+    this_exam = Exam.objects.get(id=exam_id)
+    this_file = StudentListFile.objects.get(exam_id=exam_id)
+    file_path = 'media/{}'.format(this_file.student_list.name)
+    file_name = '-'.join([this_exam.title, this_exam.location, this_exam.section, this_exam.date, ])
+    response = HttpResponse(FileWrapper(open(file_path, 'rb')), content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}.xls".format(escape_uri_path(file_name))
+    return response
+
+
 def wrong_message(warning):
     return False, warning, {}
 

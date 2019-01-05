@@ -255,9 +255,9 @@ function appendPlainTextTable($table, header, content, zeroMsg) {
     }
 }
 
-function copyLink(file_id) {
+function copyLink(file_id, is_exam) {
     var dummy = document.createElement('input');
-    dummy.value = window.location.href + 'get/' + file_id + '/';
+    dummy.value = window.location.href + (is_exam ? 'get/' : 'get_list/') + file_id + '/';
     document.body.appendChild(dummy);
     dummy.select();
     document.execCommand('copy');
