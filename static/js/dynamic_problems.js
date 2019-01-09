@@ -281,9 +281,9 @@ function formatProblemPreview(data, codes) {
     if (data.hasOwnProperty('video')) {
         $vBtn.attr('disabled', false);
         $vBtn.text('查看视频');
-        $('#problem_video').attr('src', data['video']);
         $vBtn.click(function () {
             $('#video_modal').modal('show');
+            $('#problem_video').attr('src', data['video']);
         });
     }
     $editBtn.click(function () {
@@ -498,4 +498,8 @@ $('#id_group_e_type').change(function () {
     $noteCP.attr('hidden', qType !== 7);
     $error.attr('hidden', qType !== 7 && qType !== 5);
     $needAnswer.attr('hidden', qType !== 7 && qType !== 6);
+});
+
+$('#video_modal').on('hidden.bs.modal', function () {
+    $('#problem_video').attr('src', '');
 });
