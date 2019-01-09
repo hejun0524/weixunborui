@@ -267,10 +267,10 @@ function formatProblemPreview(data, codes) {
     }
     // 5 - Buttons
     var $btnGroup = $('<div class="btn-group btn-group-sm"></div>');
-    var $editBtn = $('<button type="button" class="btn btn-primary"></button>').text('修改');
-    var $deleteBtn = $('<button type="button" class="btn btn-danger"></button>').text('删除');
-    var $aBtn = $('<button type="button" class="btn btn-primary" disabled></button>').text('无附件');
-    var $vBtn = $('<button type="button" class="btn btn-primary" disabled></button>').text('无视频');
+    var $editBtn = $('<button type="button" class="btn btn-outline-primary"></button>').text('修改');
+    var $deleteBtn = $('<button type="button" class="btn btn-outline-danger"></button>').text('删除');
+    var $aBtn = $('<button type="button" class="btn btn-outline-primary" disabled></button>').text('无附件');
+    var $vBtn = $('<button type="button" class="btn btn-outline-primary" disabled></button>').text('无视频');
     if (data.hasOwnProperty('attachment')) {
         $aBtn.attr('disabled', false);
         $aBtn.text('查看附件');
@@ -280,7 +280,11 @@ function formatProblemPreview(data, codes) {
     }
     if (data.hasOwnProperty('video')) {
         $vBtn.attr('disabled', false);
-        $vBtn.text('视频暂时不支持播放');
+        $vBtn.text('查看视频');
+        $('#problem_video').attr('src', data['video']);
+        $vBtn.click(function () {
+            $('#video_modal').modal('show');
+        });
     }
     $editBtn.click(function () {
         alert('抱歉，暂时不支持修改题目！');
