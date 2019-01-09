@@ -67,6 +67,101 @@ function digestPhotoNames(fileName) {
     return fileName;
 }
 
+function displayModal(action, type) {
+    var translations = {
+        'add': '添加',
+        'edit': '修改',
+        'category': '类别',
+        'code': '科目代码'
+    };
+    var typeSc = translations[type];
+    var actionSc = translations[action];
+    var $selection = $('#id_m_' + type);
+    var selectedValue = $selection.val();
+    var $submitBtn = $('#btn_' + type);
+    var $hiddenId = $('#id_' + type + '_id');
+    var $modalTitle = $('#title_' + type);
+    $submitBtn.attr('name', action + '_' + type);
+    $submitBtn.text('确认' + actionSc);
+    $hiddenId.val('');
+    $modalTitle.text(actionSc + typeSc);
+    $('#delete_' + type).attr('hidden', action === 'add');
+    // Selection violation
+    if (action === 'edit') {
+        if (selectedValue === '0' || selectedValue === null || selectedValue === undefined) {
+            return alert('请选择一个' + typeSc + '！');
+        }
+        // Hidden field - object id
+        $hiddenId.val(selectedValue);
+        if (type === 'category') {
+            ajaxChangeForm(
+                'get_code_category', selectedValue,
+                ['#id_category_name', '#id_category_index'],
+                ['name', 'index']
+            );
+        } else if (type === 'code') {
+            ajaxChangeForm(
+                'get_code', selectedValue,
+                ['#id_code_category', '#id_code_name', '#id_code_code', '#id_code_price', '#id_code_description'],
+                ['category', 'name', 'code', 'price', 'description']
+            );
+        }
+    }
+    $('#' + type + '_modal').modal('show');
+}
+
+function ajaxChangeSelection(callerType, code, targets, entries) {
+    /*
+    callerType: what user clicked on - the component's model type;
+    code: model id - i.e., caller's value;
+    targets: a list of components that will be affected;
+    entries: list, identify the data coming.
+    fixedSelection: whether maintain the previous selection
+     */
+    $.ajax({
+        url: ['', 'exam', callerType, code, ''].join('/'),
+        success: function (data) {
+            for (var i = 0; i < targets.length; i++) {
+                var $target = $(targets[i]);
+                $target.empty();
+                $target.append($('<option selected disabled></option>').val(0).html('请选择'));
+                $.each(data[entries[i]], function (index, text) {
+                    $target.append($('<option></option>').val(text[0]).html(text[1]));
+                });
+            }
+        }
+    });
+}
+
+function ajaxChangeForm(callerType, code, targets, entries) {
+    $.ajax({
+        url: ['', 'exam', callerType, code, ''].join('/'),
+        success: function (data) {
+            for (var i = 0; i < targets.length; i++) {
+                $(targets[i]).val(data[entries[i]]);
+            }
+        }
+    });
+}
+
+function ajaxChangeTable(callerType, code, targets, entries) {
+    $.ajax({
+        url: ['', 'exam', callerType, code, ''].join('/'),
+        success: function (data) {
+            for (var i = 0; i < targets.length; i++) {
+                var $target = $(targets[i]);
+                $target.html(data[entries[i]]);
+            }
+        }
+    });
+}
+
+function clearCodeTable(){
+    ['#cell_code_category', '#cell_code_subject', '#cell_code_price', '#cell_code_description'].forEach(
+        function (value) { $(value).html('请先选择一个代码科目'); }
+    );
+}
+
 $('#id_certification_photos').change(function () {
     var files = $(this)[0].files;
     changeFileInput('#id_certification_photos', false, '已选择' + files.length + '个文件');
@@ -89,7 +184,7 @@ $('#btn_add_list').click(function () {
 });
 
 $('#btn_new_subject').click(function () {
-    $('#code_modal').modal('show');
+    displayModal('add', 'code');
 });
 
 $('#id_code_category').change(function () {
@@ -167,3 +262,37 @@ $('#check_photos').click(function () {
     appendPlainTextTable($unnecessary, '[多余] ', extra, '没有多余的文件');
     $('#photo_check_modal').modal('show');
 });
+
+$('#add_code').click(function () {
+    displayModal('add', 'code');
+});
+
+$('#add_code_category').click(function () {
+    displayModal('add', 'category');
+});
+
+$('#edit_code').click(function () {
+    displayModal('edit', 'code');
+});
+
+$('#edit_code_category').click(function () {
+    displayModal('edit', 'category');
+});
+
+$('#id_m_category').change(function () {
+    clearCodeTable();
+    ajaxChangeSelection('change_code_category', $('#id_m_category').val(), ['#id_m_code'], ['code_subjects']);
+});
+
+
+$('#id_m_code').change(function () {
+    var selectedValue = $('#id_m_code').val();
+    if (selectedValue === '0') {
+        clearCodeTable();
+    } else ajaxChangeTable(
+        'get_code', selectedValue,
+        ['#cell_code_category', '#cell_code_subject', '#cell_code_price', '#cell_code_description'],
+        ['category_info', 'subject_info', 'price', 'description']
+    );
+});
+

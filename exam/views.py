@@ -187,13 +187,13 @@ def certification(request):
             })
             new_object.student_list = student_json
             new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf))
-        elif 'btn_add_code' in request.POST:
+        elif 'add_code' in request.POST:
             code_category_id = int(request.POST.get('code_category'))
             new_object = CodeSubject(
                 name=request.POST.get('code_name'),
                 code=request.POST.get('code_code')
             )
-            if code_category_id == 0:
+            if code_category_id == 0:  # Create new
                 new_code_category = CodeCategory(
                     name=request.POST.get('new_code_category'),
                     index=request.POST.get('new_code_category_index')
@@ -207,6 +207,41 @@ def certification(request):
             if request.POST.get('code_description'):
                 new_object.description = request.POST.get('code_description')
             new_object.save()
+        elif 'add_category' in request.POST:
+            new_code_category = CodeCategory(
+                name=request.POST.get('category_name'),
+                index=request.POST.get('category_index')
+            )
+            new_code_category.save()
+        elif 'edit_code' in request.POST:
+            code_category_id = int(request.POST.get('code_category'))
+            this_object = CodeSubject.objects.get(id=int(request.POST.get('code_id')))
+            if code_category_id == 0:  # Create new
+                new_code_category = CodeCategory(
+                    name=request.POST.get('new_code_category'),
+                    index=request.POST.get('new_code_category_index')
+                )
+                new_code_category.save()
+                this_object.category = new_code_category
+            else:
+                this_object.category_id = code_category_id
+            if request.POST.get('code_price'):
+                this_object.price = float(request.POST.get('code_price'))
+            else:
+                this_object.price = 0
+            this_object.description = request.POST.get('code_description')
+            this_object.save()
+        elif 'edit_category' in request.POST:
+            this_object = CodeCategory.objects.get(id=int(request.POST.get('category_id')))
+            this_object.name = request.POST.get('category_name')
+            this_object.index = request.POST.get('category_index')
+            this_object.save()
+        elif 'delete_code' in request.POST:
+            this_object = CodeSubject.objects.get(id=int(request.POST.get('code_id')))
+            this_object.delete()
+        elif 'delete_category' in request.POST:
+            this_object = CodeCategory.objects.get(id=int(request.POST.get('category_id')))
+            this_object.delete()
         messages.success(request, '操作成功！')
         return redirect('exam:certification')
     return render(request, 'exam/certification.html', context)
@@ -709,3 +744,32 @@ def get_picture(request, picture_type, picture_id):
         return JsonResponse({'image_path': aa_dict[picture_type][0]})
     this_object = aa_dict[picture_type][1].objects.get(id=picture_id)
     return JsonResponse({'image_path': '/media/' + str(this_object.image)})
+
+
+def change_code_category(request, category_id):
+    code_subjects = CodeSubject.objects.all() if category_id == 0 else CodeSubject.objects.filter(
+        category_id=category_id)
+    return JsonResponse({
+        'code_subjects': list(map(lambda x: (x.id, str(x)), code_subjects))
+    })
+
+
+def get_code_category(request, category_id):
+    this_object = CodeCategory.objects.get(id=category_id)
+    return JsonResponse({
+        'name': this_object.name,
+        'index': this_object.index,
+    })
+
+
+def get_code(request, code_id):
+    this_object = CodeSubject.objects.get(id=code_id)
+    return JsonResponse({
+        'category': this_object.category_id,
+        'category_info': str(this_object.category),
+        'name': this_object.name,
+        'code': this_object.code,
+        'subject_info': str(this_object),
+        'price': this_object.price,
+        'description': this_object.description
+    })

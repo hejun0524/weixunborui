@@ -485,3 +485,13 @@ $('#group_delete').click(function () {
 $('#id_questions').keyup(function () {
     $('#max_input').text(2000 - $(this).val().length);
 });
+
+$('#id_group_e_type').change(function () {
+    var qType = parseInt($('#id_group_e_type').val());
+    var $noteCP = $('#group_e_cp_note');
+    var $error = $('#group_e_error_div');
+    var $needAnswer = $('#group_e_need_answer_div');
+    $noteCP.attr('hidden', qType !== 7);
+    $error.attr('hidden', qType !== 7 && qType !== 5);
+    $needAnswer.attr('hidden', qType !== 7 && qType !== 6);
+});

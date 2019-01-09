@@ -3,10 +3,15 @@
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">添加科目代码</h5>
+                <h5 class="modal-title" id="title_code">添加科目代码</h5>
             </div>
             <form role="form" method="post" class="modal-body pr-5">
                 {% csrf_token %}
+                <div class="form-group row">
+                    <label for="id_code_id" class="col-sm-3 col-form-label required">序号</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_code_id" name="code_id" readonly>
+                </div>
                 <div class="form-group row">
                     <label for="id_code_category" class="col-sm-3 col-form-label required">代码类别</label>
                     <select class="col-sm-9 custom-select" id="id_code_category" name="code_category" required>
@@ -50,7 +55,44 @@
                            name="code_description">
                 </div>
                 <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
-                <button class="btn btn-sm btn-primary" type="submit" name="btn_add_code">确认添加</button>
+                <button class="btn btn-sm btn-primary" type="submit" id="btn_code">确认添加</button>
+                <button class="btn btn-sm btn-danger" type="submit" id="delete_code" name="delete_code" hidden>
+                    删除
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Category modal -->
+<div class="modal fade" id="category_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title_category">添加类别</h5>
+            </div>
+            <form role="form" method="post" id="form_category" class="modal-body pr-5">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label for="id_category_id" class="col-sm-3 col-form-label required">序号</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_category_id" name="category_id" readonly>
+                </div>
+                <div class="form-group row">
+                    <label for="id_category_name" class="col-sm-3 col-form-label required">类别名称</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_category_name" name="category_name" required>
+                </div>
+                <div class="form-group row">
+                    <label for="id_category_index" class="col-sm-3 col-form-label required">索引</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm"
+                           id="id_category_index" name="category_index" required>
+                </div>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
+                <button class="btn btn-sm btn-primary" type="submit" id="btn_category">确认添加</button>
+                <button class="btn btn-sm btn-danger" type="submit" id="delete_category" name="delete_category" hidden>
+                    删除
+                </button>
             </form>
         </div>
     </div>

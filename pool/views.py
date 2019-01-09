@@ -90,7 +90,14 @@ def problems(request):
                     for q in clear_set.all():
                         q.delete()
         elif 'btn_group_edit' in request.POST:
-            pass
+            group_edit(
+                int(request.POST.get('group_e_chapter_id')),
+                int(request.POST.get('group_e_type')),
+                int(request.POST.get('group_e_upload')),
+                request.POST.get('group_e_chance'),
+                request.POST.get('group_e_error'),
+                int(request.POST.get('group_e_need_answer')),
+            )
         messages.success(request, '操作成功！')
         return redirect('pool:problems')
     chapter_points = tuple(map(lambda num: 'point{}'.format(num), range(1, 8)))
@@ -445,6 +452,28 @@ def replace_or_create(question_type, question_id, option, choice_image):
     else:
         ci_object.delete()
         replace_or_create(question_type, question_id, option, choice_image)
+
+
+def group_edit(chapter_id, question_type, student_upload, chance, error, need_answer):
+    def edit_question(this_list, this_type):
+        for this_object in this_list:
+            if student_upload != 0:
+                this_object.student_upload = student_upload == 1
+            if chance != '':
+                this_object.chance = int(chance)
+            if error != '' and this_type == 5:
+                this_object.error = float(error)
+            if need_answer != 0 and this_type == 6:
+                this_object.need_answer = need_answer == 1
+            this_object.save()
+
+    q_list = class_list[question_type - 1].objects.filter(chapter_id=chapter_id)
+    if question_type == 7:
+        for q in q_list:
+            for i in range(len(sub_class_list)):
+                edit_question(sub_class_list[i].objects.filter(comprehensive=q), i + 1)
+    else:
+        edit_question(q_list, question_type)
 
 
 # AJAX functions
