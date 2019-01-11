@@ -287,7 +287,7 @@ function formatProblemPreview(data, codes) {
         });
     }
     $editBtn.click(function () {
-        alert('抱歉，暂时不支持修改题目！');
+        $('#modify_problem_modal').modal('show');
     });
     $deleteBtn.click(function () {
         if (confirm('确认要删除本题？')) {

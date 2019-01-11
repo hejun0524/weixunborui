@@ -1,7 +1,41 @@
-<form method="post" hidden id="delete_problem_form">
-    {% csrf_token %}
-    <label for="id_delete_problem_id"></label>
-    <input type="text" id="id_delete_problem_id" name="delete_problem_id">
-    <label for="id_delete_problem_type"></label>
-    <input type="text" id="id_delete_problem_type" name="delete_problem_type">
-</form>
+<div class="modal fade bd-example-modal-lg" data-backdrop="static"
+     tabindex="-1" role="dialog" id="modify_problem_modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form method="post" id="modify_problem_form">
+                    {% csrf_token %}
+                    <div hidden>
+                        <label for="id_modify_problem_id"></label>
+                        <input type="text" id="id_modify_problem_id" name="modify_problem_id">
+                        <label for="id_modify_problem_type"></label>
+                        <input type="text" id="id_modify_problem_type" name="modify_problem_type">
+                    </div>
+                    <!-- Chapter -->
+                    <div class="form-group row pr-5">
+                        <label for="id_smart_chapter" class="col-sm-2 col-form-label required">章节</label>
+                        <div class="col-sm-10 px-0">
+                            <input type="text" class="form-control form-control-sm" id="id_smart_chapter"
+                                   name="smart_chapter" placeholder="请在上方选择一个章节" readonly required>
+                            <small class="form-text text-muted">如需更改章节请在上方直接选择章节即可。</small>
+                        </div>
+                    </div>
+                    <!-- Index & Description -->
+
+                    <!-- Attachment, Image & Video -->
+
+                    <!-- Choices -->
+
+                    <!-- [Common Only] Upload, Chance & Answer Image -->
+
+                    <!-- [Common Only] Answer (Various) -->
+
+                    <!-- Error & Need Answer -->
+
+                    <button class="btn btn-sm btn-primary" type="submit" name="btn_modify_problem">确认修改</button>
+                    <button class="btn btn-sm btn-secondary" data-dismiss="modal">关闭</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
