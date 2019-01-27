@@ -64,8 +64,4 @@ def logout(request):
 
 @login_required()
 def dashboard(request):
-    try:
-        return render(request, 'home/dashboard.html')
-    except Exception as e:
-        with open('error.log', 'w') as f:
-            f.write(str(e))
+    return render(request, 'home/dashboard.html')
