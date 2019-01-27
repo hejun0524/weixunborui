@@ -29,11 +29,13 @@
             </div>
             <!-- Strategy -->
             <label for="id_strategy" class="font-weight-bold">策略</label>
-            <div class="float-right">
-                <span id="add_strategy" class="fake-link text-primary">添加</span>
-                <span id="duplicate_strategy" class="fake-link text-success">复制</span>
-                <span id="edit_strategy" class="fake-link text-secondary">编辑/删除</span>
-            </div>
+            {% if can_manage_strategy %}
+                <div class="float-right">
+                    <span id="add_strategy" class="fake-link text-primary">添加</span>
+                    <span id="duplicate_strategy" class="fake-link text-success">复制</span>
+                    <span id="edit_strategy" class="fake-link text-secondary">编辑/删除</span>
+                </div>
+            {% endif %}
             <div class="form-group">
                 <select class="custom-select" id="id_strategy" name="strategy" size="5">
                     <option value="0" selected>全部</option>
@@ -70,9 +72,11 @@
                 <thead>
                 <tr>
                     <th scope="col" class="cell-2">章节
-                        <span id="add_chapter" class="fake-link text-primary">
-                            <span class="fa fa-plus-circle"></span>
-                        </span>
+                        {% if can_manage_strategy %}
+                            <span id="add_chapter" class="fake-link text-primary">
+                                <i class="fa fa-plus-circle"></i>
+                            </span>
+                        {% endif %}
                     </th>
                     {% for entry in type_sc_abbr %}
                         <th scope="col" class="cell-8p">{{ entry }}</th>
@@ -103,15 +107,24 @@
                     <input type="checkbox" id="id_sample_check" name="sample_check">
                 </div>
             </form>
-            <button class="btn btn-sm btn-dark" id="save_structure">保存修改</button>
-            <button class="btn btn-sm btn-dark" id="generate_exam">生成考试</button>
-            <button class="btn btn-sm btn-dark" id="generate_sample">生成样卷</button>
+            {% if can_manage_strategy %}
+                <button class="btn btn-sm btn-dark" id="save_structure">保存修改</button>
+            {% endif %}
+            {% if can_generate_exam %}
+                <button class="btn btn-sm btn-dark" id="generate_exam">生成考试</button>
+                <button class="btn btn-sm btn-dark" id="generate_sample">生成样卷</button>
+            {% endif %}
+            {% if can_manage_exam %}
+                <button class="btn btn-sm btn-dark" id="manage_pictures">管理须知/宣传图</button>
+            {% endif %}
         </div>
     </div>
     <hr>
-    {% include 'exam/generate_exam.html' %}
+    {% if can_generate_exam %}
+        {% include 'exam/generate_exam.html' %}
+    {% endif %}
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-8">
             <table class="table table-sm">
                 <thead>
                 <tr>
@@ -131,22 +144,47 @@
                     </tr>
                     <tr class="table-secondary" hidden>
                         <td colspan="3">
-                            <a href="{% url 'exam:get_exam' object.id %}" role="button"
-                               class="btn btn-sm btn-primary">下载</a>
-                            <a href="javascript:" onclick="copyLink({{ object.id }}, true)" role="button"
-                               class="btn btn-sm btn-success">复制链接</a>
-                            <a href="{% url 'exam:get_exam_list' object.id %}" role="button"
-                               class="btn btn-sm btn-primary">下载签名单</a>
-                            <a href="javascript:" onclick="copyLink({{ object.id }}, false)" role="button"
-                               class="btn btn-sm btn-success">复制签名单链接</a>
-                            <a href="{% url 'exam:delete_exam' object.id %}" role="button"
-                               class="btn btn-sm btn-danger">删除</a>
+                            {% if can_download_exam %}
+                                <a href="{% url 'exam:get_exam' object.id %}" role="button"
+                                   class="btn btn-sm btn-primary">下载</a>
+                                <a href="javascript:" onclick="copyLink({{ object.id }}, true)" role="button"
+                                   class="btn btn-sm btn-success">复制链接</a>
+                                <a href="{% url 'exam:get_exam_list' object.id %}" role="button"
+                                   class="btn btn-sm btn-primary">下载签名单</a>
+                                <a href="javascript:" onclick="copyLink({{ object.id }}, false)" role="button"
+                                   class="btn btn-sm btn-success">复制签名单链接</a>
+                            {% endif %}
+                            {% if can_manage_exam %}
+                                <a href="{% url 'exam:delete_exam' object.id %}" role="button"
+                                   class="btn btn-sm btn-danger">删除</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if can_manage_exam %}
+            <div class="col-md-4">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th scope="col" class="cell-8">已保存学生名单</th>
+                        <th scope="col" class="cell-2"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for object in all_student_lists %}
+                        <tr>
+                            <td>{{ object.name }}</td>
+                            <td><a href="{% url 'exam:delete_student_list' object.id %}" class="text-muted">删除</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
     </div>
     {% include 'exam/strategy_modal.html' %}
     {% include 'exam/students_modal.html' %}

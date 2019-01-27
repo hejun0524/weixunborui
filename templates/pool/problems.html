@@ -5,95 +5,104 @@
 {% block canvas_title %}题库管理{% endblock %}
 {% block content %}
     <!-- Forms -->
-    <div class="row">
-        <div class="col-md-4">
-            <!-- Category -->
-            <label for="id_category" class="font-weight-bold">类别</label>
-            <div class="float-right">
-                <span id="add_category" class="fake-link text-primary">添加</span>
-                <span id="edit_category" class="fake-link text-secondary">编辑/删除</span>
+    {% if can_view_catalog %}
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Category -->
+                <label for="id_category" class="font-weight-bold">类别</label>
+                <div class="float-right">
+                    <span id="add_category" class="fake-link text-primary">添加</span>
+                    <span id="edit_category" class="fake-link text-secondary">编辑/删除</span>
+                </div>
+                <div class="form-group">
+                    <select class="custom-select" id="id_category" name="category" size="5">
+                        <option value="0" selected>全部</option>
+                        {% for object in all_categories %}
+                            <option value="{{ object.id }}">{{ object }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Subject -->
+                <label for="id_subject" class="font-weight-bold">科目</label>
+                <div class="float-right">
+                    <span id="add_subject" class="fake-link text-primary">添加</span>
+                    <span id="edit_subject" class="fake-link text-secondary">编辑/删除</span>
+                </div>
+                <div class="form-group">
+                    <select class="custom-select" id="id_subject" name="subject" size="5">
+                        <option value="0" selected>全部</option>
+                        {% for object in all_subjects %}
+                            <option value="{{ object.id }}">{{ object }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Chapter -->
+                <label for="id_chapter" class="font-weight-bold">章节</label>
+                <div class="float-right">
+                    <span id="add_chapter" class="fake-link text-primary">添加</span>
+                    <span id="edit_chapter" class="fake-link text-secondary">编辑/删除</span>
+                </div>
+                <div class="form-group">
+                    <select class="custom-select" id="id_chapter" name="chapter" size="5">
+                        <option value="0" selected>全部</option>
+                        {% for object in all_chapters %}
+                            <option value="{{ object.id }}">{{ object }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <select class="custom-select" id="id_category" name="category" size="5">
-                    <option value="0" selected>全部</option>
-                    {% for object in all_categories %}
-                        <option value="{{ object.id }}">{{ object }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <!-- Subject -->
-            <label for="id_subject" class="font-weight-bold">科目</label>
-            <div class="float-right">
-                <span id="add_subject" class="fake-link text-primary">添加</span>
-                <span id="edit_subject" class="fake-link text-secondary">编辑/删除</span>
-            </div>
-            <div class="form-group">
-                <select class="custom-select" id="id_subject" name="subject" size="5">
-                    <option value="0" selected>全部</option>
-                    {% for object in all_subjects %}
-                        <option value="{{ object.id }}">{{ object }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <!-- Chapter -->
-            <label for="id_chapter" class="font-weight-bold">章节</label>
-            <div class="float-right">
-                <span id="add_chapter" class="fake-link text-primary">添加</span>
-                <span id="edit_chapter" class="fake-link text-secondary">编辑/删除</span>
-            </div>
-            <div class="form-group">
-                <select class="custom-select" id="id_chapter" name="chapter" size="5">
-                    <option value="0" selected>全部</option>
-                    {% for object in all_chapters %}
-                        <option value="{{ object.id }}">{{ object }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="col-md-8">
-            <p class="font-weight-bold mb-2">查看章节信息</p>
-            <table class="table table-sm table-bordered">
-                <tbody>
-                <tr>
-                    <th scope="row" class="cell-2">章节</th>
-                    <td colspan="3" class="cell-8" id="cell_chapter_name">请先选择一个章节</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="cell-2">索引</th>
-                    <td colspan="3" class="cell-8" id="cell_chapter_index">请先选择一个章节</td>
-                </tr>
-                </tbody>
-            </table>
-            <table class="table table-sm table-bordered">
-                <tbody>
-                <tr>
-                    <th class="cell-3">章节图片</th>
-                    <th scope="row" class="cell-3">题目类型</th>
-                    <th class="cell-2">分值</th>
-                    <th class="cell-2">难度</th>
-                </tr>
-                {% for entry in chapter_info %}
+            <div class="col-md-8">
+                <p class="font-weight-bold mb-2">查看章节信息</p>
+                <table class="table table-sm table-bordered">
+                    <tbody>
                     <tr>
-                        {% if forloop.counter0 == 0 %}
-                            <td rowspan="7">
-                                <img class="img-fluid center-block" id="cell_chapter_image"
-                                     src="{% static 'img/no_img.png' %}">
-                            </td>
-                        {% endif %}
-                        <td scope="row" class="cell-2">{{ entry.0 }}</td>
-                        <td class="cell-2" id="cell_chapter_{{ entry.1 }}"></td>
-                        <td class="cell-2" id="cell_chapter_{{ entry.2 }}"></td>
+                        <th scope="row" class="cell-2">章节</th>
+                        <td colspan="3" class="cell-8" id="cell_chapter_name">请先选择一个章节</td>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <button class="btn btn-sm btn-dark" id="display_problems">显示题目</button>
-            <button class="btn btn-sm btn-dark" id="group_edit">批量修改</button>
-            <button class="btn btn-sm btn-dark" id="group_export">导出题目</button>
-            <button class="btn btn-sm btn-danger" id="group_delete">清空章节</button>
-            <button class="btn btn-sm btn-dark" id="smart_add">添加题目</button>
+                    <tr>
+                        <th scope="row" class="cell-2">索引</th>
+                        <td colspan="3" class="cell-8" id="cell_chapter_index">请先选择一个章节</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <table class="table table-sm table-bordered">
+                    <tbody>
+                    <tr>
+                        <th class="cell-3">章节图片</th>
+                        <th scope="row" class="cell-3">题目类型</th>
+                        <th class="cell-2">分值</th>
+                        <th class="cell-2">难度</th>
+                    </tr>
+                    {% for entry in chapter_info %}
+                        <tr>
+                            {% if forloop.counter0 == 0 %}
+                                <td rowspan="7">
+                                    <img class="img-fluid center-block" id="cell_chapter_image"
+                                         src="{% static 'img/no_img.png' %}">
+                                </td>
+                            {% endif %}
+                            <td scope="row" class="cell-2">{{ entry.0 }}</td>
+                            <td class="cell-2" id="cell_chapter_{{ entry.1 }}"></td>
+                            <td class="cell-2" id="cell_chapter_{{ entry.2 }}"></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+        <hr>
+    {% endif %}
+    {% if can_view_problems %}
+        <button class="btn btn-sm btn-dark" id="display_problems">显示题目</button>
+    {% endif %}
+    {% if can_group_actions %}
+        <button class="btn btn-sm btn-dark" id="group_edit">批量修改</button>
+        <button class="btn btn-sm btn-dark" id="group_export">导出题目</button>
+        <button class="btn btn-sm btn-danger" id="group_delete">清空章节</button>
+    {% endif %}
+    {% if can_manage_problems %}
+        <button class="btn btn-sm btn-dark" id="smart_add">添加题目</button>
+    {% endif %}
     <hr>
     {% include 'pool/smart_add.html' %}
     <div class="row">
@@ -121,7 +130,6 @@
     {% include 'pool/csc_modals.html' %}
     {% include 'pool/group_modals.html' %}
     {% include 'pool/video_modal.html' %}
-    {% include 'pool/problem_forms.html' %}
 {% endblock %}
 {% block js %}
     <script src="{% static 'js/dynamic_problems.js' %}"></script>
