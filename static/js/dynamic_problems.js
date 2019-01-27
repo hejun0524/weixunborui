@@ -267,7 +267,6 @@ function formatProblemPreview(data, codes) {
     }
     // 5 - Buttons
     var $btnGroup = $('<div class="btn-group btn-group-sm"></div>');
-    var $editBtn = $('<button type="button" class="btn btn-outline-primary"></button>').text('修改');
     var $deleteBtn = $('<button type="button" class="btn btn-outline-danger"></button>').text('删除');
     var $aBtn = $('<button type="button" class="btn btn-outline-primary" disabled></button>').text('无附件');
     var $vBtn = $('<button type="button" class="btn btn-outline-primary" disabled></button>').text('无视频');
@@ -286,17 +285,15 @@ function formatProblemPreview(data, codes) {
             $('#problem_video').attr('src', data['video']);
         });
     }
-    $editBtn.click(function () {
-        $('#modify_problem_modal').modal('show');
-    });
     $deleteBtn.click(function () {
         if (confirm('确认要删除本题？')) {
             location.href = ['', 'pool', 'delete_problem', ''].join('/') + codes.join('/') + '/';
         }
     });
-    $btnGroup.append($aBtn, $vBtn, $editBtn, $deleteBtn);
+    $btnGroup.append($aBtn, $vBtn, $deleteBtn);
     // Append
-    var components = [$path, $index, $desc, $image, $choices, $ans, $answerImage, $info, $btnGroup];
+    var components = [$path, $index, $desc, $image, $choices, $ans, $answerImage, $info];
+    if (data['can_manage_problems']) components.push($btnGroup);
     for (var i = 0; i < components.length; i++) {
         if (components[i]) {
             if (components[i] instanceof Array) {

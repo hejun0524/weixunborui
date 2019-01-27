@@ -33,21 +33,27 @@
                     题库/试卷管理
                 </h6>
                 <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'pool:problems' %}">
-                            <i class="fa fa-list"></i> 题库管理
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'exam:exams' %}">
-                            <i class="fa fa-random"></i> 组成试卷
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'exam:certification' %}">
-                            <i class="fa fa-certificate"></i> 工信认证
-                        </a>
-                    </li>
+                    {% if user.profile.view_access.pool %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'pool:problems' %}">
+                                <i class="fa fa-list"></i> 题库管理
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.profile.view_access.exam %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'exam:exams' %}">
+                                <i class="fa fa-random"></i> 组成试卷
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.profile.view_access.certification %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'exam:certification' %}">
+                                <i class="fa fa-certificate"></i> 工信认证
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
                 <hr>
                 <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 my-3 text-muted">
@@ -56,19 +62,16 @@
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'control:account' %}">
-                            <i class="fa fa-user"></i> 账户管理
+                            <i class="fa fa-user"></i> 用户管理
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'control:inferior' %}">
-                            <i class="fa fa-user-astronaut"></i> 下属管理
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'control:download' %}">
-                            <i class="fa fa-download"></i> 附件管理
-                        </a>
-                    </li>
+                    {% if user.profile.view_access.download %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'control:download' %}">
+                                <i class="fa fa-download"></i> 附件管理
+                            </a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'home:logout' %}">
                             <i class="fa fa-sign-out-alt"></i> 退出系统

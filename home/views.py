@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from exam.models import CodeCategory, CodeSubject
+from exam.models import CodeCategory
+from django.contrib import messages
 
 
 # Create your views here.
@@ -23,7 +24,8 @@ def login(request):
             auth.login(request, user)
             return redirect('home:dashboard')
         else:
-            pass
+            messages.error(request, '账号密码不匹配！')
+            return redirect('home:login')
     context = {'n_bar': 'login'}
     return render(request, 'home/login.html', context)
 

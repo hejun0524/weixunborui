@@ -32,3 +32,14 @@ function showButtons(e) {
         e.innerHTML = '<span class="fa fa-plus-circle fake-link-plus"></span>';
     }
 }
+
+$('#btn_clean_cache').click(function () {
+    var $btn = $('#btn_clean_cache');
+    $.ajax({
+        url: ['', 'control', 'clean_cache'].join('/'),
+        success: function (data) {
+            $btn.attr('class', 'btn btn-sm btn-outline-success');
+            $btn.text('已清理');
+        }
+    });
+});
