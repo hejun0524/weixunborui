@@ -14,18 +14,22 @@ def index(request):
 
 
 def login(request):
-    if request.user.is_authenticated:
-        return redirect('home:dashboard')
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = auth.authenticate(request, username=username, password=password)
-        if (user is not None) and user.is_active:
-            auth.login(request, user)
+    try:
+        if request.user.is_authenticated:
             return redirect('home:dashboard')
-        else:
-            messages.error(request, '账号密码不匹配！')
-            return redirect('home:login')
+        if request.method == 'POST':
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = auth.authenticate(request, username=username, password=password)
+            if (user is not None) and user.is_active:
+                auth.login(request, user)
+                return redirect('home:dashboard')
+            else:
+                messages.error(request, '账号密码不匹配！')
+                return redirect('home:login')
+    except Exception as e:
+        with open('error.log', 'w') as f:
+            f.write(str(e))
     context = {'n_bar': 'login'}
     return render(request, 'home/login.html', context)
 
