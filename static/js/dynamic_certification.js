@@ -156,11 +156,9 @@ function ajaxChangeTable(callerType, code, targets, entries) {
     });
 }
 
-function clearCodeTable() {
+function clearCodeTable(){
     ['#cell_code_category', '#cell_code_subject', '#cell_code_price', '#cell_code_description'].forEach(
-        function (value) {
-            $(value).html('请先选择一个代码科目');
-        }
+        function (value) { $(value).html('请先选择一个代码科目'); }
     );
 }
 
@@ -298,21 +296,3 @@ $('#id_m_code').change(function () {
     );
 });
 
-$('#btn_load_list').click(function () {
-    var selectedValue = $('#id_list_list').val();
-    if (!selectedValue) return alert('请选择一个列表！');
-    $.ajax({
-        url: ['', 'exam', 'get_student_list', selectedValue, ''].join('/'),
-        success: function (data) {
-            var studentList = [];
-            if (data.hasOwnProperty('student_list')) {
-                var entries = Object.entries(data['student_list']);
-                for (var i = 0; i < entries.length; i++) {
-                    studentList.push(entries[i][0] + '-' + entries[i][1][0] + '-' + entries[i][1][1]);
-                }
-                $('#id_students').text(studentList.join('\r\n'));
-                $('#student_list_modal').modal('hide');
-            }
-        }
-    });
-});

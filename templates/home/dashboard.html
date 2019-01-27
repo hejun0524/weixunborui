@@ -18,27 +18,21 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% if user.profile.view_access.pool %}
-                    <tr>
-                        <td scope="row">
-                            <a href="{% url 'pool:problems' %}">题库管理</a>
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if user.profile.view_access.exam %}
-                    <tr>
-                        <td scope="row">
-                            <a href="{% url 'exam:exams' %}">组成试卷</a>
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if user.profile.view_access.certification %}
-                    <tr>
-                        <td scope="row">
-                            <a href="{% url 'exam:certification' %}">工信认证</a>
-                        </td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'pool:problems' %}">题库管理</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'exam:exams' %}">组成试卷</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'exam:certification' %}">工信认证</a>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -52,16 +46,14 @@
                 <tbody>
                 <tr>
                     <td scope="row">
-                        <a href="{% url 'control:account' %}">用户管理</a>
+                        <a href="{% url 'control:account' %}">账户管理</a>
                     </td>
                 </tr>
-                {% if user.profile.view_access.download %}
-                    <tr>
-                        <td scope="row">
-                            <a href="{% url 'control:download' %}">附件管理</a>
-                        </td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <td scope="row">
+                        <a href="{% url 'control:download' %}">附件管理</a>
+                    </td>
+                </tr>
                 <tr>
                     <td scope="row">
                         <a href="{% url 'home:logout' %}" class="text-danger">退出系统</a>

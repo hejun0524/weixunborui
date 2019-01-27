@@ -71,13 +71,11 @@
                                 <option value="{{ object.id }}">{{ object }}</option>
                             {% endfor %}
                         </select>
-                        {% if can_manage_exam %}
-                            <div class="input-group-append">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_new_agreement">
-                                    新增
-                                </button>
-                            </div>
-                        {% endif %}
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_new_agreement">
+                                新增
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -89,13 +87,11 @@
                                 <option value="{{ object.id }}">{{ object }}</option>
                             {% endfor %}
                         </select>
-                        {% if can_manage_exam %}
-                            <div class="input-group-append">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_new_ad">
-                                    新增
-                                </button>
-                            </div>
-                        {% endif %}
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_new_ad">
+                                新增
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -112,11 +108,6 @@
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label for="id_exam_title" class="col-sm-3 col-form-label">名单命名</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_student_list_name"
-                           name="student_list_name" placeholder="若不保存学生名单请留白">
                 </div>
                 <button type="submit" form="form_exam" class="btn btn-sm btn-primary" name="add_exam">生成考试包</button>
             </form>
@@ -135,93 +126,85 @@
     </div>
     <hr>
 </div>
-{% if can_manage_exam %}
-    <!-- Picture collapse -->
-    <div class="collapse" id="manage_pictures_collapse">
-        <div class="card card-body mb-3">
 
-        </div>
-    </div>
-
-    <!-- Agreement modal -->
-    <div class="modal fade" id="agreement_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">添加考试须知图</h5>
+<!-- Agreement modal -->
+<div class="modal fade" id="agreement_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加考试须知图</h5>
+            </div>
+            <form role="form" method="post" class="modal-body pr-5" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label for="id_agreement_name" class="col-sm-3 col-form-label required">名称</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_agreement_name"
+                           name="agreement_name" required>
                 </div>
-                <form role="form" method="post" class="modal-body pr-5" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group row">
-                        <label for="id_agreement_name" class="col-sm-3 col-form-label required">名称</label>
-                        <input type="text" class="col-sm-9 form-control form-control-sm" id="id_agreement_name"
-                               name="agreement_name" required>
-                    </div>
-                    <div class="form-group row">
-                        <span class="col-sm-3 col-form-label required">图片</span>
-                        <div class="col-sm-9 input-group px-0">
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="id_agreement_image"
-                                       name="agreement_image" accept="image/*" required>
-                                <label class="custom-file-label" for="id_agreement_image">点击上传</label>
-                            </div>
-                            <div class="input-group-append">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_agreement">
-                                    重置
-                                </button>
-                            </div>
+                <div class="form-group row">
+                    <span class="col-sm-3 col-form-label required">图片</span>
+                    <div class="col-sm-9 input-group px-0">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="id_agreement_image"
+                                   name="agreement_image" accept="image/*" required>
+                            <label class="custom-file-label" for="id_agreement_image">点击上传</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_agreement">
+                                重置
+                            </button>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label for="id_agreement_description" class="col-sm-3 col-form-label">备注</label>
-                        <input type="text" class="col-sm-9 form-control form-control-sm" id="id_agreement_description"
-                               name="agreement_description">
-                    </div>
-                    <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
-                    <button class="btn btn-sm btn-primary" type="submit" name="btn_add_agreement">确认添加</button>
-                </form>
-            </div>
+                </div>
+                <div class="form-group row">
+                    <label for="id_agreement_description" class="col-sm-3 col-form-label">备注</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_agreement_description"
+                           name="agreement_description">
+                </div>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
+                <button class="btn btn-sm btn-primary" type="submit" name="btn_add_agreement">确认添加</button>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Ad modal -->
-    <div class="modal fade" id="ad_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">添加宣传图</h5>
+<!-- Ad modal -->
+<div class="modal fade" id="ad_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加宣传图</h5>
+            </div>
+            <form role="form" method="post" class="modal-body pr-5" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label for="id_ad_name" class="col-sm-3 col-form-label required">名称</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_ad_name"
+                           name="ad_name" required>
                 </div>
-                <form role="form" method="post" class="modal-body pr-5" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group row">
-                        <label for="id_ad_name" class="col-sm-3 col-form-label required">名称</label>
-                        <input type="text" class="col-sm-9 form-control form-control-sm" id="id_ad_name"
-                               name="ad_name" required>
-                    </div>
-                    <div class="form-group row">
-                        <span class="col-sm-3 col-form-label required">图片</span>
-                        <div class="col-sm-9 input-group px-0">
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="id_ad_image"
-                                       name="ad_image" accept="image/*" required>
-                                <label class="custom-file-label" for="id_ad_image">点击上传</label>
-                            </div>
-                            <div class="input-group-append">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_ad">
-                                    重置
-                                </button>
-                            </div>
+                <div class="form-group row">
+                    <span class="col-sm-3 col-form-label required">图片</span>
+                    <div class="col-sm-9 input-group px-0">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="id_ad_image"
+                                   name="ad_image" accept="image/*" required>
+                            <label class="custom-file-label" for="id_ad_image">点击上传</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_ad">
+                                重置
+                            </button>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label for="id_ad_description" class="col-sm-3 col-form-label">备注</label>
-                        <input type="text" class="col-sm-9 form-control form-control-sm" id="id_ad_description"
-                               name="ad_description">
-                    </div>
-                    <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
-                    <button class="btn btn-sm btn-primary" type="submit" name="btn_add_ad">确认添加</button>
-                </form>
-            </div>
+                </div>
+                <div class="form-group row">
+                    <label for="id_ad_description" class="col-sm-3 col-form-label">备注</label>
+                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_ad_description"
+                           name="ad_description">
+                </div>
+                <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
+                <button class="btn btn-sm btn-primary" type="submit" name="btn_add_ad">确认添加</button>
+            </form>
         </div>
     </div>
-{% endif %}
+</div>

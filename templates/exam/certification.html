@@ -7,194 +7,179 @@
 {% block content %}
     <div class="row">
         <!-- Student list input -->
-        {% if can_manage_certification %}
-            <div class="col-md-4">
-                <label for="id_students" class="font-weight-bold required">学生名单</label>
-                <div class="alert alert-secondary">
-                    <small>
-                        每行一位学生，格式为考试号-姓名-证件号。例：<br>
-                        1A-大卫-2018FCS025<br>
-                        1B-迈克-2018SEN026<br>
-                        您也可以<span class="fake-link text-primary" id="search_student_list">点此</span>搜索已存名单
-                    </small>
-                </div>
-                <textarea class="form-control notes mb-3" rows="12" id="id_students"
-                          name="students" form="form_certification" required></textarea>
+        <div class="col-md-4">
+            <label for="id_students" class="font-weight-bold required">学生名单</label>
+            <div class="alert alert-secondary">
+                <small>
+                    每行一位学生，格式为考试号-姓名-证件号。例：<br>
+                    1A-大卫-2018FCS025<br>
+                    1B-迈克-2018SEN026<br>
+                    您也可以<span class="fake-link text-primary" id="search_student_list">点此</span>搜索已存名单
+                </small>
             </div>
-            <!-- Other information inputs -->
-            <form role="form" method="post" id="form_certification" class="col-md-4" enctype="multipart/form-data">
-                {% csrf_token %}
-                <p class="font-weight-bold mb-2">其他选填信息</p>
-                <div class="alert alert-secondary">
-                    <small>
-                        照片格式不限，命名方式为考试号+姓名。例：<br>
-                        1A大卫.jpg<br>
-                        1B迈克.png<br>
-                        同时，您可以<span class="fake-link text-primary" id="check_photos">点此</span>核对照片
-                    </small>
-                </div>
-                <div class="form-group row">
-                    <label for="id_certification_name" class="col-sm-3 col-form-label">名称</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm"
-                           id="id_certification_name" name="certification_name">
-                </div>
-                <div class="form-group row">
-                    <label for="id_certification_project" class="col-sm-3 col-form-label">项目</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm" value="NCAE"
-                           id="id_certification_project" name="certification_project">
-                </div>
-                <div class="form-group row">
-                    <label for="id_certification_verified" class="col-sm-3 col-form-label">通过方式</label>
-                    <select class="col-sm-9 custom-select" id="id_certification_verified"
-                            name="certification_verified">
-                        <option value="通过验证" selected>通过验证</option>
-                        <option value="未通过验证">未通过验证</option>
-                    </select>
-                </div>
-                <div class="form-group row">
-                    <label for="id_certification_school" class="col-sm-3 col-form-label">学校</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm"
-                           id="id_certification_school" name="certification_school">
-                </div>
-                <div class="form-group row">
-                    <label for="id_certification_subject" class="col-sm-3 col-form-label">科目</label>
-                    <div class="col-sm-9 input-group px-0">
-                        <select class="custom-select" id="id_certification_subject" name="certification_subject">
-                            <option value="" selected>请选择</option>
-                            {% for object in all_code_subjects %}
-                                <option value="{{ object.name }}">{{ object }}</option>
-                            {% endfor %}
-                        </select>
-                        {% if can_manage_code %}
-                            <div class="input-group-append">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_new_subject">
-                                    新增
-                                </button>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <span class="col-sm-3 col-form-label">照片</span>
-                    <div class="col-sm-9 input-group px-0">
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" id="id_certification_photos"
-                                   name="certification_photos" accept="image/*" multiple>
-                            <label class="custom-file-label" for="id_certification_photos">上传照片（可多选）</label>
-                        </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_photos">
-                                重置
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="id_exam_title" class="col-sm-3 col-form-label">名单命名</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm" id="id_student_list_name"
-                           name="student_list_name" placeholder="若不保存学生名单请留白">
-                </div>
-                <button type="submit" class="btn btn-sm btn-primary" name="btn_certification">生成认证包</button>
-            </form>
-        {% endif %}
-        <!-- Saved lists -->
-        {% if can_download_certification %}
-            <div class="col-md-4">
-                <p class="font-weight-bold mb-2">已保存认证包</p>
-                <table class="table table-sm">
-                    <thead>
-                    <tr>
-                        <th scope="col" class="cell-4">名称</th>
-                        <th scope="col" class="cell-1"></th>
-                        <th scope="col" class="cell-5">创建时间</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for object in all_certifications %}
-                        <tr>
-                            <td>{{ object }}</td>
-                            <td class="fake-link-plus" onclick="showButtons(this);">
-                                <span class="fa fa-plus-circle"></span>
-                            </td>
-                            <td class="text-muted">{{ object.created }}</td>
-                        </tr>
-                        <tr class="table-secondary" hidden>
-                            <td colspan="3">
-                                <a href="{% url 'exam:get_certification' object.id %}" role="button"
-                                   class="btn btn-sm btn-primary">下载</a>
-                                <a href="javascript:" onclick="copyLink({{ object.id }})" role="button"
-                                   class="btn btn-sm btn-success">复制链接</a>
-                                {% if can_manage_certification %}
-                                    <a href="{% url 'exam:delete_certification' object.id %}" role="button"
-                                       class="btn btn-sm btn-danger">删除</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+            <textarea class="form-control notes mb-3" rows="12" id="id_students"
+                      name="students" form="form_certification" required></textarea>
+        </div>
+        <!-- Other information inputs -->
+        <form role="form" method="post" id="form_certification" class="col-md-4" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p class="font-weight-bold mb-2">其他选填信息</p>
+            <div class="alert alert-secondary">
+                <small>
+                    照片格式不限，命名方式为考试号+姓名。例：<br>
+                    1A大卫.jpg<br>
+                    1B迈克.png<br>
+                    同时，您可以<span class="fake-link text-primary" id="check_photos">点此</span>核对照片
+                </small>
             </div>
-        {% endif %}
-    </div>
-    {% if can_manage_code %}
-        <hr>
-        <p class="font-weight-bold">管理NCAE代码</p>
-        <div class="row">
-            <div class="col-md-4">
-                <!-- Category -->
-                <label for="id_m_category" class="font-weight-bold">代码类别</label>
-                <div class="float-right">
-                    <span id="add_code_category" class="fake-link">新增</span>
-                    <span id="edit_code_category" class="fake-link text-secondary">编辑/删除</span>
-                </div>
-                <div class="form-group">
-                    <select class="custom-select" id="id_m_category" size="5">
-                        <option value="0" selected>全部</option>
-                        {% for object in all_code_categories %}
-                            <option value="{{ object.id }}">{{ object }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Subject -->
-                <label for="id_m_code" class="font-weight-bold">代码科目</label>
-                <div class="float-right">
-                    <span id="add_code" class="fake-link">新增</span>
-                    <span id="edit_code" class="fake-link text-secondary">编辑/删除</span>
-                </div>
-                <div class="form-group">
-                    <select class="custom-select" id="id_m_code" size="5">
-                        <option value="0" disabled selected>请选择</option>
+            <div class="form-group row">
+                <label for="id_certification_name" class="col-sm-3 col-form-label">名称</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_certification_name" name="certification_name">
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_project" class="col-sm-3 col-form-label">项目</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm" value="NCAE"
+                       id="id_certification_project" name="certification_project">
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_verified" class="col-sm-3 col-form-label">通过方式</label>
+                <select class="col-sm-9 custom-select" id="id_certification_verified"
+                        name="certification_verified">
+                    <option value="通过验证" selected>通过验证</option>
+                    <option value="未通过验证">未通过验证</option>
+                </select>
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_school" class="col-sm-3 col-form-label">学校</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_certification_school" name="certification_school">
+            </div>
+            <div class="form-group row">
+                <label for="id_certification_subject" class="col-sm-3 col-form-label">科目</label>
+                <div class="col-sm-9 input-group px-0">
+                    <select class="custom-select" id="id_certification_subject" name="certification_subject">
+                        <option value="" selected>请选择</option>
                         {% for object in all_code_subjects %}
-                            <option value="{{ object.id }}">{{ object }}</option>
+                            <option value="{{ object.name }}">{{ object }}</option>
                         {% endfor %}
                     </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_new_subject">
+                            新增
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-8">
-                <p class="font-weight-bold">查看代码信息</p>
-                <table class="table table-sm table-bordered">
-                    <tbody>
+            <div class="form-group row">
+                <span class="col-sm-3 col-form-label">照片</span>
+                <div class="col-sm-9 input-group px-0">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="id_certification_photos"
+                               name="certification_photos" accept="image/*" multiple>
+                        <label class="custom-file-label" for="id_certification_photos">上传照片（可多选）</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" id="btn_reset_photos">
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary" name="btn_certification">生成认证包</button>
+        </form>
+        <!-- Saved lists -->
+        <div class="col-md-4">
+            <p class="font-weight-bold mb-2">已保存认证包</p>
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col" class="cell-4">名称</th>
+                    <th scope="col" class="cell-1"></th>
+                    <th scope="col" class="cell-5">创建时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for object in all_certifications %}
                     <tr>
-                        <th class="cell-2" scope="row">代码类别</th>
-                        <td id="cell_code_category">请先选择一个代码科目</td>
+                        <td>{{ object }}</td>
+                        <td class="fake-link-plus" onclick="showButtons(this);">
+                            <span class="fa fa-plus-circle"></span>
+                        </td>
+                        <td class="text-muted">{{ object.created }}</td>
                     </tr>
-                    <tr>
-                        <th class="cell-2" scope="row">代码科目</th>
-                        <td id="cell_code_subject">请先选择一个代码科目</td>
+                    <tr class="table-secondary" hidden>
+                        <td colspan="3">
+                            <a href="{% url 'exam:get_certification' object.id %}" role="button"
+                               class="btn btn-sm btn-primary">下载</a>
+                            <a href="javascript:" onclick="copyLink({{ object.id }})" role="button"
+                               class="btn btn-sm btn-success">复制链接</a>
+                            <a href="{% url 'exam:delete_certification' object.id %}" role="button"
+                               class="btn btn-sm btn-danger">删除</a>
+                        </td>
                     </tr>
-                    <tr>
-                        <th class="cell-2" scope="row">价格</th>
-                        <td id="cell_code_price">请先选择一个代码科目</td>
-                    </tr>
-                    <tr>
-                        <th class="cell-2" scope="row">说明</th>
-                        <td id="cell_code_description">请先选择一个代码科目</td>
-                    </tr>
-                    </tbody>
-                </table>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr>
+    <p class="font-weight-bold">管理NCAE代码</p>
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Category -->
+            <label for="id_m_category" class="font-weight-bold">代码类别</label>
+            <div class="float-right">
+                <span id="add_code_category" class="fake-link">新增</span>
+                <span id="edit_code_category" class="fake-link text-secondary">编辑/删除</span>
+            </div>
+            <div class="form-group">
+                <select class="custom-select" id="id_m_category" size="5">
+                    <option value="0" selected>全部</option>
+                    {% for object in all_code_categories %}
+                        <option value="{{ object.id }}">{{ object }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Subject -->
+            <label for="id_m_code" class="font-weight-bold">代码科目</label>
+            <div class="float-right">
+                <span id="add_code" class="fake-link">新增</span>
+                <span id="edit_code" class="fake-link text-secondary">编辑/删除</span>
+            </div>
+            <div class="form-group">
+                <select class="custom-select" id="id_m_code" size="5">
+                    <option value="0" disabled selected>请选择</option>
+                    {% for object in all_code_subjects %}
+                        <option value="{{ object.id }}">{{ object }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
-    {% endif %}
+        <div class="col-md-8">
+            <p class="font-weight-bold">查看代码信息</p>
+            <table class="table table-sm table-bordered">
+                <tbody>
+                <tr>
+                    <th class="cell-2" scope="row">代码类别</th>
+                    <td id="cell_code_category">请先选择一个代码科目</td>
+                </tr>
+                <tr>
+                    <th class="cell-2" scope="row">代码科目</th>
+                    <td id="cell_code_subject">请先选择一个代码科目</td>
+                </tr>
+                <tr>
+                    <th class="cell-2" scope="row">价格</th>
+                    <td id="cell_code_price">请先选择一个代码科目</td>
+                </tr>
+                <tr>
+                    <th class="cell-2" scope="row">说明</th>
+                    <td id="cell_code_description">请先选择一个代码科目</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
     {% include 'exam/certification_modal.html' %}
     {% include 'exam/students_modal.html' %}
 {% endblock %}

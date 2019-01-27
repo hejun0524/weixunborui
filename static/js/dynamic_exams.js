@@ -530,26 +530,3 @@ $('#id_ad_image').change(function () {
 $('#btn_reset_ad').click(function () {
     changeFileInput('#id_ad_image', true, '点击上传');
 });
-
-$('#btn_load_list').click(function () {
-    var selectedValue = $('#id_list_list').val();
-    if (!selectedValue) return alert('请选择一个列表！');
-    $.ajax({
-        url: ['', 'exam', 'get_student_list', selectedValue, ''].join('/'),
-        success: function (data) {
-            var studentList = [];
-            if (data.hasOwnProperty('student_list')) {
-                var entries = Object.entries(data['student_list']);
-                for (var i = 0; i < entries.length; i++) {
-                    studentList.push(entries[i][0] + '-' + entries[i][1][0] + '-' + entries[i][1][1]);
-                }
-                $('#id_students').text(studentList.join('\r\n'));
-                $('#student_list_modal').modal('hide');
-            }
-        }
-    });
-});
-
-$('#manage_pictures').click(function () {
-    $('#manage_pictures_collapse').collapse('toggle');
-});

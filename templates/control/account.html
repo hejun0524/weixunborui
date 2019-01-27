@@ -1,94 +1,42 @@
 {% extends 'base_dashboard.html' %}
 {% load static %}
 
-{% block title %}用户管理{% endblock %}
-{% block canvas_title %}用户管理{% endblock %}
+{% block title %}账户管理{% endblock %}
+{% block canvas_title %}账户管理{% endblock %}
 {% block content %}
-    <form method="post" class="row">
-        <div class="col-md-6">
-            <p class="font-weight-bold">添加/修改用户</p>
-            {% csrf_token %}
-            <div class="form-group row pr-md-3">
-                <label for="id_inf_user" class="col-sm-3 col-form-label">选择用户</label>
-                <select class="custom-select col-sm-9" id="id_inf_user" name="inf_user">
-                    <option value="0" selected>新建用户</option>
-                    {% for object in all_users %}
-                        <option value="{{ object.id }}">{{ object.profile }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="form-group row pr-md-3">
-                <label for="id_inf_username" class="col-sm-3 col-form-label">用户名</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm"
-                       id="id_inf_username" name="inf_username">
-            </div>
-            <div class="form-group row pr-md-3">
-                <label for="id_inf_full_name" class="col-sm-3 col-form-label">姓名</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm"
-                       id="id_inf_full_name" name="inf_full_name">
-            </div>
-            <div class="form-group row pr-md-3">
-                <label for="id_inf_area" class="col-sm-3 col-form-label">地区</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm"
-                       id="id_inf_area" name="inf_area">
-            </div>
-            <div class="form-group row pr-md-3">
-                <label for="id_inf_school" class="col-sm-3 col-form-label">学校</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm"
-                       id="id_inf_school" name="inf_school">
-            </div>
-            <div class="form-group row pr-md-3">
-                <label for="id_inf_department" class="col-sm-3 col-form-label">部门</label>
-                <input type="text" class="col-sm-9 form-control form-control-sm"
-                       id="id_inf_department" name="inf_department">
-            </div>
-            <button class="btn btn-sm btn-outline-primary" type="submit" id="btn_add_ind" name="btn_add_inf">
-                确认操作
-            </button>
-        </div>
-        <div class="col-md-6">
-            <p class="font-weight-bold">用户权限设置</p>
-            {% include 'control/access.html' %}
-        </div>
-    </form>
-    <hr>
     <div class="row">
         <div class="col-md-6 pr-md-5">
-            <p class="font-weight-bold">查看个人信息{% if not can_edit_info %}（如需修改请联系上级）{% endif %}</p>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-group row">
-                    <label for="id_username" class="col-sm-3 col-form-label">用户名</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm"
-                           id="id_username" value="{{ user.username }}" readonly>
-                </div>
-                <div class="form-group row">
-                    <label for="id_full_name" class="col-sm-3 col-form-label">姓名</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm" name="full_name"
-                           id="id_full_name" value="{{ user.profile.full_name }}" {{ tag_readonly }}>
-                </div>
-                <div class="form-group row">
-                    <label for="id_area" class="col-sm-3 col-form-label">地区</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm" name="area"
-                           id="id_area" value="{{ user.profile.area }}" {{ tag_readonly }}>
-                </div>
-                <div class="form-group row">
-                    <label for="id_school" class="col-sm-3 col-form-label">学校</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm" name="school"
-                           id="id_school" value="{{ user.profile.school }}" {{ tag_readonly }}>
-                </div>
-                <div class="form-group row">
-                    <label for="id_department" class="col-sm-3 col-form-label">部门</label>
-                    <input type="text" class="col-sm-9 form-control form-control-sm" name="department"
-                           id="id_department" value="{{ user.profile.department }}" {{ tag_readonly }}>
-                </div>
-                {% if can_edit_info %}
-                    <button class="btn btn-sm btn-outline-primary" type="submit" id="btn_info" name="btn_info">
-                        确认修改
-                    </button>
-                {% endif %}
-            </form>
+            <p class="font-weight-bold">查看个人信息（如需修改请联系上级）</p>
+            <div class="form-group row">
+                <label for="id_username" class="col-sm-3 col-form-label">用户名</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_username" value="{{ user.username }}" readonly>
+            </div>
+            <div class="form-group row">
+                <label for="id_full_name" class="col-sm-3 col-form-label">姓名</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_full_name" value="{{ user.profile.full_name }}" readonly>
+            </div>
+            <div class="form-group row">
+                <label for="id_area" class="col-sm-3 col-form-label">地区</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_area" value="{{ user.profile.area }}" readonly>
+            </div>
+            <div class="form-group row">
+                <label for="id_school" class="col-sm-3 col-form-label">学校</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_school" value="{{ user.profile.school }}" readonly>
+            </div>
+            <div class="form-group row">
+                <label for="id_department" class="col-sm-3 col-form-label">部门</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_department" value="{{ user.profile.department }}" readonly>
+            </div>
+            <div class="form-group row">
+                <label for="id_role" class="col-sm-3 col-form-label">权限</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_role" value="{{ user.profile.role }}" readonly>
+            </div>
         </div>
         <div class="col-md-6 pr-md-5">
             <p class="font-weight-bold">修改密码</p>
@@ -113,6 +61,22 @@
                     确认修改
                 </button>
             </form>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-6 pr-md-5">
+            <p class="font-weight-bold">查看订阅信息（威训博锐考试系统阅卷端）</p>
+            <div class="form-group row">
+                <label for="id_plan_detail" class="col-sm-3 col-form-label">订阅情况</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_plan_detail" value="{{ user.profile.grader.plan_detail }}" readonly>
+            </div>
+            <div class="form-group row">
+                <label for="id_enc_key" class="col-sm-3 col-form-label">登录密钥</label>
+                <input type="text" class="col-sm-9 form-control form-control-sm"
+                       id="id_enc_key" value="{{ user.profile.grader.enc_key }}" readonly>
+            </div>
         </div>
     </div>
 {% endblock %}

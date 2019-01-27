@@ -53,8 +53,10 @@ class GovernmentCertification(models.Model):
 
 
 class StudentList(models.Model):
+    exam = models.ForeignKey('Exam', on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True)
     student_list = fields.JSONField()
+    created = models.DateTimeField(auto_now=True)
 
 
 class CodeCategory(models.Model):

@@ -1,14 +1,12 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
 from django.utils.encoding import escape_uri_path
 from wsgiref.util import FileWrapper
 from pool.models import Category, Subject, Chapter
 from pool.views import class_list, sub_class_list, type_sc_abbr, type_sc_full, type_en_abbr
 from .models import *
-from control.models import User
 from PIL import Image
 from zipfile import ZipFile
 from io import BytesIO
@@ -27,12 +25,8 @@ import base64
 
 
 # Create your views here.
-@login_required()
+
 def exams(request):
-    operator = User.objects.get(username=request.user.username)
-    access = operator.profile.access
-    if not operator.profile.view_access.get('exam'):
-        return redirect('home:dashboard')
     chapter_points = tuple(map(lambda num: 'point{}'.format(num), range(1, 8)))
     chapter_difficulties = tuple(map(lambda num: 'difficulty{}'.format(num), range(1, 8)))
     chapter_q_nums = tuple(map(lambda num: 'q_num{}'.format(num), range(1, 8)))
@@ -44,13 +38,8 @@ def exams(request):
         'all_ads': Advertisement.objects.all(),
         'all_agreements': Agreement.objects.all(),
         'all_exams': Exam.objects.all().order_by('-created'),
-        'all_student_lists': StudentList.objects.all(),
         'type_sc_abbr': type_sc_abbr,
         'chapter_info': tuple(zip(type_sc_abbr, chapter_points, chapter_difficulties, chapter_q_nums)),
-        'can_manage_strategy': access.get('manage_strategy', False),
-        'can_generate_exam': access.get('generate_exam', False),
-        'can_download_exam': access.get('download_exam', False),
-        'can_manage_exam': access.get('manage_exam', False),
     }
     if request.method == 'POST':
         if 'add_strategy' in request.POST:
@@ -98,6 +87,8 @@ def exams(request):
             if request.POST.get('agreement_description'):
                 new_object.description = request.POST.get('agreement_description')
             new_object.save()
+        elif 'add_student_list' in request.POST:
+            pass
         elif 'add_exam' in request.POST:
             title = request.POST.get('exam_title')
             location = request.POST.get('exam_location')
@@ -148,24 +139,12 @@ def exams(request):
             new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf))
             new_student_list_file = StudentListFile(exam_id=new_object.id)
             new_student_list_file.student_list.save('{}.xls'.format(uuid.uuid4().hex), ContentFile(buffer_excel))
-            print(student_json, exam_set[3])
-            if request.POST.get('student_list_name') != '':
-                new_student_list = StudentList(
-                    name=request.POST.get('student_list_name'),
-                    student_list=student_json
-                )
-                new_student_list.save()
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
 
 
-@login_required()
 def certification(request):
-    operator = User.objects.get(username=request.user.username)
-    access = operator.profile.access
-    if not operator.profile.view_access.get('certification'):
-        return redirect('home:dashboard')
     context = {
         'all_certifications': GovernmentCertification.objects.all().order_by('-created'),
         'all_exams': Exam.objects.all(),
@@ -173,9 +152,6 @@ def certification(request):
         'all_code_categories': CodeCategory.objects.all().order_by('index'),
         'all_strategies': Strategy.objects.all().order_by('index'),
         'all_code_subjects': CodeSubject.objects.all().order_by('code'),
-        'can_download_certification': access.get('download_certification', False),
-        'can_manage_certification': access.get('manage_certification', False),
-        'can_manage_code': access.get('manage_code', False),
     }
     if request.method == 'POST':
         if 'btn_certification' in request.POST:
@@ -211,12 +187,6 @@ def certification(request):
             })
             new_object.student_list = student_json
             new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf))
-            if request.POST.get('student_list_name') != '':
-                new_student_list = StudentList(
-                    name=request.POST.get('student_list_name'),
-                    student_list=student_json
-                )
-                new_student_list.save()
         elif 'add_code' in request.POST:
             code_category_id = int(request.POST.get('code_category'))
             new_object = CodeSubject(
@@ -286,7 +256,6 @@ def get_exam(request, exam_id):
     return response
 
 
-@login_required()
 def delete_exam(request, exam_id):
     this_object = Exam.objects.get(id=exam_id)
     this_object.delete()
@@ -302,7 +271,6 @@ def get_certification(request, certification_id):
     return response
 
 
-@login_required()
 def delete_certification(request, certification_id):
     this_object = GovernmentCertification.objects.get(pk=certification_id)
     this_object.delete()
@@ -317,13 +285,6 @@ def get_exam_list(request, exam_id):
     response = HttpResponse(FileWrapper(open(file_path, 'rb')), content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = "attachment; filename*=utf-8''{}.xls".format(escape_uri_path(file_name))
     return response
-
-
-@login_required()
-def delete_student_list(request, list_id):
-    this_object = StudentList.objects.get(id=list_id)
-    this_object.delete()
-    return redirect('exam:exams')
 
 
 def wrong_message(warning):
@@ -811,11 +772,4 @@ def get_code(request, code_id):
         'subject_info': str(this_object),
         'price': this_object.price,
         'description': this_object.description
-    })
-
-
-def get_student_list(request, list_id):
-    this_object = StudentList.objects.get(id=list_id)
-    return JsonResponse({
-        'student_list': this_object.student_list,
     })

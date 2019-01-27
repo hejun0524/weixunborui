@@ -4,8 +4,8 @@ import base64
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.deconstruct import deconstructible
-from django.contrib.postgres import fields
 import uuid
 
 
@@ -38,23 +38,19 @@ class Download(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200, default='未设定')
+    level = models.IntegerField(default=0)
     area = models.CharField(max_length=200, default='未指定')
     school = models.CharField(max_length=200, default='未指定')
     department = models.CharField(max_length=200, default='未指定')
     relations = models.ManyToManyField('self', blank=True)
-    access = fields.JSONField(default=dict)
 
     def __str__(self):
         return self.user.username
 
     @property
-    def view_access(self):
-        return dict(
-            pool=self.access.get('view_pool', False) or self.user.is_superuser,
-            exam=self.access.get('view_exam', False) or self.user.is_superuser,
-            certification=self.access.get('view_certification', False) or self.user.is_superuser,
-            download=self.access.get('view_download', False) or self.user.is_superuser,
-        )
+    def role(self):
+        roles = ['超级用户', '系统管理员', '校园管理员', '题库编辑', '教师', '学生']
+        return roles[self.level]
 
 
 @receiver(post_save, sender=User)
@@ -66,3 +62,40 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+
+class Grader(models.Model):
+    username = models.OneToOneField(Profile, on_delete=models.CASCADE, blank=True)
+    plan = models.IntegerField()
+    date_expire = models.DateField()
+
+    @property
+    def plan_detail(self):
+        if self.plan <= 0:
+            return '无计划'
+        if self.plan % 12 == 0:
+            return '{}年'.format(self.plan // 12)
+        return '{}个月'.format(self.plan)
+
+    @property
+    def date_expire_string(self):
+        return '{}/{:02}/{:02}'.format(self.date_expire.year, self.date_expire.month, self.date_expire.day)
+
+    @property
+    def enc_key(self):
+        def _pad(s):
+            padding = AES.block_size - len(s) % AES.block_size
+            return s + (padding * chr(padding)).encode()
+
+        year = self.date_expire.year
+        month = self.date_expire.month
+        day = self.date_expire.day
+        text = 'WXGR{}{:0>2}{:0>2}'.format(year, month, day, str(self.username))
+        password = '{:.16}'.format(str(self.username))
+        if len(password) < 16:
+            password += '0' * (16 - len(password))
+        iv = password
+        cipher = AES.new(password, AES.MODE_CBC, iv)
+        encrypted = cipher.encrypt(_pad(text.encode()))
+        encrypted_key = base64.b64encode(encrypted).decode()
+        return encrypted_key

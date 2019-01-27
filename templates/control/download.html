@@ -5,7 +5,7 @@
 {% block canvas_title %}附件管理{% endblock %}
 {% block content %}
     <div class="row">
-        {% if can_manage_download %}
+        {% if can_upload %}
             <div class="col-md-6 pr-md-5">
                 <p class="font-weight-bold">添加新的附件</p>
                 <form method="post" enctype="multipart/form-data">
@@ -104,10 +104,8 @@
                                    class="btn btn-sm btn-primary">下载</a>
                                 <a href="javascript:" onclick="copyLink({{ d.id }})" role="button"
                                    class="btn btn-sm btn-success">复制链接</a>
-                                {% if can_manage_download %}
-                                    <a href="{% url 'control:delete_download' d.id %}" role="button"
-                                       class="btn btn-sm btn-danger">删除</a>
-                                {% endif %}
+                                <a href="{% url 'control:delete_download' d.id %}" role="button"
+                                   class="btn btn-sm btn-danger">删除</a>
                             </td>
                         </tr>
                         {% empty %}
@@ -120,13 +118,6 @@
             </table>
         </div>
     </div>
-    {% if can_clean_cache %}
-        <hr>
-        <p class="font-weight-bold">清理过剩文件</p>
-        <p>题目、考试包、附件等文件删除后在服务器中仍然有缓存，请定时清理！</p>
-        <button class="btn btn-sm btn-outline-danger" id="btn_clean_cache">清理缓存</button>
-    {% endif %}
-
 {% endblock %}
 {% block js %}
     <script src="{% static 'js/dynamic_download.js' %}"></script>

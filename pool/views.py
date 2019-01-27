@@ -1,8 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
 from .models import *
-from control.models import User
 from django.contrib import messages
 import re
 
@@ -16,12 +14,7 @@ type_en_abbr = ('mc', 'mr', 'tf', 'tb', 'nb', 'dc', 'cp')
 old_sc_full = {'单选题': 1, '多选题': 2, '判断题': 3, '文本填空': 4, '数字填空': 5, '简答题': 6, '主观题': 6}
 
 
-@login_required()
 def problems(request):
-    operator = User.objects.get(username=request.user.username)
-    access = operator.profile.access
-    if not operator.profile.view_access.get('pool'):
-        return redirect('home:dashboard')
     if request.method == 'POST':
         if 'btn_smart_add' in request.POST:
             chapter_id = int(request.POST.get('smart_chapter_id'))
@@ -118,12 +111,7 @@ def problems(request):
         'types': tuple(zip(type_en_abbr, type_sc_full)),
         'chapter_points': chapter_points,
         'chapter_difficulties': chapter_difficulties,
-        'chapter_info': tuple(zip(type_sc_full, chapter_points, chapter_difficulties)),
-        'can_view_catalog': access.get('view_catalog', False),
-        'can_manage_catalog': access.get('manage_catalog', False),
-        'can_view_problems': access.get('view_problems', False),
-        'can_manage_problems': access.get('manage_problems', False),
-        'can_group_actions': access.get('group_actions', False),
+        'chapter_info': tuple(zip(type_sc_full, chapter_points, chapter_difficulties))
     }
     return render(request, 'pool/problems.html', context)
 
@@ -616,10 +604,7 @@ def get_problem(request, problem_type, problem_id):
     this_subject = this_chapter.subject
     this_category = this_subject.category
     # Get content
-    operator = User.objects.get(username=request.user.username)
-    access = operator.profile.access
     result = {
-        'can_manage_problems': access.get('manage_problems', False),
         'category': this_category.id,
         'subject': this_subject.id,
         'chapter': this_chapter.id,
