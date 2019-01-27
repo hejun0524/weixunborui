@@ -29,14 +29,14 @@
                 <li class="nav-item{% if n_bar == 'index' %} active{% endif %}">
                     <a class="nav-link" href="{% url 'home:index' %}">主页</a>
                 </li>
-                <li class="nav-item{% if n_bar == 'about' %} active{% endif %}">
-                    <a class="nav-link" href="{% url 'home:about' %}">关于我们</a>
-                </li>
                 <li class="nav-item{% if n_bar == 'courses' %} active{% endif %}">
                     <a class="nav-link" href="{% url 'home:courses' %}">智能学堂</a>
                 </li>
                 <li class="nav-item{% if n_bar == 'assessment' %} active{% endif %}">
                     <a class="nav-link" href="{% url 'home:assessment' %}">人才评测</a>
+                </li>
+                <li class="nav-item{% if n_bar == 'about' %} active{% endif %}">
+                    <a class="nav-link" href="{% url 'home:about' %}">关于我们</a>
                 </li>
                 <li class="nav-item{% if n_bar == 'contact' %} active{% endif %}">
                     <a class="nav-link" href="{% url 'home:contact' %}">联系我们</a>
