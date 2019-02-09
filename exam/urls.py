@@ -21,4 +21,6 @@ urlpatterns = [
     path('get_code_category/<int:category_id>/', views.get_code_category),
     path('get_code/<int:code_id>/', views.get_code),
     path('get_student_list/<int:list_id>/', views.get_student_list),
+    path('get_ad/<int:ad_id>/', views.get_ad),
+    path('get_agreement/<int:agreement_id>/', views.get_agreement),
 ]

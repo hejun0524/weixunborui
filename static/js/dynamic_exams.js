@@ -11,9 +11,9 @@ function ajaxChangeSelection(requestApp, callerType, code, targets, has0, entrie
     $.ajax({
         url: ['', requestApp, callerType, code, ''].join('/'),
         success: function (data) {
-            for (var i = 0; i < targets.length; i++) {
-                var $target = $(targets[i]);
-                var currentValue = $target.val();
+            for (let i = 0; i < targets.length; i++) {
+                let $target = $(targets[i]);
+                let currentValue = $target.val();
                 $target.empty();
                 if (!fixedSelection) {
                     if (has0[i]) $target.append($('<option selected></option>').val(0).html('全部'));
@@ -22,7 +22,7 @@ function ajaxChangeSelection(requestApp, callerType, code, targets, has0, entrie
                     if (has0[i]) $target.append($('<option></option>').val(0).html('全部'));
                     else $target.append($('<option disabled></option>').val('').html('请选择'));
                 }
-                var ajaxDict = data[entries[i]];
+                let ajaxDict = data[entries[i]];
                 $.each(ajaxDict, function (index, text) {
                     if (fixedSelection && text[0].toString() === currentValue) {
                         $target.append($('<option selected></option>').val(text[0]).html(text[1]));
@@ -39,20 +39,20 @@ function ajaxChangeTable(requestApp, callerType, code, targets, entries, special
     $.ajax({
         url: ['', requestApp, callerType, code, ''].join('/'),
         success: function (data) {
-            for (var i = 0; i < targets.length; i++) {
-                var $target = $(targets[i]);
+            for (let i = 0; i < targets.length; i++) {
+                let $target = $(targets[i]);
                 $target.html(data[entries[i]]);
             }
-            for (var j = 0; j < specialTargets.length; j++) {
-                var sTarget = $(specialTargets[j]);
+            for (let j = 0; j < specialTargets.length; j++) {
+                let sTarget = $(specialTargets[j]);
                 if (specialAttributes[j] === 'value') {
                     sTarget.val(data[specialEntries[j]]);
                     continue;
                 }
                 if (specialAttributes[j] === 'plan') {
                     $('#strategy_structure').html(''); // Re-select, clear
-                    for (var k = 0; k < data[specialEntries[j]].length; k++) {
-                        var planLine = data[specialEntries[j]][k];
+                    for (let k = 0; k < data[specialEntries[j]].length; k++) {
+                        let planLine = data[specialEntries[j]][k];
                         appendPlanLine(planLine['chapter_name'], planLine['plan_list'], planLine['list_total_points']);
                     }
                     continue;
@@ -67,8 +67,8 @@ function ajaxChangeForm(requestApp, callerType, code, targets, entries, isDuplic
     $.ajax({
         url: ['', requestApp, callerType, code, ''].join('/'),
         success: function (data) {
-            for (var i = 0; i < targets.length; i++) {
-                var $target = $(targets[i]);
+            for (let i = 0; i < targets.length; i++) {
+                let $target = $(targets[i]);
                 if (entries[i] === 'name' && isDuplication) {
                     $target.val(data[entries[i]] + ' - 拷贝');
                 } else if (entries[i] === 'index' && isDuplication) {
@@ -82,19 +82,19 @@ function ajaxChangeForm(requestApp, callerType, code, targets, entries, isDuplic
 }
 
 function displayModal(action, type) {
-    var translations = {
+    let translations = {
         'add': '添加',
         'edit': '修改',
         'duplicate': '复制',
         'strategy': '策略'
     };
-    var typeSc = translations[type];
-    var actionSc = translations[action];
-    var $selection = $('#id_' + type); // From main page, selection list
-    var selectedValue = $selection.val();
-    var $submitBtn = $('#btn_' + type); // Determine its name
-    var $hiddenId = $('#id_' + type + '_id');
-    var $modalTitle = $('#title_' + type);
+    let typeSc = translations[type];
+    let actionSc = translations[action];
+    let $selection = $('#id_' + type); // From main page, selection list
+    let selectedValue = $selection.val();
+    let $submitBtn = $('#btn_' + type); // Determine its name
+    let $hiddenId = $('#id_' + type + '_id');
+    let $modalTitle = $('#title_' + type);
     $submitBtn.attr('name', action + '_' + type);
     $submitBtn.text('确认' + actionSc);
     $hiddenId.val('');
@@ -108,11 +108,11 @@ function displayModal(action, type) {
         // Hidden field - object id
         $hiddenId.val(selectedValue);
         if (type === 'strategy') {
-            var targets = [
+            let targets = [
                 '#id_strategy_category', '#id_strategy_subject',
                 '#id_strategy_name', '#id_strategy_index', '#id_strategy_description', '#id_strategy_timer'
             ];
-            var entries = ['category', 'subject', 'name', 'index', 'description', 'timer_num'];
+            let entries = ['category', 'subject', 'name', 'index', 'description', 'timer_num'];
             ajaxChangeForm('exam', 'get_strategy', selectedValue, targets, entries, action === 'duplicate');
             ajaxChangeSelection(
                 'pool', 'change_category', $('#id_strategy_category').val(),
@@ -124,15 +124,15 @@ function displayModal(action, type) {
 }
 
 function setStrategyInfo(pk) {
-    var targets = ['#cell_strategy_name', '#cell_strategy_index', '#cell_strategy_description', '#cell_strategy_timer'];
-    var entries = ['full_path', 'full_index', 'description', 'timer'];
-    var specialTargets = ['#id_selected_strategy', '#id_exam_strategy_id', '#id_exam_strategy', '#strategy_structure'];
-    var specialEntries = ['strategy', 'strategy', 'full_path', 'plan'];
-    var specialAttributes = ['value', 'value', 'value', 'plan'];
+    let targets = ['#cell_strategy_name', '#cell_strategy_index', '#cell_strategy_description', '#cell_strategy_timer'];
+    let entries = ['full_path', 'full_index', 'description', 'timer'];
+    let specialTargets = ['#id_selected_strategy', '#id_exam_strategy_id', '#id_exam_strategy', '#strategy_structure'];
+    let specialEntries = ['strategy', 'strategy', 'full_path', 'plan'];
+    let specialAttributes = ['value', 'value', 'value', 'plan'];
     $('#total_points').text(0);
     if (pk === 0) { // reset
-        for (var i = 0; i < targets.length; i++) {
-            var emptyCell = $(targets[i]);
+        for (let i = 0; i < targets.length; i++) {
+            let emptyCell = $(targets[i]);
             emptyCell.text('请先选择一个章节');
         }
         $('#id_selected_strategy').val('');
@@ -145,12 +145,12 @@ function setStrategyInfo(pk) {
 }
 
 function setChapterInfo(pk) {
-    var targets = [];
-    var entries = [];
-    var specialTargets = ['#cell_chapter_image'];
-    var specialEntries = ['image_path'];
-    var specialAttributes = ['src'];
-    var i = 1;
+    let targets = [];
+    let entries = [];
+    let specialTargets = ['#cell_chapter_image'];
+    let specialEntries = ['image_path'];
+    let specialAttributes = ['src'];
+    let i = 1;
     for (; i <= 7; i++) {
         specialTargets.push('#cell_chapter_point' + i);
         specialEntries.push('point' + i);
@@ -170,25 +170,25 @@ function setChapterInfo(pk) {
 }
 
 function appendPlanLine(chapterName, planDetails, planPoints) {
-    var structure = $('#strategy_structure');
-    var $totalPoints = $('#total_points');
-    var row = $('<tr>');
+    let structure = $('#strategy_structure');
+    let $totalPoints = $('#total_points');
+    let row = $('<tr>');
     // Chapter name cell
-    var nameCell = $('<td>').text(chapterName);
+    let nameCell = $('<td>').text(chapterName);
     nameCell.attr('rowspan', 2);
     // Button cell
-    var functionCell = $('<td>');
+    let functionCell = $('<td>');
     functionCell.attr('rowspan', 2);
-    var upBtn = $('<span>').addClass('fa fa-arrow-circle-up fake-link text-primary mr-2');
-    var downBtn = $('<span>').addClass('fa fa-arrow-circle-down fake-link text-primary mr-2');
-    var deleteBtn = $('<span>').addClass('fa fa-trash-alt text-danger fake-link ml-5');
-    var planString = $('<input type="text" readonly hidden>').val(JSON.stringify(planDetails));
-    var planPointsInput = $('<input type="number" readonly hidden>').val(planPoints);
+    let upBtn = $('<span>').addClass('fa fa-arrow-circle-up fake-link text-primary mr-2');
+    let downBtn = $('<span>').addClass('fa fa-arrow-circle-down fake-link text-primary mr-2');
+    let deleteBtn = $('<span>').addClass('fa fa-trash-alt text-danger fake-link ml-5');
+    let planString = $('<input type="text" readonly hidden>').val(JSON.stringify(planDetails));
+    let planPointsInput = $('<input type="number" readonly hidden>').val(planPoints);
     upBtn.click(function () {
-        var myRow = $(this).parent().parent();
-        var myPointsRow = myRow.next('tr');
-        var lastRow = myRow.prev('tr').prev('tr');
-        var lastPointsRow = lastRow.next('tr');
+        let myRow = $(this).parent().parent();
+        let myPointsRow = myRow.next('tr');
+        let lastRow = myRow.prev('tr').prev('tr');
+        let lastPointsRow = lastRow.next('tr');
         if (lastRow[0]) {
             myRow.after(myPointsRow);
             myPointsRow.after(lastRow);
@@ -198,10 +198,10 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
         }
     });
     downBtn.click(function () {
-        var myRow = $(this).parent().parent();
-        var myPointsRow = myRow.next('tr');
-        var nextRow = myPointsRow.next('tr');
-        var nextPointsRow = nextRow.next('tr');
+        let myRow = $(this).parent().parent();
+        let myPointsRow = myRow.next('tr');
+        let nextRow = myPointsRow.next('tr');
+        let nextPointsRow = nextRow.next('tr');
         if (nextRow[0]) {
             nextPointsRow.after(myRow);
             myRow.after(myPointsRow);
@@ -210,8 +210,8 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
         }
     });
     deleteBtn.click(function () {
-        var rowToDelete = $(this).parent().parent();
-        var pointRowToDelete = rowToDelete.next('tr');
+        let rowToDelete = $(this).parent().parent();
+        let pointRowToDelete = rowToDelete.next('tr');
         rowToDelete.remove();
         pointRowToDelete.remove();
         $totalPoints.text(parseInt($totalPoints.text()) - planPoints);
@@ -219,13 +219,13 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
     functionCell.append(upBtn, downBtn, deleteBtn, planString, planPointsInput);
     // Append all cells to the row
     row.append(nameCell);
-    var i;
+    let i;
     for (i = 1; i <= 7; i++) {
         row.append($('<td>').text(planDetails[i][0]));
     }
     row.append(functionCell);
     // Construct points row
-    var pointsRow = $('<tr>');
+    let pointsRow = $('<tr>');
     for (i = 1; i <= 7; i++) {
         pointsRow.append($('<td>').text(planDetails[i][1] + '分'));
     }
@@ -238,16 +238,16 @@ function appendPlanLine(chapterName, planDetails, planPoints) {
 
 function appendPlainTextTable($table, header, content, zeroMsg) {
     if (content.length === 0) {
-        var zeroRow = $('<tr></tr>');
-        var zeroCell = $('<td></td>').html('<span class="fa fa-thumbs-up"></span> ' + zeroMsg);
+        let zeroRow = $('<tr></tr>');
+        let zeroCell = $('<td></td>').html('<span class="fa fa-thumbs-up"></span> ' + zeroMsg);
         zeroCell.attr('class', 'text-success');
         zeroRow.append(zeroCell);
         $table.append(zeroRow);
     } else {
-        for (var i = 0; i < content.length; i++) {
-            for (var j = 0; j < content[i].length; j++) {
-                var row = $('<tr></tr>');
-                var cell = $('<td></td>').html(header + content[i][j]);
+        for (let i = 0; i < content.length; i++) {
+            for (let j = 0; j < content[i].length; j++) {
+                let row = $('<tr></tr>');
+                let cell = $('<td></td>').html(header + content[i][j]);
                 row.append(cell);
                 $table.append(row);
             }
@@ -256,7 +256,7 @@ function appendPlainTextTable($table, header, content, zeroMsg) {
 }
 
 function copyLink(file_id, is_exam) {
-    var dummy = document.createElement('input');
+    let dummy = document.createElement('input');
     dummy.value = window.location.href + (is_exam ? 'get/' : 'get_list/') + file_id + '/';
     document.body.appendChild(dummy);
     dummy.select();
@@ -267,9 +267,9 @@ function copyLink(file_id, is_exam) {
 
 function showButtons(e) {
     // Toggle
-    var parentRow = $(e).parent();
-    var buttons = parentRow.next();
-    var isVisible = buttons.is(':visible');
+    let parentRow = $(e).parent();
+    let buttons = parentRow.next();
+    let isVisible = buttons.is(':visible');
     if (!isVisible) {
         buttons.attr('hidden', false);
         e.innerHTML = '<span class="fa fa-minus-circle fake-link-minus"></span>';
@@ -280,10 +280,10 @@ function showButtons(e) {
 }
 
 function digestPhotoNames(fileName) {
-    var regExHyphen = /^(.*)-(.*)$/;
-    var regExBlank = /^(.*)[\t\s]+(.*)$/;
-    var regExNumbers = /^(\d+)(.*)$/;
-    var regExArray;
+    let regExHyphen = /^(.*)-(.*)$/;
+    let regExBlank = /^(.*)[\t\s]+(.*)$/;
+    let regExNumbers = /^(\d+)(.*)$/;
+    let regExArray;
     if (regExHyphen.test(fileName)) {
         regExArray = regExHyphen.exec(fileName);
         fileName = regExArray[1].trim() + regExArray[2].trim();
@@ -300,9 +300,52 @@ function digestPhotoNames(fileName) {
 }
 
 function changeFileInput(target, clear, msg) {
-    var $target = $(target);
+    let $target = $(target);
     if (clear) $target.val('');
     $target.next().text(msg);
+}
+
+function showPictureModal(action, pictureType, pictureId) {
+    let $modal = $(`#${pictureType}_modal`);
+    const translation = {
+        'add': '添加',
+        'edit': '编辑',
+        'agreement': '考试须知图',
+        'ad': '宣传图'
+    };
+    // Change title
+    let modalTitle = `${translation[action]}${translation[pictureType]}`;
+    $(`#${pictureType}_modal_title`).html(modalTitle);
+    // Change id
+    $(`#id_${pictureType}_id`).val(pictureId);
+    // Change btn name
+    let $btnPicture = $(`#btn_${pictureType}`);
+    $btnPicture.html(`确认${translation[action]}`);
+    $btnPicture.attr('name', `${action}_${pictureType}`);
+    // Show or hide delete btn & preview
+    $(`#delete_${pictureType}`).attr('hidden', action === 'add');
+    $(`#${pictureType}_preview_card`).attr('hidden', action === 'add');
+    // AJAX inputs and preview - clear all first
+    let $name = $(`#id_${pictureType}_name`), $description = $(`#id_${pictureType}_description`);
+    let $preview = $(`#${pictureType}_preview_2`), $checkBox = $(`#id_${pictureType}_changed`);
+    $name.val('');
+    $description.val('');
+    $checkBox.attr('checked', false);
+    $preview.attr('src', '');
+    changeFileInput(`#id_${pictureType}_image`, true, '点击上传');
+    if (action === 'edit') {
+        $.ajax({
+            url: `/exam/get_${pictureType}/${pictureId}/`,
+            success: function (data) {
+                $name.val(data['name']);
+                $description.val(data['description']);
+                $preview.attr('src', data['image_path']);
+                changeFileInput(`#id_${pictureType}_image`, true, data['image']);
+            }
+        });
+    }
+    // Display modal
+    $modal.modal('show');
 }
 
 $('#add_strategy').click(function () {
@@ -370,16 +413,16 @@ $('#id_chapter_chapter').change(function () {
 });
 
 $('#btn_add_chapter').click(function () {
-    var chapterId = $('#id_chapter_chapter').val();
-    var chapterName = $("#id_chapter_chapter option:selected").text();
+    let chapterId = $('#id_chapter_chapter').val();
+    let chapterName = $("#id_chapter_chapter option:selected").text();
     if (chapterId === '' || chapterId === null || chapterId === undefined) {
         return alert('请选择一个章节！');
     }
-    var i = 1, planDetails = [parseInt(chapterId)], planPoint = 0;
+    let i = 1, planDetails = [parseInt(chapterId)], planPoint = 0;
     for (; i <= 7; i++) {
-        var maxNumber = parseInt($('#cell_chapter_q_num' + i).text());
-        var selectedNumber = parseInt($('#cell_chapter_selected_q_num' + i).val());
-        var typePoints = parseInt($('#cell_chapter_point' + i).val());
+        let maxNumber = parseInt($('#cell_chapter_q_num' + i).text());
+        let selectedNumber = parseInt($('#cell_chapter_selected_q_num' + i).val());
+        let typePoints = parseInt($('#cell_chapter_point' + i).val());
         if (selectedNumber < 0 || selectedNumber > maxNumber) {
             return alert('选择的题目数量不符合要求！');
         }
@@ -391,16 +434,16 @@ $('#btn_add_chapter').click(function () {
 });
 
 $('#save_structure').click(function () {
-    var $strategy = $('#id_selected_strategy');
-    var $plan = $('#id_strategy_plan');
-    var $sample = $('#id_sample_check');
+    let $strategy = $('#id_selected_strategy');
+    let $plan = $('#id_strategy_plan');
+    let $sample = $('#id_sample_check');
     if ($strategy.val() === '') {
         return alert('请先选择一个策略！');
     }
-    var $structure = $('#strategy_structure');
-    var allPlanStrings = $structure.find('input[type="text"]');
-    var finalJson = [];
-    for (var i = 0; i < allPlanStrings.length; i++) {
+    let $structure = $('#strategy_structure');
+    let allPlanStrings = $structure.find('input[type="text"]');
+    let finalJson = [];
+    for (let i = 0; i < allPlanStrings.length; i++) {
         finalJson.push(JSON.parse(allPlanStrings[i]['value']));
     }
     $plan.val(JSON.stringify(finalJson));
@@ -409,7 +452,7 @@ $('#save_structure').click(function () {
 });
 
 $('#generate_exam').click(function () {
-    var $strategy = $('#id_strategy');
+    let $strategy = $('#id_strategy');
     if ($strategy.val() === '0') {
         return alert('请先选择一个策略！');
     }
@@ -417,11 +460,11 @@ $('#generate_exam').click(function () {
 });
 
 $('#generate_sample').click(function () {
-    var $strategy = $('#id_selected_strategy');
+    let $strategy = $('#id_selected_strategy');
     if ($strategy.val() === '') {
         return alert('请先选择一个策略！');
     }
-    var $sample = $('#id_sample_check');
+    let $sample = $('#id_sample_check');
     $sample.prop('checked', true);
     $('#form_save_structure').submit();
 });
@@ -431,30 +474,30 @@ $('#search_student_list').click(function () {
 });
 
 $('#check_photos').click(function () {
-    var studentListText = $.trim($('#id_students').val());
-    var photos = $('#id_exam_photos');
+    let studentListText = $.trim($('#id_students').val());
+    let photos = $('#id_exam_photos');
     if (!studentListText) return alert('请输入学生列表！');
     if (!photos.val()) return alert('您未上传任何照片！');
     // Get all file names
-    var files = photos.prop("files");
-    var fileNames = $.map(files, function (val) {
+    let files = photos.prop("files");
+    let fileNames = $.map(files, function (val) {
         return val.name.substr(0, val.name.lastIndexOf('.')) || val.name;
     });
     // Get student list
-    var studentList = studentListText.split(/[\r\n]+/);
-    var necessary = {}, necessaryOrdered = [], extra = [], duplicates = [], i = 0;
+    let studentList = studentListText.split(/[\r\n]+/);
+    let necessary = {}, necessaryOrdered = [], extra = [], duplicates = [], i = 0;
     for (; i < studentList.length; i++) {
-        var student = $.trim(studentList[i]);
+        let student = $.trim(studentList[i]);
         // Get desired file name
-        var studentInfo = student.split('-');
+        let studentInfo = student.split('-');
         if (studentInfo.length !== 3) return alert('您的学生列表格式有误！位置：' + student);
-        var desiredFileName = $.trim(studentInfo[0]) + $.trim(studentInfo[1]);
+        let desiredFileName = $.trim(studentInfo[0]) + $.trim(studentInfo[1]);
         necessary[desiredFileName] = {'info': student, 'has_file': false};
         necessaryOrdered.push(desiredFileName);
     }
     // Check files, get extra and duplicates
     for (i = 0; i < fileNames.length; i++) {
-        var thisFileName = digestPhotoNames(fileNames[i].trim());
+        let thisFileName = digestPhotoNames(fileNames[i].trim());
         if (necessary.hasOwnProperty(thisFileName)) {
             if (necessary[thisFileName]['has_file']) {
                 duplicates.push([thisFileName]);
@@ -466,13 +509,13 @@ $('#check_photos').click(function () {
         }
     }
     // Constructs the table
-    var $necessary = $('#necessary_photos'), $unnecessary = $('#unnecessary_photos');
+    let $necessary = $('#necessary_photos'), $unnecessary = $('#unnecessary_photos');
     $necessary.html('');
     $unnecessary.html('');
     for (i = 0; i < necessaryOrdered.length; i++) {
-        var thisStudentInfo = necessary[necessaryOrdered[i]]['info'];
-        var row = $('<tr></tr>');
-        var cell = $('<td></td>');
+        let thisStudentInfo = necessary[necessaryOrdered[i]]['info'];
+        let row = $('<tr></tr>');
+        let cell = $('<td></td>');
         if (necessary[necessaryOrdered[i]]['has_file']) {
             cell.html('<span class="fa fa-check-circle"></span> ' + thisStudentInfo);
             cell.attr('class', 'text-success');
@@ -489,15 +532,23 @@ $('#check_photos').click(function () {
 });
 
 $('#btn_new_agreement').click(function () {
-    $('#agreement_modal').modal('show');
+    showPictureModal('add', 'agreement', 0);
 });
 
 $('#btn_new_ad').click(function () {
-    $('#ad_modal').modal('show');
+    showPictureModal('add', 'ad', 0);
+});
+
+$('#btn_new_agreement_2').click(function () {
+    showPictureModal('add', 'agreement', 0);
+});
+
+$('#btn_new_ad_2').click(function () {
+    showPictureModal('add', 'ad', 0);
 });
 
 $('#id_exam_photos').change(function () {
-    var files = $(this)[0].files;
+    let files = $(this)[0].files;
     changeFileInput('#id_exam_photos', false, '已选择' + files.length + '个文件');
 });
 
@@ -511,10 +562,14 @@ $('#id_exam_agreement').change(function () {
 });
 
 $('#id_agreement_image').change(function () {
+    $('#id_agreement_changed').attr('checked', true);
+    $('#agreement_preview_card').attr('hidden', true);
     changeFileInput('#id_agreement_image', false, $(this).val());
 });
 
 $('#btn_reset_agreement').click(function () {
+    $('#id_agreement_changed').attr('checked', false);
+    $('#agreement_preview_card').attr('hidden', true);
     changeFileInput('#id_agreement_image', true, '点击上传');
 });
 
@@ -524,23 +579,27 @@ $('#id_exam_ad').change(function () {
 });
 
 $('#id_ad_image').change(function () {
+    $('#id_ad_changed').attr('checked', true);
+    $('#ad_preview_card').attr('hidden', true);
     changeFileInput('#id_ad_image', false, $(this).val());
 });
 
 $('#btn_reset_ad').click(function () {
+    $('#id_ad_changed').attr('checked', false);
+    $('#ad_preview_card').attr('hidden', true);
     changeFileInput('#id_ad_image', true, '点击上传');
 });
 
 $('#btn_load_list').click(function () {
-    var selectedValue = $('#id_list_list').val();
+    let selectedValue = $('#id_list_list').val();
     if (!selectedValue) return alert('请选择一个列表！');
     $.ajax({
         url: ['', 'exam', 'get_student_list', selectedValue, ''].join('/'),
         success: function (data) {
-            var studentList = [];
+            let studentList = [];
             if (data.hasOwnProperty('student_list')) {
-                var entries = Object.entries(data['student_list']);
-                for (var i = 0; i < entries.length; i++) {
+                let entries = Object.entries(data['student_list']);
+                for (let i = 0; i < entries.length; i++) {
                     studentList.push(entries[i][0] + '-' + entries[i][1][0] + '-' + entries[i][1][1]);
                 }
                 $('#id_students').text(studentList.join('\r\n'));

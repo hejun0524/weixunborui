@@ -88,7 +88,7 @@ def account(request):
     access = operator.profile.access
     context = {
         'can_edit_info': access.get('edit_info', False),
-        'can_manage_users': access.get('manage_users', False),
+        'can_manage_users': access.get('manage_users', False) or operator.is_superuser,
         'tag_readonly': '' if access.get('edit_info', False) else 'readonly',
         'all_users': User.objects.all().order_by('username'),
     }

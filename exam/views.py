@@ -87,18 +87,38 @@ def exams(request):
         elif 'delete_strategy' in request.POST:
             this_object = Strategy.objects.get(id=int(request.POST.get('strategy_id')))
             this_object.delete()
-        elif 'btn_add_ad' in request.POST:
+        elif 'add_ad' in request.POST:
             new_object = Advertisement(name=request.POST.get('ad_name'), image=request.FILES.get('ad_image'))
-            if request.POST.get('ad_description'):
-                new_object.description = request.POST.get('ad_description')
+            new_object.description = request.POST.get('ad_description')
             new_object.save()
-        elif 'btn_add_agreement' in request.POST:
+        elif 'add_agreement' in request.POST:
             new_object = Agreement(name=request.POST.get('agreement_name'),
                                    image=request.FILES.get('agreement_image'))
-            if request.POST.get('agreement_description'):
-                new_object.description = request.POST.get('agreement_description')
+            new_object.description = request.POST.get('agreement_description')
             new_object.save()
-        elif 'add_exam' in request.POST:
+        elif 'edit_ad' in request.POST:
+            this_object = Advertisement.objects.get(id=int(request.POST.get('ad_id')))
+            if request.POST.get('ad_name'):
+                this_object.name = request.POST.get('ad_name')
+            if request.POST.get('ad_changed'):
+                this_object.image = request.FILES.get('ad_image')
+            this_object.description = request.POST.get('ad_description')
+            this_object.save()
+        elif 'edit_agreement' in request.POST:
+            this_object = Agreement.objects.get(id=int(request.POST.get('agreement_id')))
+            if request.POST.get('agreement_name'):
+                this_object.name = request.POST.get('agreement_name')
+            if request.POST.get('agreement_changed'):
+                this_object.image = request.FILES.get('agreement_image')
+            this_object.description = request.POST.get('agreement_description')
+            this_object.save()
+        elif 'delete_ad' in request.POST:
+            this_object = Advertisement.objects.get(id=int(request.POST.get('ad_id')))
+            this_object.delete()
+        elif 'delete_agreement' in request.POST:
+            this_object = Agreement.objects.get(id=int(request.POST.get('agreement_id')))
+            this_object.delete()
+        elif ('add_exam' in request.POST) or ('add_hw' in request.POST):
             title = request.POST.get('exam_title')
             location = request.POST.get('exam_location')
             section = request.POST.get('exam_section')
@@ -140,15 +160,16 @@ def exams(request):
                     'section': section,
                     'date': date,
                     'timer': this_strategy.timer,
-                    'subject': str(this_strategy.subject)
+                    'subject': str(this_strategy.subject),
+                    'is_homework': 'add_hw' in request.POST
                 }
             })
             # Save objects to database
             new_object = Exam(title=title, location=location, section=section, date=date, plan=plan)
+            new_object.learning = 'add_hw' in request.POST
             new_object.package.save('{}.zip'.format(uuid.uuid4().hex), ContentFile(buffer_zf))
             new_student_list_file = StudentListFile(exam_id=new_object.id)
             new_student_list_file.student_list.save('{}.xls'.format(uuid.uuid4().hex), ContentFile(buffer_excel))
-            print(student_json, exam_set[3])
             if request.POST.get('student_list_name') != '':
                 new_student_list = StudentList(
                     name=request.POST.get('student_list_name'),
@@ -818,4 +839,24 @@ def get_student_list(request, list_id):
     this_object = StudentList.objects.get(id=list_id)
     return JsonResponse({
         'student_list': this_object.student_list,
+    })
+
+
+def get_ad(request, ad_id):
+    this_object = Advertisement.objects.get(id=ad_id)
+    return JsonResponse({
+        'name': this_object.name,
+        'description': this_object.description,
+        'image': str(this_object.image).split('/')[-1],
+        'image_path': '/media/' + str(this_object.image),
+    })
+
+
+def get_agreement(request, agreement_id):
+    this_object = Agreement.objects.get(id=agreement_id)
+    return JsonResponse({
+        'name': this_object.name,
+        'description': this_object.description,
+        'image': str(this_object.image).split('/')[-1],
+        'image_path': '/media/' + str(this_object.image),
     })

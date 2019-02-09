@@ -24,6 +24,7 @@ class Exam(models.Model):
     date = models.CharField(max_length=100)
     plan = fields.JSONField()
     package = models.FileField(upload_to=RenameUploads('exam/'))
+    homework = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now=True)
 
     def __str__(self):

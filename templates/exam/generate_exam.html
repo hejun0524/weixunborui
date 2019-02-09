@@ -119,6 +119,7 @@
                            name="student_list_name" placeholder="若不保存学生名单请留白">
                 </div>
                 <button type="submit" form="form_exam" class="btn btn-sm btn-primary" name="add_exam">生成考试包</button>
+                <button type="submit" form="form_exam" class="btn btn-sm btn-success" name="add_hw">生成学习包</button>
             </form>
             <div class="col-md-3">
                 <p class="font-weight-bold mb-2">辅助功能</p>
@@ -139,7 +140,60 @@
     <!-- Picture collapse -->
     <div class="collapse" id="manage_pictures_collapse">
         <div class="card card-body mb-3">
-
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-sm">
+                        <thead>
+                        <tr>
+                            <th colspan="3">考试须知</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for agreement in all_agreements %}
+                            <tr>
+                                <td class="cell-3">{{ agreement.name }}</td>
+                                <td class="cell-5">{{ agreement.description }}</td>
+                                <td class="cell-2">
+                                    <span onclick="showPictureModal('edit', 'agreement', '{{ agreement.id }}')"
+                                          class="fake-link text-muted">编辑/删除</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">暂无考试须知</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <button class="btn btn-sm btn-primary" id="btn_new_agreement_2">新增考试须知</button>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-sm">
+                        <thead>
+                        <tr>
+                            <th colspan="3">宣传图</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for ad in all_ads %}
+                            <tr>
+                                <td class="cell-3">{{ ad.name }}</td>
+                                <td class="cell-5">{{ ad.description }}</td>
+                                <td class="cell-2">
+                                    <span onclick="showPictureModal('edit', 'ad', '{{ ad.id }}')"
+                                          class="fake-link text-muted">编辑/删除</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">暂无宣传图</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <button class="btn btn-sm btn-primary" id="btn_new_ad_2">新增宣传图</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -148,21 +202,26 @@
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">添加考试须知图</h5>
+                    <h5 class="modal-title" id="agreement_modal_title">添加考试须知图</h5>
                 </div>
                 <form role="form" method="post" class="modal-body pr-5" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <div class="form-group row" hidden>
+                        <label for="id_agreement_id" class="col-sm-3 col-form-label required">序号</label>
+                        <input type="text" class="col-sm-9 form-control form-control-sm"
+                               id="id_agreement_id" name="agreement_id" readonly>
+                    </div>
                     <div class="form-group row">
                         <label for="id_agreement_name" class="col-sm-3 col-form-label required">名称</label>
                         <input type="text" class="col-sm-9 form-control form-control-sm" id="id_agreement_name"
-                               name="agreement_name" required>
+                               name="agreement_name">
                     </div>
                     <div class="form-group row">
                         <span class="col-sm-3 col-form-label required">图片</span>
                         <div class="col-sm-9 input-group px-0">
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="id_agreement_image"
-                                       name="agreement_image" accept="image/*" required>
+                                       name="agreement_image" accept="image/*">
                                 <label class="custom-file-label" for="id_agreement_image">点击上传</label>
                             </div>
                             <div class="input-group-append">
@@ -170,15 +229,27 @@
                                     重置
                                 </button>
                             </div>
+
                         </div>
+                    </div>
+                    <div class="form-group row" hidden>
+                        <label for="id_agreement_changed">须知图更换</label>
+                        <input type="checkbox" name="agreement_changed" id="id_agreement_changed">
                     </div>
                     <div class="form-group row">
                         <label for="id_agreement_description" class="col-sm-3 col-form-label">备注</label>
                         <input type="text" class="col-sm-9 form-control form-control-sm" id="id_agreement_description"
                                name="agreement_description">
                     </div>
+                    <div class="card mb-3" id="agreement_preview_card" hidden>
+                        <div class="card-header">考试须知图预览</div>
+                        <img class="card-img-bottom" id="agreement_preview_2" src="">
+                    </div>
                     <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
-                    <button class="btn btn-sm btn-primary" type="submit" name="btn_add_agreement">确认添加</button>
+                    <button class="btn btn-sm btn-primary" type="submit" id="btn_agreement">确认添加</button>
+                    <button class="btn btn-sm btn-danger" type="submit"
+                            id="delete_agreement" name="delete_agreement" hidden>删除
+                    </button>
                 </form>
             </div>
         </div>
@@ -189,21 +260,25 @@
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">添加宣传图</h5>
+                    <h5 class="modal-title" id="ad_modal_title">添加宣传图</h5>
                 </div>
                 <form role="form" method="post" class="modal-body pr-5" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <div class="form-group row" hidden>
+                        <label for="id_ad_id" class="col-sm-3 col-form-label required">序号</label>
+                        <input type="text" class="col-sm-9 form-control form-control-sm"
+                               id="id_ad_id" name="ad_id" readonly>
+                    </div>
                     <div class="form-group row">
                         <label for="id_ad_name" class="col-sm-3 col-form-label required">名称</label>
-                        <input type="text" class="col-sm-9 form-control form-control-sm" id="id_ad_name"
-                               name="ad_name" required>
+                        <input type="text" class="col-sm-9 form-control form-control-sm" id="id_ad_name" name="ad_name">
                     </div>
                     <div class="form-group row">
                         <span class="col-sm-3 col-form-label required">图片</span>
                         <div class="col-sm-9 input-group px-0">
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="id_ad_image"
-                                       name="ad_image" accept="image/*" required>
+                                       name="ad_image" accept="image/*">
                                 <label class="custom-file-label" for="id_ad_image">点击上传</label>
                             </div>
                             <div class="input-group-append">
@@ -213,13 +288,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-group row" hidden>
+                        <label for="id_ad_changed">宣传图更换</label>
+                        <input type="checkbox" name="ad_changed" id="id_ad_changed">
+                    </div>
                     <div class="form-group row">
                         <label for="id_ad_description" class="col-sm-3 col-form-label">备注</label>
                         <input type="text" class="col-sm-9 form-control form-control-sm" id="id_ad_description"
                                name="ad_description">
                     </div>
+                    <div class="card mb-3" id="ad_preview_card" hidden>
+                        <div class="card-header">宣传图预览</div>
+                        <img class="card-img-bottom" id="ad_preview_2" src="">
+                    </div>
                     <button class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
-                    <button class="btn btn-sm btn-primary" type="submit" name="btn_add_ad">确认添加</button>
+                    <button class="btn btn-sm btn-primary" type="submit" id="btn_ad">确认添加</button>
+                    <button class="btn btn-sm btn-danger" type="submit" id="delete_ad" name="delete_ad" hidden>
+                        删除
+                    </button>
                 </form>
             </div>
         </div>
