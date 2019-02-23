@@ -89,6 +89,7 @@ def account(request):
     context = {
         'can_edit_info': access.get('edit_info', False),
         'can_manage_users': access.get('manage_users', False) or operator.is_superuser,
+        'is_superuser': operator.is_superuser,
         'tag_readonly': '' if access.get('edit_info', False) else 'readonly',
         'all_users': User.objects.all().order_by('username'),
     }
@@ -176,6 +177,19 @@ def account(request):
             )
             new_profile.save()
             messages.success(request, success_msg)
+        elif 'btn_init_pwd' in request.POST:
+            this_user = User.objects.get(id=int(request.POST.get('inf_user')))
+            init_pwd = 'myweixun001'
+            this_user.set_password(init_pwd)
+            this_user.save()
+            messages.success(request, '密码已成功初始化为{}'.format(init_pwd))
+        elif 'btn_del_user' in request.POST:
+            this_user = User.objects.get(id=int(request.POST.get('inf_user')))
+            if this_user == operator:
+                messages.error(request, '您无法删除自己！如需修改请至后台！')
+            else:
+                this_user.delete()
+                messages.success(request, '删除成功！')
         return redirect('control:account')
     return render(request, 'control/account.html', context)
 

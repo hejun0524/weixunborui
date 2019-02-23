@@ -2,9 +2,9 @@ $('#id_again_password').on('input', compareNewPasswords);
 $('#id_new_password').on('input', compareNewPasswords);
 
 function compareNewPasswords() {
-    var newPwd = $('#id_new_password').val();
-    var againPwd = $('#id_again_password').val();
-    var btnSubmit = $('#btn_password');
+    let newPwd = $('#id_new_password').val();
+    let againPwd = $('#id_again_password').val();
+    let btnSubmit = $('#btn_password');
     if (newPwd !== againPwd) {
         $(this).attr('class', 'col-sm-9 form-control form-control-sm form-control-danger');
         btnSubmit.attr('disabled', true);
@@ -25,9 +25,13 @@ function resetForm() {
 
 
 $('#id_inf_user').change(function () {
-    var selectedUser = $('#id_inf_user').val();
+    let selectedUser = $('#id_inf_user').val();
+    let btnDel = $('#btn_del_user');
+    let btnInit = $('#btn_init_pwd');
     if (parseInt(selectedUser) === 0) {
         resetForm();
+        btnDel.attr('disabled', true);
+        btnInit.attr('disabled', true);
     } else {
         resetForm();
         $.ajax({
@@ -38,12 +42,22 @@ $('#id_inf_user').change(function () {
                 $('#id_inf_area').val(data['area']);
                 $('#id_inf_school').val(data['school']);
                 $('#id_inf_department').val(data['department']);
-                for (var permKey in data['permission']) {
+                for (let permKey in data['permission']) {
                     if (data['permission'].hasOwnProperty(permKey)) {
                         $('#cb_' + permKey).prop('checked', data['permission'][permKey]);
                     }
                 }
+                btnDel.attr('disabled', false);
+                btnInit.attr('disabled', false);
             }
         });
+    }
+});
+
+$('#search_user').keyup(() => {
+    let filter = $('#search_user').val().toUpperCase();
+    let myList = $('#id_inf_user').children('option');
+    for (let i = 1; i < myList.length; i++) {
+        $(myList[i]).attr('hidden', $(myList[i]).text().toUpperCase().indexOf(filter) === -1);
     }
 });
