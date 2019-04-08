@@ -213,7 +213,7 @@ def certification(request):
             # Parse students and photos
             students = request.POST.get('students').split('\r\n')
             student_photos = request.FILES.getlist('certification_photos')
-            fvr = validate_students(students, student_photos)
+            fvr = validate_students(students, student_photos, repeated_id=True)
             if not fvr[0]:
                 messages.error(request, fvr[1])
                 return redirect('exam:certification')
@@ -351,7 +351,7 @@ def wrong_message(warning):
     return False, warning, {}
 
 
-def validate_students(students, photos):
+def validate_students(students, photos, repeated_id=False):
     student_json = {}
     student_photos_dict = {}
     for student in students:
@@ -362,9 +362,10 @@ def validate_students(students, photos):
                 this_exam_id = r.group(1).strip()
                 this_student_name = r.group(2).strip()
                 this_student_id = r.group(3).strip()
-                if this_exam_id in student_json:
+                if (not repeated_id) and (this_exam_id in student_json):
                     return wrong_message('您有重复的考试号！考试号：{}'.format(this_exam_id))
-                student_json[this_exam_id] = (this_student_name, this_student_id,)
+                generalized_exam_id = student if repeated_id else this_exam_id
+                student_json[generalized_exam_id] = (this_student_name, this_student_id, this_exam_id)
                 student_photos_dict['{}{}'.format(this_exam_id, this_student_name)] = None
             else:
                 return wrong_message('学生列表输入格式有误！位置：{}'.format(student))
@@ -566,8 +567,11 @@ def generate_excel(form_data, is_sign_sheet=False):
         ws.write(row_num, col_num, headers[col_num], font_style)
         ws.col(col_num).width = 256 * 20
     # Now comes the info
-    for exam_id in student_json:
-        student_name, student_id = list(student_json[exam_id])
+    for json_key in student_json:
+        json_value = list(student_json[json_key])
+        student_name = json_value[0]
+        student_id = json_value[1]
+        exam_id = json_key if len(json_value) == 2 else json_value[2]
         student_info = [exam_id, student_name, student_id, ]
         if not is_sign_sheet:
             student_info = [
