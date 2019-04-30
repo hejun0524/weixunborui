@@ -596,7 +596,10 @@ def generate_zip(photos, caller, other_files):
             buffer_photo = BytesIO()
             try:
                 pil_image = Image.open(photo)
+                # x, y = pil_image.size
+                # pil_image = pil_image.resize((160, 160 * y // x), Image.ANTIALIAS)
                 pil_image = pil_image.convert('RGB')
+                # pil_image.save(buffer_photo, format='JPEG', optimize=True, quality=95)
                 pil_image.save(buffer_photo, format='JPEG')
                 zf.writestr('photos/{}.jpg'.format(id_name), buffer_photo.getvalue())
             finally:
