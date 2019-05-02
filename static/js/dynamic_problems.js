@@ -1,18 +1,18 @@
 function displayModal(action, type) {
-    var translations = {
+    let translations = {
         'add': '添加',
         'edit': '修改',
         'category': '类别',
         'subject': '科目',
         'chapter': '章节'
     };
-    var typeSc = translations[type];
-    var actionSc = translations[action];
-    var $selection = $('#id_' + type);
-    var selectedValue = $selection.val();
-    var $submitBtn = $('#btn_' + type);
-    var $hiddenId = $('#id_' + type + '_id');
-    var $modalTitle = $('#title_' + type);
+    let typeSc = translations[type];
+    let actionSc = translations[action];
+    let $selection = $('#id_' + type);
+    let selectedValue = $selection.val();
+    let $submitBtn = $('#btn_' + type);
+    let $hiddenId = $('#id_' + type + '_id');
+    let $modalTitle = $('#title_' + type);
     $submitBtn.attr('name', action + '_' + type);
     $submitBtn.text('确认' + actionSc);
     $hiddenId.val('');
@@ -38,12 +38,12 @@ function displayModal(action, type) {
                 ['category', 'name', 'index']
             );
         } else if (type === 'chapter') {
-            var targets = [
+            let targets = [
                 '#id_chapter_category', '#id_chapter_subject',
                 '#id_chapter_name', '#id_chapter_index', '#label_chapter_image'
             ];
-            var entries = ['category', 'subject', 'name', 'index', 'image_name'];
-            for (var i = 1; i < 8; i++) {
+            let entries = ['category', 'subject', 'name', 'index', 'image_name'];
+            for (let i = 1; i < 8; i++) {
                 targets.push('#id_point' + i, '#id_difficulty' + i);
                 entries.push('point' + i, 'difficulty' + i);
             }
@@ -69,9 +69,9 @@ function ajaxChangeSelection(callerType, code, targets, has0, entries, fixedSele
     $.ajax({
         url: ['', 'pool', callerType, code, ''].join('/'),
         success: function (data) {
-            for (var i = 0; i < targets.length; i++) {
-                var $target = $(targets[i]);
-                var currentValue = $target.val();
+            for (let i = 0; i < targets.length; i++) {
+                let $target = $(targets[i]);
+                let currentValue = $target.val();
                 $target.empty();
                 if (!fixedSelection) {
                     if (has0[i]) $target.append($('<option selected></option>').val(0).html('全部'));
@@ -80,7 +80,7 @@ function ajaxChangeSelection(callerType, code, targets, has0, entries, fixedSele
                     if (has0[i]) $target.append($('<option></option>').val(0).html('全部'));
                     else $target.append($('<option disabled></option>').val('').html('请选择'));
                 }
-                var ajaxDict = data[entries[i]];
+                let ajaxDict = data[entries[i]];
                 $.each(ajaxDict, function (index, text) {
                     if (fixedSelection && text[0].toString() === currentValue) {
                         $target.append($('<option selected></option>').val(text[0]).html(text[1]));
@@ -97,10 +97,10 @@ function ajaxChangeForm(callerType, code, targets, entries) {
     $.ajax({
         url: ['', 'pool', callerType, code, ''].join('/'),
         success: function (data) {
-            for (var i = 0; i < targets.length; i++) {
-                var $target = $(targets[i]);
+            for (let i = 0; i < targets.length; i++) {
+                let $target = $(targets[i]);
                 if ($target.prop('nodeName') === 'LABEL') {
-                    var labelText = data[entries[i]];
+                    let labelText = data[entries[i]];
                     if (labelText === '' || labelText === null || labelText === undefined) {
                         labelText = '上传图片';
                     }
@@ -117,12 +117,12 @@ function ajaxChangeTable(callerType, code, targets, entries, specialTargets, spe
     $.ajax({
         url: ['', 'pool', callerType, code, ''].join('/'),
         success: function (data) {
-            for (var i = 0; i < targets.length; i++) {
-                var $target = $(targets[i]);
+            for (let i = 0; i < targets.length; i++) {
+                let $target = $(targets[i]);
                 $target.html(data[entries[i]]);
             }
-            for (var j = 0; j < specialTargets.length; j++) {
-                var sTarget = $(specialTargets[j]);
+            for (let j = 0; j < specialTargets.length; j++) {
+                let sTarget = $(specialTargets[j]);
                 if (specialAttributes[j] === 'value') {
                     sTarget.val(data[specialEntries[j]]);
                     continue;
@@ -143,34 +143,34 @@ function ajaxChangeProblemTable(callerType, codes, target) {
     $.ajax({
         url: ['', 'pool', callerType, ''].join('/') + codes.join('/') + '/',
         success: function (data) {
-            var $target = $(target);
+            let $target = $(target);
             $target.html(''); // Empty table
-            var total = data['total'];
-            var enTypes = data['type_en_abbr'];
-            var scTypes = data['type_sc_abbr'];
-            for (var i = 0; i < total; i++) { // Each chapter
-                var chapter = data[i];
-                var $pathRow = $('<tr class="bg-secondary text-white"></tr>');
-                var $pathCell = $('<td colspan="3"></td>').html(chapter['path']);
+            let total = data['total'];
+            let enTypes = data['type_en_abbr'];
+            let scTypes = data['type_sc_abbr'];
+            for (let i = 0; i < total; i++) { // Each chapter
+                let chapter = data[i];
+                let $pathRow = $('<tr class="bg-secondary text-white"></tr>');
+                let $pathCell = $('<td colspan="3"></td>').html(chapter['path']);
                 $pathRow.append($pathCell);
                 $target.append($pathRow);
-                var empty = true;
-                for (var j = 0; j < enTypes.length; j++) {
-                    var translation = scTypes[j];
-                    var problemSubset = chapter[enTypes[j]];
+                let empty = true;
+                for (let j = 0; j < enTypes.length; j++) {
+                    let translation = scTypes[j];
+                    let problemSubset = chapter[enTypes[j]];
                     $.each(problemSubset, function (index, text) {
                         empty = false;
-                        var $typeCell = $('<td class="cell-1"></td>').html(translation);
-                        var $indexCell = $('<td class="cell-2"></td>').html(index);
-                        var $descCell = descriptionLink(text[1], text[0], enTypes[j]);
-                        var $row = $('<tr></tr>');
+                        let $typeCell = $('<td class="cell-1"></td>').html(translation);
+                        let $indexCell = $('<td class="cell-2"></td>').html(index);
+                        let $descCell = descriptionLink(text[1], text[0], enTypes[j]);
+                        let $row = $('<tr></tr>');
                         $row.append($typeCell, $indexCell, $descCell);
                         $target.append($row);
                     });
                 }
                 if (empty) {
-                    var $emptyCell = $('<td colspan="3"></td>').html('无题目');
-                    var $row = $('<tr></tr>');
+                    let $emptyCell = $('<td colspan="3"></td>').html('无题目');
+                    let $row = $('<tr></tr>');
                     $row.append($emptyCell);
                     $target.append($row);
                 }
@@ -179,16 +179,16 @@ function ajaxChangeProblemTable(callerType, codes, target) {
     });
 }
 
-function ajaxChangeProblemPreview(callerType, codes, $caller) {
+function ajaxChangeProblemPreview(callerType, codes) {
     $.ajax({
         url: ['', 'pool', callerType, ''].join('/') + codes.join('/') + '/',
         success: function (data) {
             // Clear right table
-            var $preview = $('#problem_preview');
+            let $preview = $('#problem_preview');
             $preview.html('');
             formatProblemPreview(data, codes);
             if (data.hasOwnProperty('sub')) {
-                for (var i = 0; i < data['sub'].length; i++) {
+                for (let i = 0; i < data['sub'].length; i++) {
                     codes = [codes[0], codes[1], i + 1];
                     formatProblemPreview(data['sub'][i], codes);
                 }
@@ -198,59 +198,69 @@ function ajaxChangeProblemPreview(callerType, codes, $caller) {
 }
 
 function formatProblemPreview(data, codes) {
-    var $preview = $('#problem_preview');
+    let $preview = $('#problem_preview');
     // All components
     // 0 - Paths
-    var $path = null;
+    let $path = null;
     if (data.hasOwnProperty('full_path')) {
         $path = $('<div class="font-weight-bold"></div>').html(data['full_path']);
     }
-    var $index = null;
+    let $index = null;
     if (data.hasOwnProperty('full_index')) {
         $index = $('<div class="font-weight-bold"></div>').html(data['full_index']);
     }
     // 1 - Description
-    var $desc = $('<div></div>').html(data['desc_lines'].join('<br>'));
-    var $image = null;
+    let $desc = $('<div></div>').html(data['desc_lines'].join('<br>'));
+    let $image = null, $imageLink = null;
     if (data.hasOwnProperty('image')) {
         $image = $('<img src="" class="img-fluid">');
         $image.attr('src', data['image']);
+        $imageLink = $('<a href="" target="_blank">点击查看大图</a>');
+        $imageLink.attr('href', data['image']);
     }
     // 2 - Choices and images
-    var $choices = [];
+    let $choices = [];
     if (data.hasOwnProperty('choice_lines')) {
-        for (var cl = 0; cl < data['choice_lines'].length; cl++) {
-            var choiceRow = $('<tr></tr>');
+        for (let cl = 0; cl < data['choice_lines'].length; cl++) {
+            let choiceRow = $('<tr></tr>');
             choiceRow.append($('<td></td>').html(data['choice_lines'][cl]));
             $choices.push(choiceRow);
             if (data.hasOwnProperty(String.fromCharCode(cl + 65))) {
-                var imageRow = $('<tr></tr>');
-                var imageCell = $('<td></td>');
-                var choiceImage = $('<img src="" class="img-fluid">');
+                let choiceImage = $('<img src="" class="img-fluid">');
                 choiceImage.attr('src', data[String.fromCharCode(cl + 65)]);
-                imageCell.append(choiceImage);
-                imageRow.append(imageCell);
-                $choices.push(imageRow);
+                let choiceImageLink = $('<a href="" target="_blank">点击查看大图</a>');
+                choiceImageLink.attr('href', data[String.fromCharCode(cl + 65)]);
+                let choiceImageTwins = [choiceImage, choiceImageLink];
+                for (let crc = 0; crc < 2; crc++) {
+                    let rowToPush = $('<tr></tr>');
+                    let cellToPush = $('<td></td>');
+                    cellToPush.append(choiceImageTwins[crc]);
+                    rowToPush.append(cellToPush);
+                    $choices.push(rowToPush);
+                }
+
             }
         }
     }
     // 3 - Answer
-    var $ans = null;
+    let $ans = null;
     if (data.hasOwnProperty('ans_lines')) {
         $ans = $('<div></div>').html(data['ans_lines'].join('<br>'));
     }
-    var $answerImage = null;
+    let $answerImage = null, $answerImageLink = null;
     if (data.hasOwnProperty('answer_image')) {
         $answerImage = $('<img src="" class="img-fluid">');
         $answerImage.attr('src', data['answer_image']);
+        $answerImageLink = $('<a href="" target="_blank">点击查看大图</a>');
+        $answerImageLink.attr('href', data['answer_image']);
     }
     // 4 - Other info
-    var $info = [];
-    var infoAttributes = ['error', 'percentage', 'student_upload', 'chance', 'need_answer'];
-    for (var ii = 0; ii < infoAttributes.length; ii++) {
+    let $info = [];
+    let infoAttributes = ['error', 'percentage', 'student_upload', 'chance', 'need_answer'];
+    for (let ii = 0; ii < infoAttributes.length; ii++) {
         if (data.hasOwnProperty(infoAttributes[ii])) {
-            var infoRow = $('<tr></tr>');
-            var infoRawData = data[infoAttributes[ii]];
+            let infoRow = $('<tr></tr>');
+            let infoRawData = data[infoAttributes[ii]];
             if (infoAttributes[ii] === 'error') {
                 infoRow.append($('<td></td>').html('允许误差：' + infoRawData + '%'));
             } else if (infoAttributes[ii] === 'percentage') {
@@ -266,10 +276,10 @@ function formatProblemPreview(data, codes) {
         }
     }
     // 5 - Buttons
-    var $btnGroup = $('<div class="btn-group btn-group-sm"></div>');
-    var $deleteBtn = $('<button type="button" class="btn btn-outline-danger"></button>').text('删除');
-    var $aBtn = $('<button type="button" class="btn btn-outline-primary" disabled></button>').text('无附件');
-    var $vBtn = $('<button type="button" class="btn btn-outline-primary" disabled></button>').text('无视频');
+    let $btnGroup = $('<div class="btn-group btn-group-sm"></div>');
+    let $deleteBtn = $('<button type="button" class="btn btn-outline-danger"></button>').text('删除');
+    let $aBtn = $('<button type="button" class="btn btn-outline-primary" disabled></button>').text('无附件');
+    let $vBtn = $('<button type="button" class="btn btn-outline-primary" disabled></button>').text('无视频');
     if (data.hasOwnProperty('attachment')) {
         $aBtn.attr('disabled', false);
         $aBtn.text('查看附件');
@@ -292,17 +302,17 @@ function formatProblemPreview(data, codes) {
     });
     $btnGroup.append($aBtn, $vBtn, $deleteBtn);
     // Append
-    var components = [$path, $index, $desc, $image, $choices, $ans, $answerImage, $info];
+    let components = [$path, $index, $desc, $image, $imageLink, $choices, $ans, $answerImage, $answerImageLink, $info];
     if (data['can_manage_problems']) components.push($btnGroup);
-    for (var i = 0; i < components.length; i++) {
+    for (let i = 0; i < components.length; i++) {
         if (components[i]) {
             if (components[i] instanceof Array) {
-                for (var j = 0; j < components[i].length; j++) {
+                for (let j = 0; j < components[i].length; j++) {
                     $preview.append(components[i][j]);
                 }
             } else {
-                var row = $('<tr></tr>');
-                var cell = $('<td></td>');
+                let row = $('<tr></tr>');
+                let cell = $('<td></td>');
                 cell.append(components[i]);
                 row.append(cell);
                 $preview.append(row);
@@ -312,29 +322,29 @@ function formatProblemPreview(data, codes) {
 }
 
 function setChapterInfo(pk) {
-    var targets = ['#cell_chapter_name', '#cell_chapter_index'];
-    var entries = ['full_path', 'full_index'];
-    var specialTargets = [
+    let targets = ['#cell_chapter_name', '#cell_chapter_index'];
+    let entries = ['full_path', 'full_index'];
+    let specialTargets = [
         '#cell_chapter_image',
         '#id_smart_chapter_id', '#id_smart_chapter',
         '#id_group_d_chapter_id', '#id_group_d_chapter',
         '#id_group_e_chapter_id', '#id_group_e_chapter'
     ];
-    var specialEntries = ['image_path', 'chapter', 'full_path', 'chapter', 'full_path', 'chapter', 'full_path'];
-    var specialAttributes = ['src', 'value', 'value', 'value', 'value', 'value', 'value'];
-    var i = 1;
+    let specialEntries = ['image_path', 'chapter', 'full_path', 'chapter', 'full_path', 'chapter', 'full_path'];
+    let specialAttributes = ['src', 'value', 'value', 'value', 'value', 'value', 'value'];
+    let i = 1;
     for (; i <= 7; i++) {
         targets.push('#cell_chapter_point' + i, '#cell_chapter_difficulty' + i);
         entries.push('point' + i, 'difficulty' + i);
     }
     if (pk === 0) { // reset
         for (i = 0; i < targets.length; i++) {
-            var emptyCell = $(targets[i]);
+            let emptyCell = $(targets[i]);
             if (i < 2) emptyCell.text('请先选择一个章节');
             else emptyCell.html('');
         }
         $('#cell_chapter_image').attr('src', '/static/img/no_img.png');
-        for (var j = 1; j < specialTargets.length; j++) {
+        for (let j = 1; j < specialTargets.length; j++) {
             $(specialTargets[j]).val('');
         }
     } else {
@@ -343,17 +353,17 @@ function setChapterInfo(pk) {
 }
 
 function changeFileInput(target, clear, msg) {
-    var $target = $(target);
+    let $target = $(target);
     if (clear) $target.val('');
     $target.next().text(msg);
 }
 
 function descriptionLink(description, pk, problemType) {
-    var $fakeLink = $('<span class="fake-link"></span>').text(description);
-    var $descCell = $('<td></td>');
+    let $fakeLink = $('<span class="fake-link"></span>').text(description);
+    let $descCell = $('<td></td>');
     $descCell.append($fakeLink);
     $fakeLink.click(function () {
-        ajaxChangeProblemPreview('get_problem', [problemType, pk], $fakeLink);
+        ajaxChangeProblemPreview('get_problem', [problemType, pk]);
     });
     return $descCell;
 }
@@ -410,8 +420,8 @@ $('#id_chapter_category').change(function () {
 });
 
 $('#display_problems').click(function () {
-    var codes = [$('#id_category').val(), $('#id_subject').val(), $('#id_chapter').val()];
-    var target = '#table_problem_set';
+    let codes = [$('#id_category').val(), $('#id_subject').val(), $('#id_chapter').val()];
+    let target = '#table_problem_set';
     ajaxChangeProblemTable('get_problem_set', codes, target);
 });
 
@@ -423,7 +433,7 @@ $('#smart_add').click(function () {
 });
 
 $('#form_smart_add').submit(function (event) {
-    var smartId = $('#id_smart_chapter_id').val();
+    let smartId = $('#id_smart_chapter_id').val();
     if (smartId === '' || smartId === undefined) {
         alert('请选择一个章节！');
         event.preventDefault();
@@ -455,17 +465,17 @@ $('#id_chapter_image').change(function () {
 });
 
 $('#id_smart_attachments').change(function () {
-    var files = $(this)[0].files;
+    let files = $(this)[0].files;
     changeFileInput('#id_smart_attachments', false, '已选择' + files.length + '个文件');
 });
 
 $('#id_smart_images').change(function () {
-    var files = $(this)[0].files;
+    let files = $(this)[0].files;
     changeFileInput('#id_smart_images', false, '已选择' + files.length + '张图片');
 });
 
 $('#id_smart_videos').change(function () {
-    var files = $(this)[0].files;
+    let files = $(this)[0].files;
     changeFileInput('#id_smart_videos', false, '已选择' + files.length + '个视频');
 });
 
@@ -488,10 +498,10 @@ $('#id_questions').keyup(function () {
 });
 
 $('#id_group_e_type').change(function () {
-    var qType = parseInt($('#id_group_e_type').val());
-    var $noteCP = $('#group_e_cp_note');
-    var $error = $('#group_e_error_div');
-    var $needAnswer = $('#group_e_need_answer_div');
+    let qType = parseInt($('#id_group_e_type').val());
+    let $noteCP = $('#group_e_cp_note');
+    let $error = $('#group_e_error_div');
+    let $needAnswer = $('#group_e_need_answer_div');
     $noteCP.attr('hidden', qType !== 7);
     $error.attr('hidden', qType !== 7 && qType !== 5);
     $needAnswer.attr('hidden', qType !== 7 && qType !== 6);
