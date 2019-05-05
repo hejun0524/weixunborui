@@ -24,6 +24,7 @@ import xlwt
 import random
 import string
 import base64
+import datetime
 
 
 # Create your views here.
@@ -559,7 +560,7 @@ def generate_excel(form_data, is_sign_sheet=False):
     # First the header
     headers = [
         '序号', '姓名', '考试项目', '课程/级别', '通过方式',
-        '证书编号', '身份证号', '成绩', '考试时间', '学校',
+        '证书编号', '身份证号', '考试时间', '成绩', '学校',
     ]
     if is_sign_sheet:
         headers = ['考试编号', '考生姓名', '证件号', '签名']
@@ -574,9 +575,10 @@ def generate_excel(form_data, is_sign_sheet=False):
         exam_id = json_key if len(json_value) == 2 else json_value[2]
         student_info = [exam_id, student_name, student_id, ]
         if not is_sign_sheet:
+            today = datetime.date.today().strftime('%Y/%-m/%-d')
             student_info = [
                 exam_id, student_name, form_data['project'], form_data['subject'], form_data['verified'],
-                '', student_id, '', '', form_data['school'],
+                '', student_id, today, '合格', form_data['school'],
             ]
         row_num += 1
         for col_num in range(len(student_info)):
