@@ -494,7 +494,7 @@ $('#group_delete').click(function () {
 });
 
 $('#id_questions').keyup(function () {
-    $('#max_input').text(2000 - $(this).val().length);
+    $('#max_input').text(4000 - $(this).val().length);
 });
 
 $('#id_group_e_type').change(function () {
