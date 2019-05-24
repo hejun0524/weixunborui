@@ -1,16 +1,16 @@
 $('#id_file').change(function () {
-    var fileName = $(this).val();
+    let fileName = $(this).val();
     $(this).next('.custom-file-label').html(fileName);
 });
 
 $('#btn_reset').click(function () {
-    var inputFile = $('#id_file');
+    let inputFile = $('#id_file');
     inputFile.prop('value', '');
     inputFile.next('.custom-file-label').html('上传附件');
 });
 
 function copyLink(file_id) {
-    var dummy = document.createElement('input');
+    let dummy = document.createElement('input');
     dummy.value = window.location.href + 'get/' + file_id + '/';
     document.body.appendChild(dummy);
     dummy.select();
@@ -21,9 +21,9 @@ function copyLink(file_id) {
 
 function showButtons(e) {
     // Toggle
-    var parentRow = $(e).parent();
-    var buttons = parentRow.next();
-    var isVisible = buttons.is(':visible');
+    let parentRow = $(e).parent();
+    let buttons = parentRow.next();
+    let isVisible = buttons.is(':visible');
     if (!isVisible) {
         buttons.attr('hidden', false);
         e.innerHTML = '<span class="fa fa-minus-circle fake-link-minus"></span>';
@@ -34,7 +34,7 @@ function showButtons(e) {
 }
 
 $('#btn_clean_cache').click(function () {
-    var $btn = $('#btn_clean_cache');
+    let $btn = $('#btn_clean_cache');
     $.ajax({
         url: ['', 'control', 'clean_cache'].join('/'),
         success: function (data) {
