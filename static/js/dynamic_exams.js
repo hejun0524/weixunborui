@@ -612,3 +612,10 @@ $('#btn_load_list').click(function () {
 $('#manage_pictures').click(function () {
     $('#manage_pictures_collapse').collapse('toggle');
 });
+
+$('#group_delete_exams_form').on('submit', function (e) {
+    // validation code here
+    if (!confirm('确认删除？')) {
+        e.preventDefault();
+    }
+});

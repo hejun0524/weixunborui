@@ -108,14 +108,18 @@
                 </div>
             </form>
             {% if can_manage_strategy %}
-                <button class="btn btn-sm btn-dark" id="save_structure">保存修改</button>
+                <button class="btn btn-sm btn-primary" id="save_structure">保存修改</button>
             {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
             {% if can_generate_exam %}
-                <button class="btn btn-sm btn-dark" id="generate_exam">生成考试</button>
-                <button class="btn btn-sm btn-dark" id="generate_sample">生成样卷</button>
+                <button class="btn btn-sm btn-success" id="generate_exam">生成考试</button>
+                <button class="btn btn-sm btn-secondary" id="generate_sample">生成样卷</button>
             {% endif %}
             {% if can_manage_exam %}
-                <button class="btn btn-sm btn-dark" id="manage_pictures">管理须知/宣传图</button>
+                <button class="btn btn-sm btn-primary" id="manage_pictures">管理须知/宣传图</button>
             {% endif %}
         </div>
     </div>
@@ -136,7 +140,15 @@
                 <tbody>
                 {% for object in all_exams %}
                     <tr>
-                        <td>{{ object }}</td>
+                        <td>
+                            {% if can_manage_exam %}
+                                <label for="id_delete_checkbox_{{ object.id }}" hidden></label>
+                                <input type="checkbox" class="form-check-input" value="{{ object.id }}"
+                                       name="delete_checkboxes" id="id_delete_checkbox_{{ object.id }}"
+                                       form="group_delete_exams_form">
+                            {% endif %}
+                            {{ object }}
+                        </td>
                         <td class="fake-link-plus" onclick="showButtons(this);">
                             <span class="fa fa-plus-circle"></span>
                         </td>
@@ -163,6 +175,14 @@
                 {% endfor %}
                 </tbody>
             </table>
+            {% if can_manage_exam %}
+                <form role="form" id="group_delete_exams_form" method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-danger" name="btn_delete_exams" id="btn_delete_exams" type="submit">
+                        批量删除考试包
+                    </button>
+                </form>
+            {% endif %}
         </div>
         {% if can_manage_exam %}
             <div class="col-md-4">
