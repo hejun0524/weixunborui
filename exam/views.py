@@ -13,7 +13,7 @@ from PIL import Image
 from zipfile import ZipFile
 from io import BytesIO
 from dateutil import parser
-from Crypto.Cipher import AES
+from crypto.Cipher import AES
 from docx import Document
 from docx.oxml.ns import qn
 from docx.shared import Inches

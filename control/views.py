@@ -63,7 +63,6 @@ def download(request):
     return render(request, 'control/download.html', context)
 
 
-@login_required()
 def get_download(request, file_id):
     this_file = Download.objects.get(id=file_id)
     filename_as_list = this_file.file.name.split('.')
