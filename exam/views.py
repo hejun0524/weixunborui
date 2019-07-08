@@ -179,8 +179,9 @@ def exams(request):
                 new_student_list.save()
         elif 'delete_checkboxes' in request.POST:
             try:
-                for exam_id in request.POST.get('delete_checkboxes'):
+                for exam_id in request.POST.getlist('delete_checkboxes'):
                     this_object = Exam.objects.get(id=int(exam_id))
+                    
                     this_object.delete()
             except Exception as e:
                 all_exams = Exam.objects.all()
