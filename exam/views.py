@@ -183,7 +183,11 @@ def exams(request):
                     this_object = Exam.objects.get(id=int(exam_id))
                     this_object.delete()
             except Exception as e:
-                return JsonResponse({"error": str(e), "all": request.POST.get('delete_checkboxes')})
+                all_exams = Exam.objects.all()
+                my_ex = {}
+                for ex in all_exams:
+                    my_ex[ex.id] = ex.tite
+                return JsonResponse({"error": str(e), "all": request.POST.get('delete_checkboxes'), "p": my_ex})
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
