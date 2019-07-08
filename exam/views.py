@@ -178,17 +178,9 @@ def exams(request):
                 )
                 new_student_list.save()
         elif 'delete_checkboxes' in request.POST:
-            try:
-                for exam_id in request.POST.getlist('delete_checkboxes'):
-                    this_object = Exam.objects.get(id=int(exam_id))
-                    
-                    this_object.delete()
-            except Exception as e:
-                all_exams = Exam.objects.all()
-                my_ex = {}
-                for ex in all_exams:
-                    my_ex[ex.id] = ex.title
-                return JsonResponse({"error": str(e), "all": request.POST.get('delete_checkboxes'), "p": my_ex})
+            for exam_id in request.POST.getlist('delete_checkboxes'):
+                this_object = Exam.objects.get(id=int(exam_id))
+                this_object.delete()
         messages.success(request, '操作成功！')
         return redirect('exam:exams')
     return render(request, 'exam/exams.html', context)
