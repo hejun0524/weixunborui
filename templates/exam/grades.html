@@ -1,0 +1,21 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}上传成绩{% endblock %}
+{% block canvas_title %}上传成绩{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col">
+            <p>点击下方按钮上传Excel，表格格式请严格按照“姓名-证件号-科目-成绩-备注”5列（可<a href="{% url 'exam:grades_sample' %}">点此</a>下载模版）。</p>
+            <form role="form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="excel_file">上传成绩</label>
+                    <input type="file" class="form-control-file" id="excel_file" name="excel_file" accept=".xls, .xlsx" required>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary mb-2">上传</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

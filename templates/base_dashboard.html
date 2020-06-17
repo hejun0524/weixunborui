@@ -47,6 +47,11 @@
                             </a>
                         </li>
                     {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'exam:grades' %}">
+                            <i class="fa fa-upload"></i> 上传成绩
+                        </a>
+                    </li>
                     {% if user.profile.view_access.certification %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'exam:certification' %}">

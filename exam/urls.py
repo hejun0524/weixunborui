@@ -12,6 +12,8 @@ urlpatterns = [
     path('certification/', views.certification, name='certification'),
     path('certification/get/<int:certification_id>', views.get_certification, name='get_certification'),
     path('certification/delete/<int:certification_id>', views.delete_certification, name='delete_certification'),
+    path('grades/', views.grades, name='grades'),
+    path('grades/get-sample', views.grades_sample, name='grades_sample'),
     # AJAX urls
     path('change_category/<int:category_id>/', views.change_category),
     path('change_subject/<int:category_id>/<int:subject_id>/', views.change_subject),

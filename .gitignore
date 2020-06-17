@@ -5,3 +5,4 @@ __pycache__
 .idea
 weixunborui/settings.py
 venv
+.vscode

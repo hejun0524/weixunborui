@@ -93,3 +93,14 @@ class Agreement(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Grade(models.Model):
+    student_name = models.CharField(max_length=100)
+    student_id = models.CharField(max_length=100)
+    subject = models.CharField(max_length=100)
+    grade = models.FloatField()
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.student_name

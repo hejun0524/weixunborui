@@ -1,0 +1,69 @@
+{% extends 'base_home.html' %}
+{% load static %}
+{% block title%}查询成绩{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-bottom: 200px">
+  <h3>查询成绩</h3>
+  <div class="row">
+    <div class="col-md-4">
+      <form method="post" role="form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="student_name">请输入姓名</label>
+          <input type="text" class="form-control" id="student_name" name="student_name" required>
+        </div>
+        <div class="form-group">
+          <label for="student_id">请输入证件号</label>
+          <input type="text" class="form-control" id="student_id" name="student_id" required>
+        </div>
+        <button type="submit" name="query" class="btn btn-primary">查询</button>
+      </form>
+    </div>
+    
+    <div class="col-md-8">
+      {% if student_name and student_id %}
+        <table class="table table-sm">
+          <tbody>
+            <tr>
+              <th>姓名</th>
+              <td>{{ student_name }}</th>
+            </tr>
+            <tr>
+              <th>证件号</th>
+              <td>{{ student_id }}</th>
+            </tr>
+          </tbody>
+        </table>
+        <table class="table table-sm">
+          <tbody>
+            {% for grade in results %}
+              <tr class="table-active">
+                <th colspan="2">考试 {{ forloop.counter }}</th>
+              </tr>
+              <tr>
+                <th>科目</th>
+                <td>{{ grade.subject }}</th>
+              </tr>
+              <tr>
+                <th>成绩</th>
+                <td>{{ grade.grade }}</th>
+              </tr>
+              <tr>
+                <th>备注</th>
+                <td>{{ grade.note }}</th>
+              </tr>
+            {% empty %}
+              <tr>
+                <th>抱歉，找不到对应的成绩。</th>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="alert alert-info" role="alert">请输入查询条件</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
