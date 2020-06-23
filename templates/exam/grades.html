@@ -7,15 +7,52 @@
 {% block content %}
     <div class="row">
         <div class="col">
-            <p>点击下方按钮上传Excel，表格格式请严格按照“姓名-证件号-科目-成绩-备注”5列（可<a href="{% url 'exam:grades_sample' %}">点此</a>下载模版）。</p>
+            <p>点击下方按钮上传Excel，表格格式请严格按照“姓名-证件号-科目-成绩-日期-备注”6列（可<a href="{% url 'exam:grades_sample' %}">点此</a>下载模版）。</p>
             <form role="form" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="excel_file">上传成绩</label>
                     <input type="file" class="form-control-file" id="excel_file" name="excel_file" accept=".xls, .xlsx" required>
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary mb-2">上传</button>
+                <button type="submit" class="btn btn-sm btn-primary mb-2" name="btn_upload">上传</button>
+            </form>
+            <form role="form" method="post">
+            {% csrf_token %}
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>姓名</th>
+                        <th>证件号</th>
+                        <th>科目</th>
+                        <th>成绩</th>
+                        <th>日期</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in grades %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="grade-{{ grade.id }}">
+                        </td>
+                        <td>{{ grade.student_name }}</td>
+                        <td>{{ grade.student_id }}</td>
+                        <td>{{ grade.subject }}</td>
+                        <td>{{ grade.grade }}</td>
+                        <td>{{ grade.date }}</td>
+                        <td>{{ grade.note }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <th colspan="7">暂无数据</th>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-sm btn-danger mb-2" name="btn_delete">批量删除</button>
             </form>
         </div>
     </div>
+
 {% endblock %}

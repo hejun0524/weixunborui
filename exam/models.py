@@ -100,6 +100,7 @@ class Grade(models.Model):
     student_id = models.CharField(max_length=100)
     subject = models.CharField(max_length=100)
     grade = models.FloatField()
+    date = models.DateField(blank=True, null=True)
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):

@@ -317,42 +317,58 @@ def get_exam(request, exam_id):
 def grades(request):
     operator = User.objects.get(username=request.user.username)
     access = operator.profile.access
+    context = {
+        'grades': Grade.objects.all().order_by('-id'),
+    }
     if not operator.profile.view_access.get('exam'):
         return redirect('home:dashboard')
     if request.method == 'POST':
-        excel = request.FILES.get('excel_file')
-        wb = xlrd.open_workbook(file_contents=excel.read(), encoding_override='utf8')
-        sheets_name = wb.sheet_names()
-        ws = wb.sheet_by_name(sheets_name[0])
-        num_rows = ws.nrows
+        if 'btn_upload' in request.POST:
+            excel = request.FILES.get('excel_file')
+            wb = xlrd.open_workbook(file_contents=excel.read(), encoding_override='utf8')
+            sheets_name = wb.sheet_names()
+            ws = wb.sheet_by_name(sheets_name[0])
+            num_rows = ws.nrows
 
-        for curr_row in range(num_rows):
-            if curr_row == 0:
-                continue
-            student_name = ws.cell_value(curr_row, 0)
-            student_id = ws.cell_value(curr_row, 1)
-            subject = ws.cell_value(curr_row, 2)
-            grade = ws.cell_value(curr_row, 3)
-            note = ws.cell_value(curr_row, 4)
+            for curr_row in range(num_rows):
+                if curr_row == 0:
+                    continue
+                student_name = ws.cell_value(curr_row, 0)
+                student_id = ws.cell_value(curr_row, 1)
+                subject = ws.cell_value(curr_row, 2)
+                grade = ws.cell_value(curr_row, 3)
+                note = ws.cell_value(curr_row, 5)
 
-            instance = Grade(
-                student_name=student_name, 
-                student_id=student_id,
-                subject=subject,
-                grade=grade,
-                note=note
-            )
-            instance.save()
-        
-        messages.success(request, '操作成功！')
-    return render(request, 'exam/grades.html')
+                date_val = ws.cell_value(curr_row, 4)
+                date = datetime.datetime(*xlrd.xldate_as_tuple(date_val, wb.datemode))
+
+                instance = Grade(
+                    student_name=student_name, 
+                    student_id=student_id,
+                    subject=subject,
+                    grade=grade,
+                    date=date,
+                    note=note
+                )
+                instance.save()
+            
+            messages.success(request, '操作成功！')
+        elif 'btn_delete' in request.POST:
+            for key, value in request.POST.items():
+                if key.startswith('grade-'):
+                    pk = int(key.split('-')[-1])
+                    instance = Grade.objects.get(pk=pk)
+                    instance.delete()
+            messages.success(request, '操作成功！')
+        return redirect('exam:grades')
+    return render(request, 'exam/grades.html', context)
 
 
 
 def grades_sample(request):
     wb = xlwt.Workbook()
     ws = wb.add_sheet("成绩")
-    header = ['姓名','证件号','科目','成绩','备注']
+    header = ['姓名','证件号','科目','成绩','日期', '备注']
     for idx, text in enumerate(header):
         ws.write(0, idx, text)
     response = HttpResponse(content_type='application/vnd.ms-excel')
