@@ -8,14 +8,14 @@
     <div class="row">
         <div class="col">
             <p>点击下方按钮上传Excel，表格格式请严格按照“姓名-证件号-科目-成绩-日期-备注”6列（可<a href="{% url 'exam:grades_sample' %}">点此</a>下载模版）。</p>
-            <form role="form" method="post" enctype="multipart/form-data">
+            <form role="form" method="post" enctype="multipart/form-data" id="formGrade">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="excel_file">上传成绩</label>
                     <input type="file" class="form-control-file" id="excel_file" name="excel_file" accept=".xls, .xlsx" required>
                 </div>
                 <button type="submit" class="btn btn-sm btn-primary mb-2" name="btn_upload">上传</button>
-                <button type="button" class="btn btn-sm btn-secondary mb-2" name="btn_check" id="btn_check">检查（还没做这功能）</button>
+                <button type="button" class="btn btn-sm btn-secondary mb-2" name="btn_check" id="btn_check">检查</button>
             </form>
             <form role="form" method="post">
             {% csrf_token %}
@@ -70,6 +70,44 @@
             </div>
             <button type="submit" class="btn btn-sm btn-danger my-2" name="btn_delete">批量删除</button>
             </form>
+        </div>
+    </div>
+    <div class="modal" tabindex="-1" role="dialog" id="gradeModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">检查结果</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <p>
+                    共上传
+                    <span id="pTotal" class="text-primary font-weight-bold"></span>，
+                    其中
+                    <span id="pDuplicate" class="text-danger font-weight-bold"></span>
+                    条与之前记录重复
+                    </p>
+                    <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">姓名</th>
+                        <th scope="col">证件号</th>
+                        <th scope="col">科目</th>
+                        <th scope="col">日期</th>
+                        <th scope="col">分数</th>
+                        <th scope="col">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gradeBody"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

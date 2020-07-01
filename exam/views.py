@@ -408,7 +408,7 @@ def check_grades(request):
                     'date': date,
                     'note': note
                 })
-        return JsonResponse({'name_list': name_list})
+        return JsonResponse({'name_list': name_list, 'total': num_rows - 1})
 
 
 def grades_sample(request):
