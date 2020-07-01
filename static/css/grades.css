@@ -1,0 +1,23 @@
+body {
+  background-image: url("/static/img/bg_grades.jpeg");
+  background-color: #cccccc;
+  background-size: cover;
+}
+
+div.box {
+  margin-top: 200px;
+  margin-bottom: 200px;
+  padding: 100px 100px;
+}
+
+form.box-form {
+  margin: 20px;
+  padding: 0 20%;
+}
+.box-alert {
+  margin: 0 150px;
+}
+
+input[type="text"] {
+  color: white;
+}

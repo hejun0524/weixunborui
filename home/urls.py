@@ -13,4 +13,5 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('grades/', views.grades, name='grades'),
+    path('query-grades/', views.query_grades),
 ]

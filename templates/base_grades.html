@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    {% load static %}
+    {% include 'global_css.html' %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/grades.css' %}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+
+<div class="container-fluid">
+    {% block content %}
+    {% endblock %}
+</div>
+
+{% include 'global_js.html' %}
+{% block js %}
+{% endblock %}
+</body>
+
+</html>

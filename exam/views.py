@@ -364,6 +364,47 @@ def grades(request):
     return render(request, 'exam/grades.html', context)
 
 
+def check_grades(request):
+    if request.method == 'POST':
+        excel = request.FILES.get('excel_file')
+        wb = xlrd.open_workbook(file_contents=excel.read(), encoding_override='utf8')
+        sheets_name = wb.sheet_names()
+        ws = wb.sheet_by_name(sheets_name[0])
+        num_rows = ws.nrows
+        name_list = []
+
+        for curr_row in range(num_rows):
+            if curr_row == 0:
+                continue
+            student_name = ws.cell_value(curr_row, 0)
+            student_id = ws.cell_value(curr_row, 1)
+            subject = ws.cell_value(curr_row, 2)
+            grade = ws.cell_value(curr_row, 3)
+            note = ws.cell_value(curr_row, 5)
+
+            date_val = ws.cell_value(curr_row, 4)
+            date = datetime.datetime(*xlrd.xldate_as_tuple(date_val, wb.datemode))
+
+            queryset = Grade.objects.filter(
+                student_name=student_name, 
+                student_id=student_id,
+                subject=subject,
+                grade=grade,
+                date=date,
+                note=note
+            )
+            if len(queryset):
+                name_list.append({
+                    'row_idx': curr_row,
+                    'student_name': student_name,
+                    'student_id': student_id,
+                    'subject': subject,
+                    'grade': grade,
+                    'date': date,
+                    'note': note
+                })
+        return JsonResponse({'name_list': name_list})
+
 
 def grades_sample(request):
     wb = xlwt.Workbook()

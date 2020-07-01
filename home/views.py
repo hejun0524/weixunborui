@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.urls import reverse
 from django.contrib import auth
+from django.core import serializers
 from django.contrib.auth.decorators import login_required
 from exam.models import CodeCategory
 from django.contrib import messages
@@ -8,8 +10,6 @@ from exam.models import Grade
 
 
 # Create your views here.
-
-
 def index(request):
     context = {'n_bar': 'index'}
     return render(request, 'home/index.html', context)
@@ -59,25 +59,23 @@ def courses(request):
 
 
 def grades(request):
-    context = {
-        'n_bar': 'grades',
-        'results': [],
-        'student_name': '',
-        'student_id': '',
-    }
+    context = {'n_bar': 'grades'}
+    return render(request, 'home/grades.html')
+
+
+def query_grades(request):
     if request.method == 'POST':
-        student_name = request.POST.get('student_name', '').strip()
-        student_id = request.POST.get('student_id', '').strip()
-        queryset = Grade.objects.filter(student_name=student_name, student_id=student_id)
-        if not len(queryset):
-            queryset = []
-        context.update({
-            'results': queryset,
-            'student_name': student_name,
-            'student_id': student_id
-        })
-        return render(request, 'home/grades.html', context)
-    return render(request, 'home/grades.html', context)
+        name = request.POST.get('name', '').strip()
+        id = request.POST.get('id', '').strip()
+        queryset = Grade.objects.filter(student_name=name, student_id=id)
+        if len(queryset):
+            return JsonResponse({
+                'student_name': name,
+                'student_id': id,
+                'grades': serializers.serialize("json",queryset),
+                'success': True
+            })
+    return JsonResponse({ 'success': False })
 
 
 @login_required()

@@ -1,73 +1,84 @@
-{% extends 'base_home.html' %}
+{% extends 'base_grades.html' %}
 {% load static %}
 {% block title%}查询成绩{% endblock %}
 
 {% block content %}
-<div class="container" style="margin-bottom: 200px">
-  <h3>查询成绩</h3>
-  <div class="row">
-    <div class="col-md-4">
-      <form method="post" role="form">
-        {% csrf_token %}
-        <div class="form-group">
-          <label for="student_name">请输入姓名</label>
-          <input type="text" class="form-control" id="student_name" name="student_name" required>
-        </div>
-        <div class="form-group">
-          <label for="student_id">请输入证件号</label>
-          <input type="text" class="form-control" id="student_id" name="student_id" required>
-        </div>
-        <button type="submit" name="query" class="btn btn-primary">查询</button>
-      </form>
+<div class="container box text-white text-center">
+  <h2 class="mx-auto">工业和信息化人才专业知识测评成绩查询系统</h2>
+  <form method="post" role="form" class="box-form" id="formGrade">
+    {% csrf_token %}
+    <div class="form-group row">
+      <label for="student_name" class="col-sm-2 col-form-label">姓名</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="student_name" name="student_name" required>
+      </div>
     </div>
-    
-    <div class="col-md-8">
-      {% if student_name and student_id %}
-        <table class="table table-sm">
-          <tbody>
+    <div class="form-group row">
+      <label for="student_id" class="col-sm-2 col-form-label">证件号</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="student_id" name="student_id" required>
+      </div>
+    </div>
+    <button type="submit" name="query" id="btn_query" class="btn btn-light">查询</button>
+  </form>
+  <div class="alert alert-danger box-alert" role="alert" hidden id="requiredAlert">
+    请输入姓名和证件号
+  </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="gradeModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">成绩一览</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <p>
+        正在显示
+        <span id="pName" class="text-primary font-weight-bold"></span>
+        （证件号：<span id="pId" class="text-primary font-weight-bold"></span>）
+        的考试成绩
+        </p>
+        <table class="table table-bordered table-sm">
+          <thead>
             <tr>
-              <th>姓名</th>
-              <td>{{ student_name }}</th>
+              <th scope="col">#</th>
+              <th scope="col">科目</th>
+              <th scope="col">日期</th>
+              <th scope="col">分数</th>
+              <th scope="col">备注</th>
             </tr>
-            <tr>
-              <th>证件号</th>
-              <td>{{ student_id }}</th>
-            </tr>
-          </tbody>
+          </thead>
+          <tbody id="gradeBody"></tbody>
         </table>
-        <table class="table table-sm">
-          <tbody>
-            {% for grade in results %}
-              <tr class="table-active">
-                <th colspan="2">考试 {{ forloop.counter }}</th>
-              </tr>
-              <tr>
-                <th>科目</th>
-                <td>{{ grade.subject }}</th>
-              </tr>
-              <tr>
-                <th>成绩</th>
-                <td>{{ grade.grade }}</th>
-              </tr>
-              <tr>
-                <th>日期</th>
-                <td>{{ grade.date }}</th>
-              </tr>
-              <tr>
-                <th>备注</th>
-                <td>{{ grade.note }}</th>
-              </tr>
-            {% empty %}
-              <tr>
-                <th>抱歉，找不到对应的成绩。</th>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% else %}
-        <div class="alert alert-info" role="alert">请输入查询条件</div>
-      {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+      </div>
     </div>
   </div>
 </div>
+<div class="modal" tabindex="-1" role="dialog" id="notFoundModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">找不到结果</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <p>找不到对应的成绩，请检查输入是否正确。</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{% static 'js/dynamic_home_grades.js' %}"></script>
 {% endblock %}

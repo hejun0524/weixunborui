@@ -15,6 +15,7 @@ urlpatterns = [
     path('grades/', views.grades, name='grades'),
     path('grades/get-sample', views.grades_sample, name='grades_sample'),
     # AJAX urls
+    path('check_grades/', views.check_grades),
     path('change_category/<int:category_id>/', views.change_category),
     path('change_subject/<int:category_id>/<int:subject_id>/', views.change_subject),
     path('change_code_category/<int:category_id>/', views.change_code_category),

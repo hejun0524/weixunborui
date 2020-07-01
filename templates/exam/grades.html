@@ -15,6 +15,7 @@
                     <input type="file" class="form-control-file" id="excel_file" name="excel_file" accept=".xls, .xlsx" required>
                 </div>
                 <button type="submit" class="btn btn-sm btn-primary mb-2" name="btn_upload">上传</button>
+                <button type="button" class="btn btn-sm btn-secondary mb-2" name="btn_check" id="btn_check">检查（还没做这功能）</button>
             </form>
             <form role="form" method="post">
             {% csrf_token %}
@@ -54,5 +55,7 @@
             </form>
         </div>
     </div>
-
+{% endblock %}
+{% block js %}
+<script src="{% static 'js/dynamic_grades.js' %}"></script>
 {% endblock %}
