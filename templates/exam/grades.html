@@ -51,7 +51,24 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <button type="submit" class="btn btn-sm btn-danger mb-2" name="btn_delete">批量删除</button>
+            <div class="pagination mb-2">
+                <span class="step-links">
+                    {% if grades.has_previous %}
+                        <a href="?page=1">&laquo; 首页</a>
+                        <a href="?page={{ grades.previous_page_number }}">上页</a>
+                    {% endif %}
+
+                    <span class="current">
+                        {{ grades.number }} / {{ grades.paginator.num_pages }}页
+                    </span>
+
+                    {% if grades.has_next %}
+                        <a href="?page={{ grades.next_page_number }}">下一页</a>
+                        <a href="?page={{ grades.paginator.num_pages }}">末页 &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+            <button type="submit" class="btn btn-sm btn-danger my-2" name="btn_delete">批量删除</button>
             </form>
         </div>
     </div>

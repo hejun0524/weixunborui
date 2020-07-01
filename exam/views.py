@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
+from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
@@ -317,9 +318,13 @@ def get_exam(request, exam_id):
 def grades(request):
     operator = User.objects.get(username=request.user.username)
     access = operator.profile.access
-    context = {
-        'grades': Grade.objects.all().order_by('-id'),
-    }
+
+    grades_list = Grade.objects.all().order_by('-id')
+    paginator = Paginator(grades_list, 25) # Show 25 contacts per page.
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = { 'grades': page_obj, }
     if not operator.profile.view_access.get('exam'):
         return redirect('home:dashboard')
     if request.method == 'POST':
