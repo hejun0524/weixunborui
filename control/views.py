@@ -266,6 +266,28 @@ def get_user(request, user_id):
 def iterate_problems(chapter_id):
     chapter = Chapter.objects.get(pk=chapter_id)
     problems = []
+
+    def get_basic_info(p, problem_type):
+        # common problems only
+        info = {
+            'problem_type': problem_type,
+            'index': p.index,
+            'description': p.description,
+            'extra': {
+                'upload': p.student_upload,
+                'chance': p.chance,
+                'answer': p.answer,
+            }
+        }
+        if problem_type == 'dc':
+            info['extra']['optional'] = not p.need_answer
+        if problem_type == 'nb':
+            info['extra']['error'] = not p.error
+        if problem_type == 'mc' or problem_type == 'mr':
+            info['extra']['choices'] = [
+                {'choice': chr(65 + idx), 'content': c for idx, c in enumerate(p.choices)}
+            ]
+
     for p in chapter.multiplechoice_set.all():
         problems.append({
             'problem_type': 'mc',
@@ -313,8 +335,7 @@ def iterate_problems(chapter_id):
 
 def get_cover(chapter_id):
     chapter = Chapter.objects.get(pk=chapter_id)
-    if chapter.image:
-        return ('/media/' + str(chapter.image)) if chapter.image else ''
+    return ('/media/' + str(chapter.image)) if chapter.image else ''
 
 
 def iterate_database():
@@ -343,7 +364,6 @@ def iterate_database():
                     'index': chap.index,
                     'cover': get_cover(chap.id)
                 }
-                '''
                 # points and difficulties
                 points = chap.points
                 points.insert(5, 1)
@@ -353,7 +373,6 @@ def iterate_database():
                 this_chap['difficulties'] = difficulties
                 # problems
                 this_chap['problems'] = iterate_problems(chap.id)
-                '''
                 # append chapter
                 this_subj['chapters'].append(this_chap)
             this_cat['subjects'].append(this_subj)
