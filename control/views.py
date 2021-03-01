@@ -277,12 +277,18 @@ def iterate_problems(chapter_id):
                 'upload': p.student_upload,
                 'chance': p.chance,
                 'answer': p.answer,
+            },
+            'files': {
+                'image': ('/media/' + str(p.image)) if p.image else ''
+                'video': ('/media/' + str(p.video)) if p.video else ''
+                'attachment': ('/media/' + str(p.attachment)) if p.attachment else ''
+                'answer_image': ('/media/' + str(p.answer_image)) if p.answer_image else ''
             }
         }
         if problem_type == 'dc':
             info['extra']['optional'] = not p.need_answer
         if problem_type == 'nb':
-            info['extra']['error'] = not p.error
+            info['extra']['error'] = p.error
         if problem_type == 'mc' or problem_type == 'mr':
             info['extra']['choices'] = [
                 {'choice': chr(65 + idx), 'content': c} for idx, c in enumerate(p.choices)]
