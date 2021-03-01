@@ -288,41 +288,17 @@ def iterate_problems(chapter_id):
                 {'choice': chr(65 + idx), 'content': c} for idx, c in enumerate(p.choices)]
 
     for p in chapter.multiplechoice_set.all():
-        problems.append({
-            'problem_type': 'mc',
-            'index': p.index,
-            'description': p.description,
-        })
+        problems.append(get_basic_info(p, 'mc'))
     for p in chapter.multipleresponse_set.all():
-        problems.append({
-            'problem_type': 'mr',
-            'index': p.index,
-            'description': p.description,
-        })
+        problems.append(get_basic_info(p, 'mr'))
     for p in chapter.trueorfalse_set.all():
-        problems.append({
-            'problem_type': 'tf',
-            'index': p.index,
-            'description': p.description,
-        })
+        problems.append(get_basic_info(p, 'tf'))
     for p in chapter.textblank_set.all():
-        problems.append({
-            'problem_type': 'tb',
-            'index': p.index,
-            'description': p.description,
-        })
+        problems.append(get_basic_info(p, 'tb'))
     for p in chapter.numericblank_set.all():
-        problems.append({
-            'problem_type': 'nb',
-            'index': p.index,
-            'description': p.description,
-        })
+        problems.append(get_basic_info(p, 'nb'))
     for p in chapter.description_set.all():
-        problems.append({
-            'problem_type': 'dc',
-            'index': p.index,
-            'description': p.description,
-        })
+        problems.append(get_basic_info(p, 'dc'))
     for p in chapter.comprehensive_set.all():
         problems.append({
             'problem_type': 'cp',
