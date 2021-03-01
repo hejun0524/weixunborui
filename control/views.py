@@ -324,7 +324,7 @@ def get_cover(chapter_id):
 
 
 def iterate_database(id):
-    cat = Category.object.get(pk=id)
+    cat = Category.objects.get(pk=id)
     # init current cat dict
     this_cat = {
         'name': cat.name,
