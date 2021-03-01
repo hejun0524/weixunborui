@@ -340,7 +340,7 @@ def iterate_database():
                 if chap.image:
                     this_chap['cover'] = ''
                 else:
-                    this_chap['cover'] = chap.image.url
+                    this_chap['cover'] = '/media/{}'.format(str(chap.image))
                 # points and difficulties
                 points = chap.points
                 points.insert(5, 1)
