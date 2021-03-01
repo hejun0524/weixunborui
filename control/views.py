@@ -323,51 +323,55 @@ def get_cover(chapter_id):
     return ('/media/' + str(chapter.image)) if chapter.image else ''
 
 
-def iterate_database():
-    list_of_cats = []
-    all_categories = Category.objects.all()
-    for cat in all_categories:
-        # init current cat dict
-        this_cat = {
-            'name': cat.name,
-            'index': cat.index,
-            'subjects': []
+def iterate_database(id):
+    cat = Category.object.get(pk=id)
+    # init current cat dict
+    this_cat = {
+        'name': cat.name,
+        'index': cat.index,
+        'subjects': []
+    }
+    all_subjects = cat.subject_set.all()
+    for subj in all_subjects:
+        # init current subj dict
+        this_subj = {
+            'name': subj.name,
+            'index': subj.index,
+            'chapters': []
         }
-        all_subjects = cat.subject_set.all()
-        for subj in all_subjects:
-            # init current subj dict
-            this_subj = {
-                'name': subj.name,
-                'index': subj.index,
-                'chapters': []
+        all_chapters = subj.chapter_set.all()
+        for chap in all_chapters:
+            # init current chap dict
+            this_chap = {
+                'name': chap.name,
+                'index': chap.index,
+                'cover': get_cover(chap.id)
             }
-            all_chapters = subj.chapter_set.all()
-            for chap in all_chapters:
-                # init current chap dict
-                this_chap = {
-                    'name': chap.name,
-                    'index': chap.index,
-                    'cover': get_cover(chap.id)
-                }
-                # points and difficulties
-                points = chap.points
-                points.insert(5, 1)
-                this_chap['points'] = points
-                difficulties = chap.difficulties
-                difficulties.insert(5, 1)
-                this_chap['difficulties'] = difficulties
-                # problems
-                this_chap['problems'] = iterate_problems(chap.id)
-                # append chapter
-                this_subj['chapters'].append(this_chap)
-            this_cat['subjects'].append(this_subj)
-        list_of_cats.append(this_cat)
-    return list_of_cats
+            # points and difficulties
+            points = chap.points
+            points.insert(5, 1)
+            this_chap['points'] = points
+            difficulties = chap.difficulties
+            difficulties.insert(5, 1)
+            this_chap['difficulties'] = difficulties
+            # problems
+            this_chap['problems'] = iterate_problems(chap.id)
+            # append chapter
+            this_subj['chapters'].append(this_chap)
+        this_cat['subjects'].append(this_subj)
+    return this_cat
 
 
-def remote_backup(request):
+def remote_backup(request, id):
     try:
-        res = iterate_database()
+        res = iterate_database(id)
         return JsonResponse({'data': res}, json_dumps_params={'ensure_ascii': False})
     except Exception as e:
         return JsonResponse({'err': str(e)})
+
+
+def remote_get_category(request):
+    all_categories = Category.objects.all()
+    res = [
+        {'name': c.name, 'index': c.index, 'id': c.id} for c in all_categories]
+    return JsonResponse({'data': res}, json_dumps_params={'ensure_ascii': False})

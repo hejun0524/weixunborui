@@ -11,5 +11,6 @@ urlpatterns = [
     path('account/', views.account, name='account'),
     path('clean_cache/', views.clean_cache),
     path('get_user/<int:user_id>/', views.get_user),
-    path('remote-backup', views.remote_backup),
+    path('remote-backup/<int:id>', views.remote_backup),
+    path('remote-cat', views.remote_get_category),
 ]
