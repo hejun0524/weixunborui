@@ -267,7 +267,7 @@ def iterate_problems(chapter_id):
     chapter = Chapter.objects.get(pk=chapter_id)
     return {
         'total': [
-            len(chapter.multiple_choice_set.all()),
+            len(chapter.multiplechoice_set.all()),
         ]
     }
 
