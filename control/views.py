@@ -265,11 +265,50 @@ def get_user(request, user_id):
 
 def iterate_problems(chapter_id):
     chapter = Chapter.objects.get(pk=chapter_id)
-    return {
-        'total': [
-            len(chapter.multiplechoice_set.all()),
-        ]
-    }
+    problems = []
+    for p in chapter.multiplechoice_set.all():
+        problems.append({
+            'problem_type': 'mc',
+            'index': p.index,
+            'description': p.description,
+        })
+    for p in chapter.multipleresponse_set.all():
+        problems.append({
+            'problem_type': 'mr',
+            'index': p.index,
+            'description': p.description,
+        })
+    for p in chapter.trueorfalse_set.all():
+        problems.append({
+            'problem_type': 'tf',
+            'index': p.index,
+            'description': p.description,
+        })
+    for p in chapter.textblank_set.all():
+        problems.append({
+            'problem_type': 'tb',
+            'index': p.index,
+            'description': p.description,
+        })
+    for p in chapter.numericblank_set.all():
+        problems.append({
+            'problem_type': 'nb',
+            'index': p.index,
+            'description': p.description,
+        })
+    for p in chapter.description_set.all():
+        problems.append({
+            'problem_type': 'dc',
+            'index': p.index,
+            'description': p.description,
+        })
+    for p in chapter.comprehensive_set.all():
+        problems.append({
+            'problem_type': 'cp',
+            'index': p.index,
+            'description': p.description,
+        })
+    return problems
 
 
 def iterate_database():
@@ -297,6 +336,11 @@ def iterate_database():
                     'name': chap.name,
                     'index': chap.index,
                 }
+                # cover
+                if chap.image:
+                    this_chap['cover'] = ''
+                else:
+                    this_chap['cover'] = chap.image.url
                 # points and difficulties
                 points = chap.points
                 points.insert(5, 1)
