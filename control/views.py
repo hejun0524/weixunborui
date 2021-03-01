@@ -286,6 +286,7 @@ def iterate_problems(chapter_id):
         if problem_type == 'mc' or problem_type == 'mr':
             info['extra']['choices'] = [
                 {'choice': chr(65 + idx), 'content': c} for idx, c in enumerate(p.choices)]
+        return info
 
     for p in chapter.multiplechoice_set.all():
         problems.append(get_basic_info(p, 'mc'))
