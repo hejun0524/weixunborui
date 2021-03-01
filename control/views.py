@@ -263,6 +263,15 @@ def get_user(request, user_id):
     })
 
 
+def iterate_problems(chapter_id):
+    chapter = Chapter.objects.get(pk=chapter_id)
+    return {
+        'total': [
+            len(chapter.multiple_choice_set.all()),
+        ]
+    }
+
+
 def iterate_database():
     list_of_cats = []
     all_categories = Category.objects.all()
@@ -290,13 +299,13 @@ def iterate_database():
                 }
                 # points and difficulties
                 points = chap.points
-                chap.points.insert(5, 1)
+                points.insert(5, 1)
                 this_chap['points'] = points
                 difficulties = chap.difficulties
-                chap.difficulties.insert(5, 1)
+                difficulties.insert(5, 1)
                 this_chap['difficulties'] = difficulties
                 # problems
-
+                this_chap['problems'] = iterate_problems(chap.id)
                 # append chapter
                 this_subj['chapters'].append(this_chap)
             this_cat['subjects'].append(this_subj)
@@ -307,6 +316,6 @@ def iterate_database():
 def remote_backup(request):
     try:
         res = iterate_database()
-        return JsonResponse(res)
+        return JsonResponse({'data': res})
     except Exception as e:
         return JsonResponse({'err': str(e)})
