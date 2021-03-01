@@ -267,11 +267,11 @@ def iterate_problems(chapter_id):
     chapter = Chapter.objects.get(pk=chapter_id)
     problems = []
 
-    def get_basic_info(p, problem_type):
+    def get_basic_info(p, problem_type, is_sub):
         # common problems only
         info = {
             'problem_type': problem_type,
-            'index': p.index,
+            'index': p.index if not is_sub else p.order,
             'description': p.description,
             'extra': {
                 'upload': p.student_upload,
@@ -292,6 +292,8 @@ def iterate_problems(chapter_id):
         if problem_type == 'mc' or problem_type == 'mr':
             info['extra']['choices'] = [
                 {'choice': chr(65 + idx), 'content': c} for idx, c in enumerate(p.choices)]
+        if is_sub:
+            info['percentage'] = p.percentage
         return info
 
     for p in chapter.multiplechoice_set.all():
@@ -308,11 +310,27 @@ def iterate_problems(chapter_id):
         problems.append(get_basic_info(p, 'dc'))
     for p in chapter.comprehensive_set.all():
         sub_problems = []
-
+        for sub in p.submultiplechoice_set.all():
+            sub_problems.append(get_basic_info(sub, 'mc', True))
+        for sub in p.submultipleresponse_set.all():
+            sub_problems.append(get_basic_info(sub, 'mr', True))
+        for sub in p.subtrueorfalse_set.all():
+            sub_problems.append(get_basic_info(sub, 'tf', True))
+        for sub in p.subtextblank_set.all():
+            sub_problems.append(get_basic_info(sub, 'tb', True))
+        for sub in p.subnumericblank_set.all():
+            sub_problems.append(get_basic_info(sub, 'nb', True))
+        for sub in p.subdescription_set.all():
+            sub_problems.append(get_basic_info(sub, 'dc', True))
         problems.append({
             'problem_type': 'cp',
             'index': p.index,
             'description': p.description,
+            'files': {
+                'image': ('/media/' + str(p.image)) if p.image else '',
+                'video': ('/media/' + str(p.video)) if p.video else '',
+                'attachment': ('/media/' + str(p.attachment)) if p.attachment else '',
+            }
             'subs': sub_problems,
         })
     return problems
