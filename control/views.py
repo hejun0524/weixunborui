@@ -279,10 +279,10 @@ def iterate_problems(chapter_id):
                 'answer': p.answer,
             },
             'files': {
-                'image': ('/media/' + str(p.image)) if p.image else ''
-                'video': ('/media/' + str(p.video)) if p.video else ''
-                'attachment': ('/media/' + str(p.attachment)) if p.attachment else ''
-                'answer_image': ('/media/' + str(p.answer_image)) if p.answer_image else ''
+                'image': ('/media/' + str(p.image)) if p.image else '',
+                'video': ('/media/' + str(p.video)) if p.video else '',
+                'attachment': ('/media/' + str(p.attachment)) if p.attachment else '',
+                'answer_image': ('/media/' + str(p.answer_image)) if p.answer_image else '',
             }
         }
         if problem_type == 'dc':
