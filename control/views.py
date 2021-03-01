@@ -296,6 +296,7 @@ def iterate_database():
                 chap.difficulties.insert(5, 1)
                 this_chap['difficulties'] = difficulties
                 # problems
+
                 # append chapter
                 this_subj['chapters'].append(this_chap)
             this_cat['subjects'].append(this_subj)
