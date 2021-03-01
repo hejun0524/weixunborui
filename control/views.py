@@ -307,10 +307,13 @@ def iterate_problems(chapter_id):
     for p in chapter.description_set.all():
         problems.append(get_basic_info(p, 'dc'))
     for p in chapter.comprehensive_set.all():
+        sub_problems = []
+
         problems.append({
             'problem_type': 'cp',
             'index': p.index,
             'description': p.description,
+            'subs': sub_problems,
         })
     return problems
 
