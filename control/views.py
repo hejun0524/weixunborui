@@ -332,7 +332,7 @@ def iterate_problems(chapter_id):
                 'image': ('/media/' + str(p.image)) if p.image else '',
                 'video': ('/media/' + str(p.video)) if p.video else '',
                 'attachment': ('/media/' + str(p.attachment)) if p.attachment else '',
-            }
+            },
             'subs': sub_problems,
         })
     return problems
