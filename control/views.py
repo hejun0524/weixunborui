@@ -69,8 +69,10 @@ def get_download(request, file_id):
     filename_as_list[0] = this_file.name
     filename = '.'.join(filename_as_list)
     file_path = 'media/{}'.format(this_file.file.name)
-    response = HttpResponse(FileWrapper(open(file_path, 'rb')), content_type=mimetypes.guess_type(file_path))
-    response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(filename))
+    response = HttpResponse(FileWrapper(
+        open(file_path, 'rb')), content_type=mimetypes.guess_type(file_path))
+    response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(
+        escape_uri_path(filename))
     return response
 
 
@@ -128,9 +130,11 @@ def account(request):
                 if User.objects.filter(username=username).exists():
                     messages.error(request, '此用户名已存在！')
                     return redirect('control:account')
-                new_user = User.objects.create_user(username.strip(), None, password)
+                new_user = User.objects.create_user(
+                    username.strip(), None, password)
                 new_user.save()
-                success_msg = '成功创建用户！用户名：{}，初始密码：{}'.format(username, password)
+                success_msg = '成功创建用户！用户名：{}，初始密码：{}'.format(
+                    username, password)
             else:
                 new_user = User.objects.get(id=user_id)
                 if User.objects.exclude(id=user_id).filter(username=username).exists():
@@ -196,8 +200,10 @@ def account(request):
 @login_required()
 def clean_cache(request):
     def clean(object_class, attribute_name, folder_name):
-        object_files = set(map(lambda x: getattr(x, attribute_name).name, object_class.objects.all()))
-        folder_files = set(map(lambda x: f'{folder_name}/{x}', listdir(f'media/{folder_name}/')))
+        object_files = set(map(lambda x: getattr(
+            x, attribute_name).name, object_class.objects.all()))
+        folder_files = set(
+            map(lambda x: f'{folder_name}/{x}', listdir(f'media/{folder_name}/')))
         caches = folder_files - object_files
         for cache in caches:
             remove(f'media/{cache}')
@@ -216,23 +222,28 @@ def clean_cache(request):
         MultipleChoice, MultipleResponse, TrueOrFalse, TextBlank, NumericBlank, Description,
     ]:
         for attr in ('image', 'attachment', 'video', 'answer_image'):
-            all_problem_files |= set(map(lambda x: getattr(x, attr).name, q_class.objects.all()))
+            all_problem_files |= set(
+                map(lambda x: getattr(x, attr).name, q_class.objects.all()))
     # Comprehensive
     for attr in ('image', 'attachment', 'video'):
-        all_problem_files |= set(map(lambda x: getattr(x, attr).name, Comprehensive.objects.all()))
+        all_problem_files |= set(map(lambda x: getattr(
+            x, attr).name, Comprehensive.objects.all()))
     # Sub questions
     for sub_class in [
         SubMultipleChoice, SubMultipleResponse, SubTrueOrFalse, SubTextBlank, SubNumericBlank, SubDescription,
     ]:
         for attr in ('image', 'video', 'answer_image'):
-            all_problem_files |= set(map(lambda x: getattr(x, attr).name, sub_class.objects.all()))
+            all_problem_files |= set(
+                map(lambda x: getattr(x, attr).name, sub_class.objects.all()))
     # Choices
     for choice_class in [
         MultipleChoiceImage, MultipleResponseImage, SubMultipleChoiceImage, SubMultipleResponseImage,
     ]:
-        all_problem_files |= set(map(lambda x: getattr(x, attr).name, choice_class.objects.all()))
+        all_problem_files |= set(map(lambda x: getattr(
+            x, attr).name, choice_class.objects.all()))
     # Clean it
-    problem_folder_files = set(map(lambda x: f'problem/{x}', listdir(f'media/problem/')))
+    problem_folder_files = set(
+        map(lambda x: f'problem/{x}', listdir(f'media/problem/')))
     problem_caches = problem_folder_files - all_problem_files
     for problem_cache in problem_caches:
         remove(f'media/{problem_cache}')
@@ -250,3 +261,28 @@ def get_user(request, user_id):
         'department': target_user.profile.department,
         'permission': target_user.profile.access
     })
+
+
+def remote_backup(request):
+    list_of_cats = []
+    all_categories = Category.objects.all()
+    for cat in all_categories:
+        # init current cat dict
+        this_cat = {
+            'name': cat.name,
+            'index': cat.index,
+            'subjects': []
+        }
+        all_subjects = cat.subject_set.all()
+        for subj in all_subjects:
+            # init current subj dict
+            this_subj = {
+                'name': subj.name,
+                'index': subj.index,
+                'chapters': []
+            }
+            all_chapters = subj.chapter_set.all()
+            for chap in all_chapters:
+                this_subj['chapters'].append(chap.id)
+            this_cat['subjects'].append(this_subj)
+    return JsonResponse({'data': list_of_cats, })
