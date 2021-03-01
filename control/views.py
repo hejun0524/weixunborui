@@ -300,7 +300,7 @@ def iterate_problems(chapter_id):
                 if problem_type == 'mc':
                     c_imgs = SubMultipleChoiceImage.objects.filter(problem=p)
                 if problem_type == 'mr':
-                    c_imgs = SubMultipleChoiceImage.objects.filter(problem=p)
+                    c_imgs = SubMultipleResponseImage.objects.filter(problem=p)
             info['files']['choice_images'] = []
             if len(c_imgs):
                 info['files']['choice_images'] = [
