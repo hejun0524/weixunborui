@@ -280,7 +280,6 @@ def iterate_problems(chapter_id):
             'files': {
                 'image': ('/media/' + str(p.image)) if p.image else '',
                 'video': ('/media/' + str(p.video)) if p.video else '',
-                'attachment': ('/media/' + str(p.attachment)) if p.attachment else '',
                 'answer_image': ('/media/' + str(p.answer_image)) if p.answer_image else '',
             }
         }
@@ -296,6 +295,9 @@ def iterate_problems(chapter_id):
             info['index'] = p.order
         else:
             info['index'] = p.index
+            info['files'].update(({
+                'attachment': '/media/' + str(p.attachment)) if p.attachment else '', }
+            )
         return info
 
     for p in chapter.multiplechoice_set.all():
