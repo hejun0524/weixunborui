@@ -311,6 +311,12 @@ def iterate_problems(chapter_id):
     return problems
 
 
+def get_cover(chapter_id):
+    chapter = Chapter.objects.get(pk=chapter_id)
+    if chapter.image:
+        return ('/media/' + str(chapter.image)) if chapter.image else ''
+
+
 def iterate_database():
     list_of_cats = []
     all_categories = Category.objects.all()
@@ -335,12 +341,9 @@ def iterate_database():
                 this_chap = {
                     'name': chap.name,
                     'index': chap.index,
+                    'cover': get_cover(chap.id)
                 }
-                # cover
-                if chap.image:
-                    this_chap['cover'] = ''
-                else:
-                    this_chap['cover'] = '/media/' + str(chap.image)
+                '''
                 # points and difficulties
                 points = chap.points
                 points.insert(5, 1)
@@ -350,6 +353,7 @@ def iterate_database():
                 this_chap['difficulties'] = difficulties
                 # problems
                 this_chap['problems'] = iterate_problems(chap.id)
+                '''
                 # append chapter
                 this_subj['chapters'].append(this_chap)
             this_cat['subjects'].append(this_subj)
