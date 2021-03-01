@@ -340,7 +340,7 @@ def iterate_database():
                 if chap.image:
                     this_chap['cover'] = ''
                 else:
-                    this_chap['cover'] = '/media/{}'.format(str(chap.image))
+                    this_chap['cover'] = '/media/' + str(chap.image)
                 # points and difficulties
                 points = chap.points
                 points.insert(5, 1)
@@ -360,6 +360,6 @@ def iterate_database():
 def remote_backup(request):
     try:
         res = iterate_database()
-        return JsonResponse({'data': res})
+        return JsonResponse({'data': res}, json_dumps_params={'ensure_ascii': False})
     except Exception as e:
         return JsonResponse({'err': str(e)})
