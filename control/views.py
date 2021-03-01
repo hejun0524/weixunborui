@@ -267,11 +267,10 @@ def iterate_problems(chapter_id):
     chapter = Chapter.objects.get(pk=chapter_id)
     problems = []
 
-    def get_basic_info(p, problem_type, is_sub):
+    def get_basic_info(p, problem_type, is_sub=False):
         # common problems only
         info = {
             'problem_type': problem_type,
-            'index': p.index if not is_sub else p.order,
             'description': p.description,
             'extra': {
                 'upload': p.student_upload,
@@ -294,6 +293,9 @@ def iterate_problems(chapter_id):
                 {'choice': chr(65 + idx), 'content': c} for idx, c in enumerate(p.choices)]
         if is_sub:
             info['percentage'] = p.percentage
+            info['index'] = p.order
+        else:
+            info['index'] = p.index
         return info
 
     for p in chapter.multiplechoice_set.all():
