@@ -291,7 +291,7 @@ def iterate_problems(chapter_id):
             info['extra']['choices'] = [
                 {'choice': chr(65 + idx), 'content': c} for idx, c in enumerate(p.choices)]
             c_imgs = []
-            if is_sub:
+            if not is_sub:
                 if problem_type == 'mc':
                     c_imgs = MultipleChoiceImage.objects.filter(problem=p)
                 if problem_type == 'mr':
