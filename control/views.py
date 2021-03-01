@@ -263,7 +263,7 @@ def get_user(request, user_id):
     })
 
 
-def remote_backup(request):
+def iterate_database():
     list_of_cats = []
     all_categories = Category.objects.all()
     for cat in all_categories:
@@ -283,6 +283,29 @@ def remote_backup(request):
             }
             all_chapters = subj.chapter_set.all()
             for chap in all_chapters:
-                this_subj['chapters'].append(chap.id)
+                # init current chap dict
+                this_chap = {
+                    'name': chap.name,
+                    'index': chap.index,
+                }
+                # points and difficulties
+                points = chap.points
+                chap.points.insert(5, 1)
+                this_chap['points'] = points
+                difficulties = chap.difficulties
+                chap.difficulties.insert(5, 1)
+                this_chap['difficulties'] = difficulties
+                # problems
+                # append chapter
+                this_subj['chapters'].append(this_chap)
             this_cat['subjects'].append(this_subj)
-    return JsonResponse({'data': list_of_cats, })
+        list_of_cats.append(this_cat)
+    return list_of_cats
+
+
+def remote_backup(request):
+    try:
+        res = iterate_database()
+        return JsonResponse(res)
+    except Exception as e:
+        return JsonResponse({'err': str(e)})
