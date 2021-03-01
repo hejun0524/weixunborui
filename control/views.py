@@ -296,7 +296,7 @@ def iterate_problems(chapter_id):
         else:
             info['index'] = p.index
             info['files'].update(
-                {'attachment': '/media/' + str(p.attachment)) if p.attachment else '', }
+                {'attachment': ('/media/' + str(p.attachment)) if p.attachment else '', }
             )
         return info
 
