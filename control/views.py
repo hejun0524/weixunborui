@@ -290,13 +290,29 @@ def iterate_problems(chapter_id):
         if problem_type == 'mc' or problem_type == 'mr':
             info['extra']['choices'] = [
                 {'choice': chr(65 + idx), 'content': c} for idx, c in enumerate(p.choices)]
+            c_imgs = []
+            if is_sub:
+                if problem_type == 'mc':
+                    c_imgs = MultipleChoiceImage.objects.filter(problem=p)
+                if problem_type == 'mr':
+                    c_imgs = MultipleResponseImage.objects.filter(problem=p)
+            else:
+                if problem_type == 'mc':
+                    c_imgs = SubMultipleChoiceImage.objects.filter(problem=p)
+                if problem_type == 'mr':
+                    c_imgs = SubMultipleChoiceImage.objects.filter(problem=p)
+            info['files']['choice_images'] = []
+            if len(c_imgs):
+                info['files']['choice_images'] = [
+                    {'choice': x.choice, 'path': '/media/' + str(x.image), } for x in c_imgs]
         if is_sub:
             info['percentage'] = p.percentage
             info['index'] = p.order
         else:
             info['index'] = p.index
             info['files'].update(
-                {'attachment': ('/media/' + str(p.attachment)) if p.attachment else '', }
+                {'attachment': ('/media/' + str(p.attachment))
+                 if p.attachment else '', }
             )
         return info
 
@@ -313,7 +329,7 @@ def iterate_problems(chapter_id):
     for p in chapter.description_set.all():
         problems.append(get_basic_info(p, 'dc'))
     for p in chapter.comprehensive_set.all():
-        sub_problems=[]
+        sub_problems = []
         for sub in p.submultiplechoice_set.all():
             sub_problems.append(get_basic_info(sub, 'mc', True))
         for sub in p.submultipleresponse_set.all():
@@ -341,14 +357,14 @@ def iterate_problems(chapter_id):
 
 
 def get_cover(chapter_id):
-    chapter=Chapter.objects.get(pk = chapter_id)
+    chapter = Chapter.objects.get(pk=chapter_id)
     return ('/media/' + str(chapter.image)) if chapter.image else ''
 
 
 def iterate_database(id):
-    cat=Category.objects.get(pk = id)
+    cat = Category.objects.get(pk=id)
     # init current cat dict
-    this_cat={
+    this_cat = {
         'name': cat.name,
         'index': cat.index,
         'subjects': []
