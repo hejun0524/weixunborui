@@ -40,7 +40,8 @@ def about(request):
 def assessment(request):
     all_codes = {}
     for code_category in CodeCategory.objects.all().order_by('index'):
-        all_codes[str(code_category)] = code_category.codesubject_set.order_by('code')
+        all_codes[str(code_category)
+                  ] = code_category.codesubject_set.order_by('code')
     context = {
         'n_bar': 'assessment',
         'codes': all_codes
@@ -72,10 +73,10 @@ def query_grades(request):
             return JsonResponse({
                 'student_name': name,
                 'student_id': id,
-                'grades': serializers.serialize("json",queryset),
+                'grades': serializers.serialize("json", queryset),
                 'success': True
             })
-    return JsonResponse({ 'success': False })
+    return JsonResponse({'success': False})
 
 
 @login_required()
