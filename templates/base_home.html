@@ -6,16 +6,7 @@
     <title>{% block title %}{% endblock %}</title>
   </head>
   <body>
-    <div class="container">
-      <header class="blog-header py-3 mt-3">
-        <div class="row flex-nowrap justify-content-between align-items-center">
-          <div class="col text-center">
-            <a class="blog-header-logo text-dark" href="{% url 'home:index' %}">工业和信息化人才专业知识测评系统</a>
-            <br />
-            <small>主办单位：工业和信息化部人才交流中心</small>
-          </div>
-        </div>
-      </header>
+    <div class="container-fluid">
       <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-2">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item{% if n_bar == 'index' %} active{% endif %}">
@@ -32,13 +23,13 @@
         </ul>
       </nav>
     </div>
-    <main role="main" class="container">
+    <main role="main" class="container-fluid">
       {% block content %} {% endblock %}
-      <!-- FOOTER -->
-      <footer class="container">
-        <p>主办单位：工业和信息化部人才交流中心</p>
-      </footer>
     </main>
+    <!-- FOOTER -->
+    <footer class="container-fluid ml-5">
+      <p>主办单位：工业和信息化部人才交流中心</p>
+    </footer>
     {% include 'global_js.html' %} {% block js %} {% endblock %}
   </body>
 </html>

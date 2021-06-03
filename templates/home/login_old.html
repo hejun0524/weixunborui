@@ -1,0 +1,37 @@
+{% extends 'base_home.html' %}
+{% load static %}
+{% block title %}登录{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <div class="container card-container mb-3">
+        <div class="row">
+            <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+                <div class="card card-signin my-5">
+                    <div class="card-body">
+                        <form class="form-signin" method="post">
+                            {% csrf_token %}
+                            {% for message in messages %}
+                                <div class="alert alert-warning text-danger">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                            <div class="form-label-group">
+                                <input type="text" id="inputUsername" class="form-control" placeholder="用户名"
+                                       required autofocus name="username">
+                                <label for="inputUsername">用户名</label>
+                            </div>
+
+                            <div class="form-label-group">
+                                <input type="password" id="inputPassword" class="form-control" placeholder="密码"
+                                       required name="password">
+                                <label for="inputPassword">密码</label>
+                            </div>
+                            <button class="btn btn-lg btn-primary btn-block" type="submit">登入工作台</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

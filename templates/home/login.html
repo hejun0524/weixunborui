@@ -1,37 +1,31 @@
-{% extends 'base_home.html' %}
+{% extends 'base_grades.html' %}
 {% load static %}
-{% block title %}登录{% endblock %}
+{% block title%}登录{% endblock %}
 
 {% block content %}
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <div class="container card-container mb-3">
-        <div class="row">
-            <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
-                <div class="card card-signin my-5">
-                    <div class="card-body">
-                        <form class="form-signin" method="post">
-                            {% csrf_token %}
-                            {% for message in messages %}
-                                <div class="alert alert-warning text-danger">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                            <div class="form-label-group">
-                                <input type="text" id="inputUsername" class="form-control" placeholder="用户名"
-                                       required autofocus name="username">
-                                <label for="inputUsername">用户名</label>
-                            </div>
-
-                            <div class="form-label-group">
-                                <input type="password" id="inputPassword" class="form-control" placeholder="密码"
-                                       required name="password">
-                                <label for="inputPassword">密码</label>
-                            </div>
-                            <button class="btn btn-lg btn-primary btn-block" type="submit">登入工作台</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+<div class="container box text-white text-center">
+  <h2 class="mx-auto">工业和信息化人才专业知识测评工作台登录系统</h2>
+  <form method="post" role="form" class="box-form">
+    {% csrf_token %}
+    {% for message in messages %}
+        <div class="alert alert-warning text-danger">
+            {{ message }}
         </div>
+    {% endfor %}
+    <div class="form-group row">
+      <label for="id_username" class="col-sm-2 col-form-label">用户名</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="id_username" name="id_username" required autofocus>
+      </div>
     </div>
+    <div class="form-group row">
+      <label for="id_password" class="col-sm-2 col-form-label">密码</label>
+      <div class="col-sm-10">
+        <input type="password" class="form-control" id="id_password" name="password" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-light">登入工作台</button>
+  </form>
+  <p class="mx-auto" style="margin-top: 200px;">主办单位：工业和信息化部人才交流中心</p>
+</div>
 {% endblock %}
